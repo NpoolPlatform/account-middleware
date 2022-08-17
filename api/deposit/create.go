@@ -35,7 +35,7 @@ func (s *Server) CreateAccount(
 		}
 	}()
 
-	if err := validate(in.GetInfo()); err != nil {
+	if err := validate(ctx, in.GetInfo()); err != nil {
 		logger.Sugar().Errorw("CreateAccount", "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}

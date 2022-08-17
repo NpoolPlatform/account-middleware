@@ -35,7 +35,7 @@ func (s *Server) UpdateAccount(
 		}
 	}()
 
-	if err := validate(in.GetInfo()); err != nil {
+	if err := validate(ctx, in.GetInfo()); err != nil {
 		logger.Sugar().Errorw("UpdateAccount", "error", err)
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
@@ -70,7 +70,7 @@ func (s *Server) AddAccount(
 		}
 	}()
 
-	if err := validate(in.GetInfo()); err != nil {
+	if err := validate(ctx, in.GetInfo()); err != nil {
 		logger.Sugar().Errorw("AddAccount", "error", err)
 		return &npool.AddAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}

@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-middleware/api"
-	"github.com/NpoolPlatform/account-middleware/pkg/db"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
