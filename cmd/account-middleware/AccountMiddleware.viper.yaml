@@ -1,0 +1,11 @@
+---
+config:
+  hostname: "account-middleware.npool.top"
+  http_port: 50470
+  grpc_port: 50471
+  healthz_port: 50472
+  prometheus_port: 50473
+  appid: "89089012783789789719823798127398"
+  serviceid: "54d440e8-1de7-11ed-9ad5-4ba1a8bcb990"
+  logdir: "./"
+  apolloAccessKey: "0147fb70b815403790e8634b899fac07"

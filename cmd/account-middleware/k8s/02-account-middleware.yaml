@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: account-middleware
+  namespace: kube-system
+  annotations:
+    "sidecar.jaegertracing.io/inject": "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: account-middleware
+  template:
+    metadata:
+      labels:
+        app: account-middleware
+    spec:
+      containers:
+        - name: account-middleware
+          image: uhub.service.ucloud.cn/entropypool/account-middleware:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - name: service-config
+              mountPath: /etc/AccountMiddleware
+          env:
+            - name: ENV_ENVIRONMENT_TARGET
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.target
+            - name: ENV_CONSUL_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_host
+            - name: ENV_CONSUL_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: system-environment
+                  key: environment.consul_port
+            - name: ENV_CLUSTER_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+      volumes:
+        - name: service-config
+          configMap:
+            name: account-middleware-config
+            items:
+              - key: service-conf
+                path: AccountMiddleware.viper.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: account-middleware
+  namespace: kube-system
+spec:
+  ports:
+    - name: http
+      port: 50470
+      targetPort: 50470
+    - name: grpc
+      port: 50471
+      targetPort: 50471
+    - name: healthz
+      port: 50472
+      targetPort: 50472
+    - name: prometheus
+      port: 50473
+      targetPort: 50473
+  selector:
+    app: account-middleware
