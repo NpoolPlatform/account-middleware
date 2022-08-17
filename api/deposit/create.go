@@ -42,12 +42,7 @@ func (s *Server) CreateAccount(
 
 	span = commontracer.TraceInvoker(span, "deposit", "deposit", "CreateAccount")
 
-	info, err := deposit1.CreateAccount(
-		ctx,
-		in.GetInfo().GetAppID(),
-		in.GetInfo().GetUserID(),
-		in.GetInfo().GetCoinTypeID(),
-	)
+	info, err := deposit1.CreateAccount(ctx, in.GetInfo())
 	if err != nil {
 		logger.Sugar().Errorf("fail create deposit: %v", err.Error())
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
