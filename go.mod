@@ -3,7 +3,8 @@ module github.com/NpoolPlatform/account-middleware
 go 1.17
 
 require (
-	github.com/NpoolPlatform/account-manager v0.0.0-20220817062218-7b4bb84aa86d
+	entgo.io/ent v0.10.1
+	github.com/NpoolPlatform/account-manager v0.0.0-20220817082138-40973fd574c7
 	github.com/NpoolPlatform/api-manager v0.0.0-20220328101926-8907b2f76c6d
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220812032117-44ecffa2bb95
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220621110548-8f3f8049ecc5
@@ -22,7 +23,6 @@ require (
 
 require (
 	ariga.io/atlas v0.3.7-0.20220303204946-787354f533c3 // indirect
-	entgo.io/ent v0.10.1 // indirect
 	github.com/Shonminh/apollo-client v0.4.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
