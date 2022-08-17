@@ -57,3 +57,9 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 
 	return info, nil
 }
+
+func GetAccounts(ctx context.Context, conds *npool.Conds) (infos []*npool.Account, err error) {
+	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
+
+	})
+}
