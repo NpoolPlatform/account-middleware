@@ -47,3 +47,21 @@ func CreateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 	}
 	return info.(*npool.Account), nil
 }
+
+func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) ([]*npool.Account, error) {
+	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetAccounts(ctx, &npool.GetAccountsRequest{
+			Conds:  conds,
+			Offset: offset,
+			Limit:  limit,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Infos, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return infos.([]*npool.Account), nil
+}
