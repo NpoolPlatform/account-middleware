@@ -1,12 +1,11 @@
-//nolint:nolintlint,dupl
-package deposit
+package goodbenefit
 
 import (
 	"context"
 
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 
-	deposit1 "github.com/NpoolPlatform/account-middleware/pkg/deposit"
+	goodbenefit1 "github.com/NpoolPlatform/account-middleware/pkg/goodbenefit"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 
 	"go.opentelemetry.io/otel"
@@ -15,14 +14,10 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 )
 
-func (s *Server) CreateAccount(
-	ctx context.Context, in *npool.CreateAccountRequest,
-) (
-	*npool.CreateAccountResponse, error,
-) {
+func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
 	var err error
 
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
@@ -36,15 +31,15 @@ func (s *Server) CreateAccount(
 	}()
 
 	if err := validate(ctx, in.GetInfo()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "error", err)
+		logger.Sugar().Errorw("CreateAccount", "err", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "CreateAccount")
+	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "CreateAccount")
 
-	info, err := deposit1.CreateAccount(ctx, in.GetInfo())
+	info, err := goodbenefit1.CreateAccount(ctx, in.GetInfo())
 	if err != nil {
-		logger.Sugar().Errorf("CreateAccount", "err", err)
+		logger.Sugar().Errorf("GetAccounts", "err", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 

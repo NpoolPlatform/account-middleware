@@ -3,6 +3,9 @@ package deposit
 
 import (
 	"context"
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
 
@@ -18,7 +21,8 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 
 	infos, err := deposit1.GetAccounts(ctx, conds, in.GetOffset(), in.GetLimit())
 	if err != nil {
-		return nil, err
+		logger.Sugar().Errorf("GetAccounts", "err", err)
+		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 	return &npool.GetAccountsResponse{
 		Infos: infos,
