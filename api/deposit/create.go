@@ -44,7 +44,7 @@ func (s *Server) CreateAccount(
 
 	info, err := deposit1.CreateAccount(ctx, in.GetInfo())
 	if err != nil {
-		logger.Sugar().Errorf("fail create deposit: %v", err.Error())
+		logger.Sugar().Errorf("CreateAccount", "err", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 

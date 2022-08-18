@@ -32,7 +32,7 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 
 	infos, err := goodbenefit1.GetAccounts(ctx, in.GetConds(), in.GetOffset(), in.GetLimit())
 	if err != nil {
-		logger.Sugar().Errorf("fail get good benefit: %v", err.Error())
+		logger.Sugar().Errorf("GetAccounts", "err", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
 	}
 

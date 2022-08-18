@@ -31,7 +31,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	}()
 
 	if err := validate(ctx, in.GetInfo()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "error", err)
+		logger.Sugar().Errorw("CreateAccount", "err", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -39,7 +39,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 
 	info, err := goodbenefit1.CreateAccount(ctx, in.GetInfo())
 	if err != nil {
-		logger.Sugar().Errorf("fail create good benefit: %v", err.Error())
+		logger.Sugar().Errorf("GetAccounts", "err", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
