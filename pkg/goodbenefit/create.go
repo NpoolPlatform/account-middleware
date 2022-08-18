@@ -2,6 +2,7 @@ package goodbenefit
 
 import (
 	"context"
+
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	"go.opentelemetry.io/otel"
@@ -35,6 +36,7 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		usedFor := accountpb.AccountUsedFor_GoodBenefit
 		privateKey := true
+
 		info1, err := accountcrud.CreateSet(tx.Account.Create(), &accountpb.AccountReq{
 			CoinTypeID:             in.CoinTypeID,
 			Address:                in.Address,

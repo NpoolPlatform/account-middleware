@@ -1,7 +1,9 @@
+//nolint:dupl
 package goodbenefit
 
 import (
 	"context"
+
 	goodbenefitcurlcrud "github.com/NpoolPlatform/account-manager/pkg/crud/goodbenefit"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent/goodbenefit"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/goodbenefit"

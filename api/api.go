@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+
 	"github.com/NpoolPlatform/account-middleware/api/goodbenefit"
 
 	account "github.com/NpoolPlatform/message/npool/account/mw/v1"
