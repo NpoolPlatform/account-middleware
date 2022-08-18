@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"fmt"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -20,8 +21,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAccount(ctx context.Context, id string) (info *npool.Account, err error) {
-	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
+func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
+	infos := []*npool.Account{}
+
+	err := db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		return cli.
 			Deposit.
 			Query().
@@ -54,13 +57,16 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 						sql.As(t1.C(account.FieldUsedFor), "used_for"),
 					)
 			}).
-			Scan(ctx, &info)
+			Scan(ctx, &infos)
 	})
 	if err != nil {
 		return nil, err
 	}
+	if len(infos) == 0 {
+		return nil, fmt.Errorf("no record")
+	}
 
-	return info, nil
+	return infos[0], nil
 }
 
 func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (infos []*npool.Account, err error) {

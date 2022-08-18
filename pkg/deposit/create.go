@@ -3,6 +3,8 @@ package user
 import (
 	"context"
 
+	"github.com/shopspring/decimal"
+
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
 
@@ -34,6 +36,7 @@ func CreateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			SetUserID(uuid.MustParse(in.GetUserID())).
 			SetCoinTypeID(uuid.MustParse(in.GetCoinTypeID())).
 			SetAccountID(info1.ID).
+			SetBalance(decimal.NewFromInt(0)).
 			Save(ctx)
 		if err != nil {
 			return err
