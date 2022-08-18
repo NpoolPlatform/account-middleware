@@ -74,11 +74,12 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (infos []*npool.Account, err error) {
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := depositcrud.SetQueryConds(&depositmgrpb.Conds{
-			ID:         conds.ID,
-			AppID:      conds.AppID,
-			UserID:     conds.UserID,
-			CoinTypeID: conds.CoinTypeID,
-			AccountID:  conds.AccountID,
+			ID:          conds.ID,
+			AppID:       conds.AppID,
+			UserID:      conds.UserID,
+			CoinTypeID:  conds.CoinTypeID,
+			AccountID:   conds.AccountID,
+			ScannableAt: conds.ScannableAt,
 		}, cli)
 		if err != nil {
 			return err
