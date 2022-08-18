@@ -39,7 +39,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 
 	info, err := goodbenefit1.CreateAccount(ctx, in.GetInfo())
 	if err != nil {
-		logger.Sugar().Errorf("GetAccounts", "err", err)
+		logger.Sugar().Errorw("CreateAccount", "err", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 

@@ -1,4 +1,4 @@
-package user
+package deposit
 
 import (
 	"context"
@@ -39,6 +39,8 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 				deposit.FieldAccountID,
 				deposit.FieldCollectingTid,
 				deposit.FieldCreatedAt,
+				deposit.FieldIncoming,
+				deposit.FieldOutcoming,
 			).
 			Modify(func(s *sql.Selector) {
 				t1 := sql.Table(account.Table)
