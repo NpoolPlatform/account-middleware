@@ -63,7 +63,7 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 	return info, nil
 }
 
-func GetAccounts(ctx context.Context, conds *npool.Conds) (infos []*npool.Account, err error) {
+func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (infos []*npool.Account, err error) {
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := depositcrud.SetQueryConds(&depositmgrpb.Conds{
 			ID:         conds.ID,
@@ -86,6 +86,8 @@ func GetAccounts(ctx context.Context, conds *npool.Conds) (infos []*npool.Accoun
 				deposit.FieldCollectingTid,
 				deposit.FieldCreatedAt,
 			).
+			Offset(int(offset)).
+			Limit(int(limit)).
 			Modify(func(s *sql.Selector) {
 				t1 := sql.Table(account.Table)
 				s.

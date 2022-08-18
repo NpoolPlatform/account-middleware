@@ -10,7 +10,13 @@ import (
 )
 
 func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) (*npool.GetAccountsResponse, error) {
-	infos, err := deposit1.GetAccounts(ctx, in.GetConds())
+	conds := in.GetConds()
+
+	if conds == nil {
+		conds = &npool.Conds{}
+	}
+
+	infos, err := deposit1.GetAccounts(ctx, conds, in.GetOffset(), in.GetLimit())
 	if err != nil {
 		return nil, err
 	}
