@@ -12,16 +12,16 @@ import (
 )
 
 type Server struct {
-	account.UnimplementedManagerServer
+	account.UnimplementedMiddlewareServer
 }
 
 func Register(server grpc.ServiceRegistrar) {
-	account.RegisterManagerServer(server, &Server{})
+	account.RegisterMiddlewareServer(server, &Server{})
 	deposit.Register(server)
 }
 
 func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
-	if err := account.RegisterManagerHandlerFromEndpoint(context.Background(), mux, endpoint, opts); err != nil {
+	if err := account.RegisterMiddlewareHandlerFromEndpoint(context.Background(), mux, endpoint, opts); err != nil {
 		return err
 	}
 	return nil
