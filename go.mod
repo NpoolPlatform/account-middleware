@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	entgo.io/ent v0.10.1
-	github.com/NpoolPlatform/account-manager v0.0.0-20220817095815-2f42078ae000
+	github.com/NpoolPlatform/account-manager v0.0.0-20220818062006-4750772b1863
 	github.com/NpoolPlatform/api-manager v0.0.0-20220328101926-8907b2f76c6d
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220812032117-44ecffa2bb95
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220621110548-8f3f8049ecc5
