@@ -41,6 +41,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 				deposit.FieldCreatedAt,
 				deposit.FieldIncoming,
 				deposit.FieldOutcoming,
+				deposit.FieldScannableAt,
 			).
 			Modify(func(s *sql.Selector) {
 				t1 := sql.Table(account.Table)
@@ -94,6 +95,9 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 				deposit.FieldAccountID,
 				deposit.FieldCollectingTid,
 				deposit.FieldCreatedAt,
+				deposit.FieldIncoming,
+				deposit.FieldOutcoming,
+				deposit.FieldScannableAt,
 			).
 			Offset(int(offset)).
 			Limit(int(limit)).
