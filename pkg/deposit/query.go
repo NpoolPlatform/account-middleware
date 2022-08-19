@@ -59,6 +59,7 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 				deposit.FieldCreatedAt,
 				deposit.FieldIncoming,
 				deposit.FieldOutcoming,
+				deposit.FieldScannableAt,
 			).
 			Modify(func(s *sql.Selector) {
 				t1 := sql.Table(account.Table)
@@ -109,11 +110,12 @@ func GetAccounts(ctx context.Context,
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := depositcrud.SetQueryConds(&depositmgrpb.Conds{
-			ID:         conds.ID,
-			AppID:      conds.AppID,
-			UserID:     conds.UserID,
-			CoinTypeID: conds.CoinTypeID,
-			AccountID:  conds.AccountID,
+			ID:          conds.ID,
+			AppID:       conds.AppID,
+			UserID:      conds.UserID,
+			CoinTypeID:  conds.CoinTypeID,
+			AccountID:   conds.AccountID,
+			ScannableAt: conds.ScannableAt,
 		}, cli)
 		if err != nil {
 			return err
@@ -130,6 +132,9 @@ func GetAccounts(ctx context.Context,
 				deposit.FieldAccountID,
 				deposit.FieldCollectingTid,
 				deposit.FieldCreatedAt,
+				deposit.FieldIncoming,
+				deposit.FieldOutcoming,
+				deposit.FieldScannableAt,
 			).
 			Offset(int(offset)).
 			Limit(int(limit)).
