@@ -1,13 +1,13 @@
 //nolint:dupl
-package goodbenefit
+package payment
 
 import (
 	"context"
 
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 
-	goodbenefit1 "github.com/NpoolPlatform/account-middleware/pkg/goodbenefit"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
+	payment1 "github.com/NpoolPlatform/account-middleware/pkg/payment"
 
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/payment"
 )
 
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
@@ -36,9 +36,9 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "CreateAccount")
+	span = commontracer.TraceInvoker(span, "payment", "payment", "CreateAccount")
 
-	info, err := goodbenefit1.CreateAccount(ctx, in.GetInfo())
+	info, err := payment1.CreateAccount(ctx, in.GetInfo())
 	if err != nil {
 		logger.Sugar().Errorw("CreateAccount", "err", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())

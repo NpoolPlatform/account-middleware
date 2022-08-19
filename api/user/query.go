@@ -1,5 +1,4 @@
-//nolint:nolintlint,dupl
-package deposit
+package user
 
 import (
 	"context"
@@ -7,15 +6,14 @@ import (
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
-	"github.com/google/uuid"
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 
-	deposit1 "github.com/NpoolPlatform/account-middleware/pkg/deposit"
+	user1 "github.com/NpoolPlatform/account-middleware/pkg/user"
 )
 
 func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*npool.GetAccountResponse, error) {
@@ -31,14 +29,9 @@ func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*
 		}
 	}()
 
-	if _, err := uuid.Parse(in.GetID()); err != nil {
-		logger.Sugar().Errorw("GetAccount", "error", err)
-		return &npool.GetAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
+	span = commontracer.TraceInvoker(span, "user", "user", "GetAccount")
 
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "GetAccount")
-
-	info, err := deposit1.GetAccount(ctx, in.GetID())
+	info, err := user1.GetAccount(ctx, in.GetID())
 	if err != nil {
 		logger.Sugar().Errorw("GetAccount", "err", err)
 		return &npool.GetAccountResponse{}, status.Error(codes.Internal, err.Error())
@@ -52,7 +45,7 @@ func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*
 func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) (*npool.GetAccountsResponse, error) {
 	var err error
 
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
 	defer span.End()
 
 	defer func() {
@@ -62,15 +55,9 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		}
 	}()
 
-	conds := in.GetConds()
+	span = commontracer.TraceInvoker(span, "user", "user", "GetAccounts")
 
-	if conds == nil {
-		conds = &npool.Conds{}
-	}
-
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "GetAccounts")
-
-	infos, err := deposit1.GetAccounts(ctx, conds, in.GetOffset(), in.GetLimit())
+	infos, err := user1.GetAccounts(ctx, in.GetConds(), in.GetOffset(), in.GetLimit())
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "err", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())

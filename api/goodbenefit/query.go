@@ -16,6 +16,32 @@ import (
 	goodbenefit1 "github.com/NpoolPlatform/account-middleware/pkg/goodbenefit"
 )
 
+func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*npool.GetAccountResponse, error) {
+	var err error
+
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccount")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "GetAccount")
+
+	info, err := goodbenefit1.GetAccount(ctx, in.GetID())
+	if err != nil {
+		logger.Sugar().Errorw("GetAccount", "err", err)
+		return &npool.GetAccountResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetAccountResponse{
+		Info: info,
+	}, nil
+}
+
 func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) (*npool.GetAccountsResponse, error) {
 	var err error
 

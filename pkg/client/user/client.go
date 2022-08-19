@@ -1,4 +1,4 @@
-package deposit
+package user
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 )
