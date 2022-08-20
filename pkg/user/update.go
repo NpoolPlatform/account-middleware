@@ -40,7 +40,9 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			Query().
 			Where(
 				entaccount.ID(uuid.MustParse(in.GetAccountID())),
-			).Only(ctx)
+			).
+			ForUpdate().
+			Only(ctx)
 		if err != nil {
 			return err
 		}
@@ -57,7 +59,9 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			Query().
 			Where(
 				entuser.ID(uuid.MustParse(in.GetID())),
-			).Only(ctx)
+			).
+			ForUpdate().
+			Only(ctx)
 		if err != nil {
 			return err
 		}
