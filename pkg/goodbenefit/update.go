@@ -1,4 +1,4 @@
-package deposit
+package goodbenefit
 
 import (
 	"context"
@@ -9,15 +9,15 @@ import (
 	scodes "go.opentelemetry.io/otel/codes"
 
 	accountcrud "github.com/NpoolPlatform/account-manager/pkg/crud/account"
-	depositcrud "github.com/NpoolPlatform/account-manager/pkg/crud/deposit"
+	goodbenefitcrud "github.com/NpoolPlatform/account-manager/pkg/crud/goodbenefit"
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
 	entaccount "github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
-	entdeposit "github.com/NpoolPlatform/account-manager/pkg/db/ent/deposit"
+	entgoodbenefit "github.com/NpoolPlatform/account-manager/pkg/db/ent/goodbenefit"
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
-	depositmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/deposit"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	goodbenefitpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/goodbenefit"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 
 	"github.com/google/uuid"
 )
@@ -33,7 +33,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 	}()
 
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "UpdateTX")
+	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "UpdateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		account, err := tx.Account.
@@ -56,10 +56,10 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
-		deposit, err := tx.Deposit.
+		goodBenefit, err := tx.GoodBenefit.
 			Query().
 			Where(
-				entdeposit.ID(uuid.MustParse(in.GetID())),
+				entgoodbenefit.ID(uuid.MustParse(in.GetID())),
 			).
 			ForUpdate().
 			Only(ctx)
@@ -67,17 +67,9 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
-		u, err := depositcrud.UpdateSet(deposit, &depositmgrpb.AccountReq{
-			CoinTypeID:    in.CoinTypeID,
-			Incoming:      in.Incoming,
-			CollectingTID: in.Outcoming,
-			ScannableAt:   in.ScannableAt,
-		})
-		if err != nil {
-			return err
-		}
-
-		if _, err = u.Save(ctx); err != nil {
+		if _, err = goodbenefitcrud.UpdateSet(goodBenefit, &goodbenefitpb.AccountReq{
+			Backup: in.Backup,
+		}).Save(ctx); err != nil {
 			return err
 		}
 

@@ -3,6 +3,10 @@ package api
 import (
 	"context"
 
+	"github.com/NpoolPlatform/account-middleware/api/payment"
+	"github.com/NpoolPlatform/account-middleware/api/platform"
+	"github.com/NpoolPlatform/account-middleware/api/user"
+
 	"github.com/NpoolPlatform/account-middleware/api/goodbenefit"
 
 	account "github.com/NpoolPlatform/message/npool/account/mw/v1"
@@ -21,6 +25,9 @@ func Register(server grpc.ServiceRegistrar) {
 	account.RegisterMiddlewareServer(server, &Server{})
 	deposit.Register(server)
 	goodbenefit.Register(server)
+	payment.Register(server)
+	platform.Register(server)
+	user.Register(server)
 }
 
 func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {

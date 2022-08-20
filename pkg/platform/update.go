@@ -1,4 +1,4 @@
-package deposit
+package platform
 
 import (
 	"context"
@@ -9,15 +9,15 @@ import (
 	scodes "go.opentelemetry.io/otel/codes"
 
 	accountcrud "github.com/NpoolPlatform/account-manager/pkg/crud/account"
-	depositcrud "github.com/NpoolPlatform/account-manager/pkg/crud/deposit"
+	platformcrud "github.com/NpoolPlatform/account-manager/pkg/crud/platform"
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
 	entaccount "github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
-	entdeposit "github.com/NpoolPlatform/account-manager/pkg/db/ent/deposit"
+	entplatform "github.com/NpoolPlatform/account-manager/pkg/db/ent/platform"
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
-	depositmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/deposit"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	platformmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/platform"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
 
 	"github.com/google/uuid"
 )
@@ -33,7 +33,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 	}()
 
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "UpdateTX")
+	span = commontracer.TraceInvoker(span, "platform", "platform", "UpdateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		account, err := tx.Account.
@@ -56,10 +56,10 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
-		deposit, err := tx.Deposit.
+		platform, err := tx.Platform.
 			Query().
 			Where(
-				entdeposit.ID(uuid.MustParse(in.GetID())),
+				entplatform.ID(uuid.MustParse(in.GetID())),
 			).
 			ForUpdate().
 			Only(ctx)
@@ -67,17 +67,12 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
-		u, err := depositcrud.UpdateSet(deposit, &depositmgrpb.AccountReq{
-			CoinTypeID:    in.CoinTypeID,
-			Incoming:      in.Incoming,
-			CollectingTID: in.Outcoming,
-			ScannableAt:   in.ScannableAt,
-		})
-		if err != nil {
-			return err
-		}
-
-		if _, err = u.Save(ctx); err != nil {
+		if _, err := platformcrud.UpdateSet(platform, &platformmgrpb.AccountReq{
+			CoinTypeID: in.CoinTypeID,
+			UsedFor:    in.UsedFor,
+			AccountID:  in.AccountID,
+			Backup:     in.Backup,
+		}).Save(ctx); err != nil {
 			return err
 		}
 

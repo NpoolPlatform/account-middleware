@@ -3,6 +3,12 @@ package deposit
 import (
 	"context"
 	"fmt"
+	"time"
+
+	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
+	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
+	"go.opentelemetry.io/otel"
+	scodes "go.opentelemetry.io/otel/codes"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -21,10 +27,22 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
+func GetAccount(ctx context.Context, id string) (info *npool.Account, err error) {
 	infos := []*npool.Account{}
 
-	err := db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccount")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	span = commontracer.TraceInvoker(span, "deposit", "deposit", "QueryJoin")
+
+	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		return cli.
 			Deposit.
 			Query().
@@ -72,7 +90,24 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	return infos[0], nil
 }
 
-func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (infos []*npool.Account, err error) {
+//nolint:funlen
+func GetAccounts(ctx context.Context,
+	conds *npool.Conds,
+	offset,
+	limit int32,
+) (infos []*npool.Account, err error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	span = commontracer.TraceInvoker(span, "deposit", "deposit", "QueryJoin")
+
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := depositcrud.SetQueryConds(&depositmgrpb.Conds{
 			ID:          conds.ID,
@@ -85,6 +120,8 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 		if err != nil {
 			return err
 		}
+
+		stm.Where(deposit.ScannableAtGT(uint32(time.Now().Unix())))
 
 		return stm.
 			Select(

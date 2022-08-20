@@ -1,16 +1,15 @@
-package goodbenefit
+package user
 
 import (
 	"context"
 
+	crud "github.com/NpoolPlatform/account-manager/pkg/crud/user"
+	entuser "github.com/NpoolPlatform/account-manager/pkg/db/ent/user"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
+	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/user"
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
-
-	curl "github.com/NpoolPlatform/account-manager/pkg/crud/goodbenefit"
-	"github.com/NpoolPlatform/account-manager/pkg/db/ent/goodbenefit"
-	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/goodbenefit"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -19,7 +18,7 @@ import (
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent/deposit"
 
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 
 	"github.com/google/uuid"
 )
@@ -37,14 +36,14 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 		}
 	}()
 
-	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "QueryJoin")
+	span = commontracer.TraceInvoker(span, "user", "user", "QueryJoin")
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm := cli.
-			GoodBenefit.
+			User.
 			Query().
 			Where(
-				goodbenefit.ID(uuid.MustParse(id)),
+				entuser.ID(uuid.MustParse(id)),
 			)
 		return join(stm).Scan(ctx, infos)
 	})
@@ -56,7 +55,7 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 }
 
 func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (infos []*npool.Account, err error) {
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccount")
 	defer span.End()
 
 	defer func() {
@@ -66,14 +65,12 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 		}
 	}()
 
-	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "QueryJoin")
+	span = commontracer.TraceInvoker(span, "user", "user", "QueryJoin")
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
-		stm, err := curl.SetQueryConds(&mgrpb.Conds{
-			ID:        conds.ID,
-			GoodID:    conds.GoodID,
-			AccountID: conds.AccountID,
-			Backup:    conds.Backup,
+		stm, err := crud.SetQueryConds(&mgrpb.Conds{
+			CoinTypeID: conds.CoinTypeID,
+			AccountID:  conds.AccountID,
 		}, cli)
 		if err != nil {
 			return err
@@ -92,11 +89,12 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	return infos, nil
 }
 
-func join(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
+func join(stm *ent.UserQuery) *ent.UserSelect {
 	return stm.Select(
-		goodbenefit.FieldID,
-		goodbenefit.FieldGoodID,
-		goodbenefit.FieldBackup,
+		entuser.FieldID,
+		entuser.FieldAppID,
+		entuser.FieldUserID,
+		entuser.FieldCoinTypeID,
 	).
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(account.Table)

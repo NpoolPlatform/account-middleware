@@ -18,10 +18,10 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 )
 
-func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
+func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.UpdateAccountResponse, error) {
 	var err error
 
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateAccount")
 	defer span.End()
 
 	defer func() {
@@ -32,19 +32,19 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	}()
 
 	if err := validate(ctx, in.GetInfo()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+		logger.Sugar().Errorw("UpdateAccount", "err", err)
+		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "CreateAccount")
+	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "UpdateAccount")
 
-	info, err := goodbenefit1.CreateAccount(ctx, in.GetInfo())
+	info, err := goodbenefit1.UpdateAccount(ctx, in.GetInfo())
 	if err != nil {
-		logger.Sugar().Errorw("CreateAccount", "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw("UpdateAccount", "err", err)
+		return &npool.UpdateAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
-	return &npool.CreateAccountResponse{
+	return &npool.UpdateAccountResponse{
 		Info: info,
 	}, nil
 }
