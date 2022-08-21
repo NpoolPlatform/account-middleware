@@ -2,7 +2,7 @@ package deposit
 
 import (
 	"context"
-
+	"fmt"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	"go.opentelemetry.io/otel"
@@ -36,10 +36,24 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 	span = commontracer.TraceInvoker(span, "deposit", "deposit", "UpdateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
+		deposit, err := tx.Deposit.
+			Query().
+			Where(
+				entdeposit.ID(uuid.MustParse(in.GetID())),
+			).
+			ForUpdate().
+			Only(ctx)
+		if err != nil {
+			return err
+		}
+		if deposit == nil {
+			return fmt.Errorf("invalid deposit")
+		}
+
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.ID(uuid.MustParse(in.GetAccountID())),
+				entaccount.ID(deposit.AccountID),
 			).
 			ForUpdate().
 			Only(ctx)
@@ -53,17 +67,6 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			LockedBy: in.LockedBy,
 			Blocked:  in.Blocked,
 		}).Save(ctx); err != nil {
-			return err
-		}
-
-		deposit, err := tx.Deposit.
-			Query().
-			Where(
-				entdeposit.ID(uuid.MustParse(in.GetID())),
-			).
-			ForUpdate().
-			Only(ctx)
-		if err != nil {
 			return err
 		}
 
