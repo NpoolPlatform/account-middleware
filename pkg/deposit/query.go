@@ -121,7 +121,7 @@ func GetAccounts(ctx context.Context,
 			return err
 		}
 
-		stm.Where(deposit.ScannableAtGT(uint32(time.Now().Unix())))
+		stm.Where(deposit.ScannableAtLT(uint32(time.Now().Unix())))
 
 		return stm.
 			Select(

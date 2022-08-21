@@ -62,15 +62,19 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		}
 	}()
 
-	conds := in.GetConds()
-
+	conds := in.Conds
 	if conds == nil {
 		conds = &npool.Conds{}
 	}
 
+	limit := in.GetLimit()
+	if limit == 0 {
+		limit = 1000
+	}
+
 	span = commontracer.TraceInvoker(span, "deposit", "deposit", "GetAccounts")
 
-	infos, err := deposit1.GetAccounts(ctx, conds, in.GetOffset(), in.GetLimit())
+	infos, err := deposit1.GetAccounts(ctx, conds, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "err", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
