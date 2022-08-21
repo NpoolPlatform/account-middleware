@@ -64,8 +64,8 @@ github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym
 github.com/DATA-DOG/go-sqlmock v1.5.0 h1:Shsta01QNfFxHCfpW6YH2STWB0MudeXXEWMr20OEh60=
 github.com/DATA-DOG/go-sqlmock v1.5.0/go.mod h1:f/Ixk793poVmq4qj/V1dPUg2JEAKC73Q5eFN3EC/SaM=
 github.com/DataDog/datadog-go v3.2.0+incompatible/go.mod h1:LButxg5PwREeZtORoXG3tL4fMGNddJ+vMq1mwgfaqoQ=
-github.com/NpoolPlatform/account-manager v0.0.0-20220820053915-92f5d6fc0ada h1:Nn15IAZ/AlcpbnKUwrpcPIxHy9E0FYtMnLf/kgAtw0k=
-github.com/NpoolPlatform/account-manager v0.0.0-20220820053915-92f5d6fc0ada/go.mod h1:rYGYvAIeXz096iwoTlp3XJQbEX/pEX5i7Jb4oOxsteQ=
+github.com/NpoolPlatform/account-manager v0.0.0-20220821105540-c543bd2f6c57 h1:EPBdaLCYEnadMGb8KsFWjAukSl8FPftC7QZUrbf8ibk=
+github.com/NpoolPlatform/account-manager v0.0.0-20220821105540-c543bd2f6c57/go.mod h1:rYGYvAIeXz096iwoTlp3XJQbEX/pEX5i7Jb4oOxsteQ=
 github.com/NpoolPlatform/api-manager v0.0.0-20220328101926-8907b2f76c6d h1:lbBWd/t79S1JIuGySCFDyRJnOMQ7oHSjzUk+5aCAMxI=
 github.com/NpoolPlatform/api-manager v0.0.0-20220328101926-8907b2f76c6d/go.mod h1:ubnvHuhc0o6drhdYrT+nM5DXZW/yEesObWky6oRsHoQ=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220120091626-4e8035637592/go.mod h1:JqrktA7gNQe/Uprnr6DCs5UCFpheCZ30lDd0OkyRtC4=
