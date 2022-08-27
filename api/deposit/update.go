@@ -1,4 +1,3 @@
-//nolint:dupl
 package deposit
 
 import (
@@ -16,6 +15,8 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+
+	"github.com/google/uuid"
 )
 
 func (s *Server) UpdateAccount(
@@ -35,7 +36,7 @@ func (s *Server) UpdateAccount(
 		}
 	}()
 
-	if err := validate(ctx, in.GetInfo()); err != nil {
+	if _, err := uuid.Parse(in.GetInfo().GetID()); err != nil {
 		logger.Sugar().Errorw("UpdateAccount", "error", err)
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}

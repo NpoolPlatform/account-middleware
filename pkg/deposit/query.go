@@ -19,6 +19,7 @@ import (
 
 	depositcrud "github.com/NpoolPlatform/account-manager/pkg/crud/deposit"
 
+	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	depositmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/deposit"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
 
@@ -121,7 +122,7 @@ func GetAccounts(ctx context.Context,
 			return err
 		}
 
-		stm.Where(deposit.ScannableAtGT(uint32(time.Now().Unix())))
+		stm.Where(deposit.ScannableAtLT(uint32(time.Now().Unix())))
 
 		return stm.
 			Select(
@@ -175,7 +176,7 @@ func GetAccounts(ctx context.Context,
 					s.Where(
 						sql.EQ(
 							t1.C(account.FieldLockedBy),
-							conds.GetLockedBy().GetValue(),
+							accountmgrpb.LockedBy(conds.GetLockedBy().GetValue()).String(),
 						),
 					)
 				}
