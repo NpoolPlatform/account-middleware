@@ -45,7 +45,7 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 			Where(
 				entpayment.ID(uuid.MustParse(id)),
 			)
-		return join(stm).Scan(ctx, infos)
+		return join(stm).Scan(ctx, &infos)
 	})
 	if err != nil {
 		return nil, err
