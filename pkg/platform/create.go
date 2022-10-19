@@ -14,6 +14,8 @@ import (
 	accountcrud "github.com/NpoolPlatform/account-manager/pkg/crud/account"
 	platformcrud "github.com/NpoolPlatform/account-manager/pkg/crud/platform"
 	accountpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
+
+	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/platform"
 	mwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
 )
@@ -35,6 +37,17 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		privateKey := true
+
+		switch in.GetUsedFor() {
+		case accountmgrpb.AccountUsedFor_UserBenefitHot:
+		case accountmgrpb.AccountUsedFor_UserBenefitCold:
+			privateKey = false
+		case accountmgrpb.AccountUsedFor_PlatformBenefitCold:
+			privateKey = false
+		case accountmgrpb.AccountUsedFor_GasProvider:
+		case accountmgrpb.AccountUsedFor_PaymentCollector:
+			privateKey = false
+		}
 
 		info1, err := accountcrud.CreateSet(tx.Account.Create(), &accountpb.AccountReq{
 			CoinTypeID:             in.CoinTypeID,
