@@ -7,6 +7,14 @@ import (
 	"testing"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
+
+	"github.com/NpoolPlatform/go-service-framework/pkg/config"
+
+	"bou.ke/monkey"
+
+	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func init() {
@@ -18,9 +26,20 @@ func init() {
 	}
 }
 
+func createAccount(t *testing.T) {
+
+}
+
 func TestClient(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction { //nolint
 		return
 	}
-	// Here won't pass test due to we always test with localhost
+
+	gport := config.GetIntValueWithNameSpace("", config.KeyGRPCPort)
+
+	monkey.Patch(grpc2.GetGRPCConn, func(service string, tags ...string) (*grpc.ClientConn, error) {
+		return grpc.Dial(fmt.Sprintf("localhost:%v", gport), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	})
+
+	t.Run("createAccount", createAccount)
 }
