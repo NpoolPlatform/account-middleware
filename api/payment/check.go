@@ -32,14 +32,11 @@ func validate(ctx context.Context, info *npool.AccountReq) error {
 		return err
 	}
 
-	if info.CollectingTID == nil {
-		logger.Sugar().Errorw("validate", "CollectingTID", info.CollectingTID)
-		return status.Error(codes.InvalidArgument, "CollectingTID is empty")
-	}
-
-	if _, err := uuid.Parse(info.GetCollectingTID()); err != nil {
-		logger.Sugar().Errorw("validate", "CollectingTID", info.GetCollectingTID(), "error", err)
-		return status.Error(codes.InvalidArgument, fmt.Sprintf("CollectingTID is invalid: %v", err))
+	if info.CollectingTID != nil {
+		if _, err := uuid.Parse(info.GetCollectingTID()); err != nil {
+			logger.Sugar().Errorw("validate", "CollectingTID", info.CollectingTID)
+			return status.Error(codes.InvalidArgument, "CollectingTID is invalid")
+		}
 	}
 
 	exist, err := accountmgrcli.ExistAccountConds(ctx, &accountmgrpb.Conds{
