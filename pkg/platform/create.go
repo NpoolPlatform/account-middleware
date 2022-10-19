@@ -13,7 +13,6 @@ import (
 
 	accountcrud "github.com/NpoolPlatform/account-manager/pkg/crud/account"
 	platformcrud "github.com/NpoolPlatform/account-manager/pkg/crud/platform"
-	accountpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/platform"
@@ -49,7 +48,7 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 			privateKey = false
 		}
 
-		info1, err := accountcrud.CreateSet(tx.Account.Create(), &accountpb.AccountReq{
+		info1, err := accountcrud.CreateSet(tx.Account.Create(), &accountmgrpb.AccountReq{
 			CoinTypeID:             in.CoinTypeID,
 			Address:                in.Address,
 			UsedFor:                in.UsedFor,

@@ -34,7 +34,6 @@ func validate(ctx context.Context, info *npool.AccountReq) error {
 
 	switch info.GetUsedFor() {
 	case accountmgrpb.AccountUsedFor_UserWithdraw:
-	case accountmgrpb.AccountUsedFor_UserDeposit:
 	case accountmgrpb.AccountUsedFor_UserDirectBenefit:
 	default:
 		logger.Sugar().Errorw("validate", "UsedFor", info.GetUsedFor())

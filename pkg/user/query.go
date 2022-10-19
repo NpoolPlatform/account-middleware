@@ -7,7 +7,10 @@ import (
 	entuser "github.com/NpoolPlatform/account-manager/pkg/db/ent/user"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
+
+	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/user"
+
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
 
@@ -45,11 +48,14 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 			Where(
 				entuser.ID(uuid.MustParse(id)),
 			)
-		return join(stm).Scan(ctx, infos)
+		return join(stm).
+			Scan(ctx, &infos)
 	})
 	if err != nil {
 		return nil, err
 	}
+
+	infos = expand(infos)
 
 	return infos[0], nil
 }
@@ -86,6 +92,8 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 		return nil, err
 	}
 
+	infos = expand(infos)
+
 	return infos, nil
 }
 
@@ -108,10 +116,15 @@ func join(stm *ent.UserQuery) *ent.UserSelect {
 					sql.As(t1.C(account.FieldID), "account_id"),
 					sql.As(t1.C(account.FieldAddress), "address"),
 					sql.As(t1.C(account.FieldActive), "active"),
-					sql.As(t1.C(account.FieldLocked), "locked"),
-					sql.As(t1.C(account.FieldLockedBy), "locked_by"),
 					sql.As(t1.C(account.FieldBlocked), "blocked"),
 					sql.As(t1.C(account.FieldUsedFor), "used_for"),
 				)
 		})
+}
+
+func expand(infos []*npool.Account) []*npool.Account {
+	for _, info := range infos {
+		info.UsedFor = accountmgrpb.AccountUsedFor(accountmgrpb.AccountUsedFor_value[info.UsedForStr])
+	}
+	return infos
 }
