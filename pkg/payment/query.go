@@ -7,7 +7,10 @@ import (
 	entpayment "github.com/NpoolPlatform/account-manager/pkg/db/ent/payment"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
+
+	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/payment"
+
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
 
@@ -51,6 +54,8 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 		return nil, err
 	}
 
+	infos = expand(infos)
+
 	return infos[0], nil
 }
 
@@ -86,6 +91,8 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 		return nil, err
 	}
 
+	infos = expand(infos)
+
 	return infos, nil
 }
 
@@ -113,4 +120,11 @@ func join(stm *ent.PaymentQuery) *ent.PaymentSelect {
 					sql.As(t1.C(account.FieldBlocked), "blocked"),
 				)
 		})
+}
+
+func expand(infos []*npool.Account) []*npool.Account {
+	for _, info := range infos {
+		info.LockedBy = accountmgrpb.LockedBy(accountmgrpb.LockedBy_value[info.LockedByStr])
+	}
+	return infos
 }
