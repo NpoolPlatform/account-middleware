@@ -44,23 +44,25 @@ func validate(ctx context.Context, info *npool.AccountReq) error {
 		return status.Error(codes.InvalidArgument, fmt.Sprintf("GoodID is invalid: %v", err))
 	}
 
-	exist, err := accountmgrcli.ExistAccountConds(ctx, &accountmgrpb.Conds{
-		CoinTypeID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: info.GetCoinTypeID(),
-		},
-		Address: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: info.GetAddress(),
-		},
-	})
-	if err != nil {
-		logger.Sugar().Errorw("validate", "CoinTypeID", info.GetCoinTypeID(), "Address", info.GetAddress(), "error", err)
-		return status.Error(codes.InvalidArgument, fmt.Sprintf("Address is invalid: %v", err))
-	}
-	if exist {
-		logger.Sugar().Errorw("validate", "CoinTypeID", info.GetCoinTypeID(), "Address", info.GetAddress(), "exist", exist)
-		return status.Error(codes.AlreadyExists, "Address already exists")
+	if info.CoinTypeID != nil && info.Address != nil {
+		exist, err := accountmgrcli.ExistAccountConds(ctx, &accountmgrpb.Conds{
+			CoinTypeID: &commonpb.StringVal{
+				Op:    cruder.EQ,
+				Value: info.GetCoinTypeID(),
+			},
+			Address: &commonpb.StringVal{
+				Op:    cruder.EQ,
+				Value: info.GetAddress(),
+			},
+		})
+		if err != nil {
+			logger.Sugar().Errorw("validate", "CoinTypeID", info.GetCoinTypeID(), "Address", info.GetAddress(), "error", err)
+			return status.Error(codes.InvalidArgument, fmt.Sprintf("Address is invalid: %v", err))
+		}
+		if exist {
+			logger.Sugar().Errorw("validate", "CoinTypeID", info.GetCoinTypeID(), "Address", info.GetAddress(), "exist", exist)
+			return status.Error(codes.AlreadyExists, "Address already exists")
+		}
 	}
 
 	return nil

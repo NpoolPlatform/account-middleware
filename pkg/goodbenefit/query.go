@@ -116,6 +116,7 @@ func join(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
 				).
 				AppendSelect(
 					sql.As(t1.C(account.FieldID), "account_id"),
+					sql.As(t1.C(account.FieldCoinTypeID), "coin_type_id"),
 					sql.As(t1.C(account.FieldAddress), "address"),
 					sql.As(t1.C(account.FieldActive), "active"),
 					sql.As(t1.C(account.FieldLocked), "locked"),

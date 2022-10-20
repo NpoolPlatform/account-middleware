@@ -37,8 +37,14 @@ func (s *Server) UpdateAccount(
 	}()
 
 	if _, err := uuid.Parse(in.GetInfo().GetID()); err != nil {
-		logger.Sugar().Errorw("UpdateAccount", "error", err)
+		logger.Sugar().Errorw("UpdateAccount", "ID", in.GetInfo().GetID(), "error", err)
 		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+	if in.GetInfo().CollectingTID != nil {
+		if _, err := uuid.Parse(in.GetInfo().GetCollectingTID()); err != nil {
+			logger.Sugar().Errorw("UpdateAccount", "CollectingTID", in.GetInfo().GetCollectingTID(), "error", err)
+			return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+		}
 	}
 
 	span = commontracer.TraceInvoker(span, "deposit", "deposit", "UpdateAccount")
