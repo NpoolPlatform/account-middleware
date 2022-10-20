@@ -34,6 +34,13 @@ func validate(ctx context.Context, info *npool.AccountReq) error {
 		return err
 	}
 
+	if info.ID != nil {
+		if _, err := uuid.Parse(info.GetID()); err != nil {
+			logger.Sugar().Errorw("validate", "ID", info.ID)
+			return status.Error(codes.InvalidArgument, "ID is invalid")
+		}
+	}
+
 	if info.AppID == nil {
 		logger.Sugar().Errorw("validate", "AppID", info.AppID)
 		return status.Error(codes.InvalidArgument, "AppID is empty")

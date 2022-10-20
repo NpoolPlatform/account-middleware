@@ -38,7 +38,6 @@ var acc = &npool.Account{
 	AppID:         uuid.NewString(),
 	UserID:        uuid.NewString(),
 	CoinTypeID:    uuid.NewString(),
-	AccountID:     uuid.NewString(),
 	Address:       uuid.NewString(),
 	Active:        true,
 	Locked:        false,
@@ -55,7 +54,6 @@ var accReq = npool.AccountReq{
 	AppID:      &acc.AppID,
 	UserID:     &acc.UserID,
 	CoinTypeID: &acc.CoinTypeID,
-	AccountID:  &acc.AccountID,
 	Address:    &acc.Address,
 	Active:     &acc.Active,
 	Locked:     &acc.Locked,
@@ -68,6 +66,7 @@ func createAccount(t *testing.T) {
 	if assert.Nil(t, err) {
 		acc.CreatedAt = info.CreatedAt
 		acc.ScannableAt = info.ScannableAt
+		acc.AccountID = info.AccountID
 		assert.Equal(t, info, acc)
 	}
 }

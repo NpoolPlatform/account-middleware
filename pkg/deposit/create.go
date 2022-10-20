@@ -50,6 +50,7 @@ func CreateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		accountID := info1.ID.String()
 
 		info2, err := depositcrud.CreateSet(tx.Deposit.Create(), &mgrpb.AccountReq{
+			ID:         in.ID,
 			AppID:      in.AppID,
 			UserID:     in.UserID,
 			CoinTypeID: in.CoinTypeID,
