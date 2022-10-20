@@ -72,10 +72,9 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		u, err := depositcrud.UpdateSet(deposit, &depositmgrpb.AccountReq{
-			CoinTypeID:    in.CoinTypeID,
+			CollectingTID: in.CollectingTID,
 			Incoming:      in.Incoming,
 			Outcoming:     in.Outcoming,
-			CollectingTID: in.CollectingTID,
 			ScannableAt:   in.ScannableAt,
 		})
 		if err != nil {

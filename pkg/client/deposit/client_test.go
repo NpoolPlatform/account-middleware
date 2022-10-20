@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
 
@@ -71,6 +72,28 @@ func createAccount(t *testing.T) {
 	}
 }
 
+func updateAccount(t *testing.T) {
+	collectingTID := uuid.NewString()
+	incoming := "1.200000000000000000"
+	outcoming := "1.100000000000000000"
+	scannableAt := uint32(time.Now().Unix() + 100000)
+
+	accReq.CollectingTID = &collectingTID
+	accReq.Incoming = &incoming
+	accReq.Outcoming = &outcoming
+	accReq.ScannableAt = &scannableAt
+
+	acc.CollectingTID = collectingTID
+	acc.Incoming = incoming
+	acc.Outcoming = outcoming
+	acc.ScannableAt = scannableAt
+
+	info, err := UpdateAccount(context.Background(), &accReq)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, acc)
+	}
+}
+
 func TestClient(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction { //nolint
 		return
@@ -83,4 +106,5 @@ func TestClient(t *testing.T) {
 	})
 
 	t.Run("createAccount", createAccount)
+	t.Run("updateAccount", updateAccount)
 }
