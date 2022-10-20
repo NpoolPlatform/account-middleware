@@ -76,7 +76,6 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 						sql.As(t1.C(account.FieldLocked), "locked"),
 						sql.As(t1.C(account.FieldLockedBy), "locked_by"),
 						sql.As(t1.C(account.FieldBlocked), "blocked"),
-						sql.As(t1.C(account.FieldUsedFor), "used_for"),
 					)
 			}).
 			Scan(ctx, &infos)
