@@ -12,6 +12,8 @@ import (
 
 	"bou.ke/monkey"
 
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -24,6 +26,13 @@ func init() {
 	if err := testinit.Init(); err != nil {
 		fmt.Printf("cannot init test stub: %v\n", err)
 	}
+}
+
+var account = npool.Account{
+	ID:         uuid.NewString(),
+	AppID:      uuid.NewString(),
+	UserID:     uuid.NewString(),
+	CoinTypeID: uuid.NewString(),
 }
 
 func createAccount(t *testing.T) {
