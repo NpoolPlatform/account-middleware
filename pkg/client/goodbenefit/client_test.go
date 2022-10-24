@@ -1,6 +1,5 @@
 package goodbenefit
 
-/*
 import (
 	"context"
 	"fmt"
@@ -38,9 +37,8 @@ var acc = &npool.Account{
 	ID:          uuid.NewString(),
 	GoodID:      uuid.NewString(),
 	CoinTypeID:  uuid.NewString(),
-	AccountID:   uuid.NewString(),
-	Backup:      false,
 	Address:     uuid.NewString(),
+	Backup:      false,
 	Active:      true,
 	Locked:      false,
 	LockedByStr: accountmgrpb.LockedBy_DefaultLockedBy.String(),
@@ -52,9 +50,8 @@ var accReq = npool.AccountReq{
 	ID:         &acc.ID,
 	GoodID:     &acc.GoodID,
 	CoinTypeID: &acc.CoinTypeID,
-	AccountID:  &acc.AccountID,
-	Backup:     &acc.Backup,
 	Address:    &acc.Address,
+	Backup:     &acc.Backup,
 	Active:     &acc.Active,
 	Locked:     &acc.Locked,
 	LockedBy:   &acc.LockedBy,
@@ -67,6 +64,8 @@ func createAccount(t *testing.T) {
 		acc.CreatedAt = info.CreatedAt
 		acc.UpdatedAt = info.UpdatedAt
 		acc.AccountID = info.AccountID
+		accReq.ID = &info.ID
+		accReq.AccountID = &info.AccountID
 		assert.Equal(t, info, acc)
 	}
 }
@@ -81,17 +80,16 @@ func updateAccount(t *testing.T) {
 	acc.Blocked = blocked
 	acc.Locked = locked
 	acc.LockedBy = lockedBy
+	acc.LockedByStr = lockedBy.String()
 
 	accReq.Active = &active
 	accReq.Blocked = &blocked
 	accReq.Locked = &locked
 	accReq.LockedBy = &lockedBy
-	accReq.Address = nil
 
 	info, err := UpdateAccount(context.Background(), &accReq)
 	if assert.Nil(t, err) {
 		acc.UpdatedAt = info.UpdatedAt
-		acc.AccountID = info.AccountID
 		assert.Equal(t, info, acc)
 	}
 }
@@ -110,5 +108,3 @@ func TestClient(t *testing.T) {
 	t.Run("createAccount", createAccount)
 	t.Run("updateAccount", updateAccount)
 }
-
-*/

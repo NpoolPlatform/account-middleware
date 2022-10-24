@@ -68,7 +68,9 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if _, err = goodbenefitcrud.UpdateSet(goodBenefit, &goodbenefitpb.AccountReq{
-			Backup: in.Backup,
+			TransactionID: in.TransactionID,
+			AccountID:     in.AccountID,
+			Backup:        in.Backup,
 		}).Save(ctx); err != nil {
 			return err
 		}
