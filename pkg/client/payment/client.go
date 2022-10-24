@@ -2,6 +2,7 @@ package payment
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
@@ -93,6 +94,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 		return resp.Info, nil
 	})
 	if err != nil {
+		fmt.Printf("---- error %v\n", err)
 		return nil, err
 	}
 	return info.(*npool.Account), nil
