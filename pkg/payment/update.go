@@ -68,7 +68,6 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if _, err = paymentcrud.UpdateSet(payment, &paymentmgrpb.AccountReq{
-			CoinTypeID:    in.CoinTypeID,
 			AccountID:     in.AccountID,
 			CollectingTID: in.CollectingTID,
 			AvailableAt:   in.AvailableAt,

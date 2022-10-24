@@ -74,8 +74,7 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := crud.SetQueryConds(&mgrpb.Conds{
-			CoinTypeID: conds.CoinTypeID,
-			AccountID:  conds.AccountID,
+			AccountID: conds.AccountID,
 		}, cli)
 		if err != nil {
 			return err
@@ -99,7 +98,6 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 func join(stm *ent.PaymentQuery) *ent.PaymentSelect {
 	return stm.Select(
 		entpayment.FieldID,
-		entpayment.FieldCoinTypeID,
 		entpayment.FieldCollectingTid,
 		entpayment.FieldAvailableAt,
 	).
@@ -118,6 +116,7 @@ func join(stm *ent.PaymentQuery) *ent.PaymentSelect {
 					sql.As(t1.C(account.FieldLocked), "locked"),
 					sql.As(t1.C(account.FieldLockedBy), "locked_by"),
 					sql.As(t1.C(account.FieldBlocked), "blocked"),
+					sql.As(t1.C(account.FieldCoinTypeID), "coin_type_id"),
 				)
 		})
 }

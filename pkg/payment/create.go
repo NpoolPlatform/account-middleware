@@ -49,7 +49,7 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 
 		accountID := info1.ID.String()
 		info2, err := paymentcrud.CreateSet(tx.Payment.Create(), &mgrpb.AccountReq{
-			CoinTypeID:    in.CollectingTID,
+			ID:            in.ID,
 			AccountID:     &accountID,
 			CollectingTID: in.CollectingTID,
 			AvailableAt:   in.AvailableAt,
