@@ -36,26 +36,6 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 	span = commontracer.TraceInvoker(span, "platform", "platform", "UpdateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		account, err := tx.Account.
-			Query().
-			Where(
-				entaccount.ID(uuid.MustParse(in.GetAccountID())),
-			).
-			ForUpdate().
-			Only(ctx)
-		if err != nil {
-			return err
-		}
-
-		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
-			Active:   in.Active,
-			Locked:   in.Locked,
-			LockedBy: in.LockedBy,
-			Blocked:  in.Blocked,
-		}).Save(ctx); err != nil {
-			return err
-		}
-
 		platform, err := tx.Platform.
 			Query().
 			Where(
@@ -68,10 +48,27 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if _, err := platformcrud.UpdateSet(platform, &platformmgrpb.AccountReq{
-			CoinTypeID: in.CoinTypeID,
-			UsedFor:    in.UsedFor,
-			AccountID:  in.AccountID,
-			Backup:     in.Backup,
+			Backup: in.Backup,
+		}).Save(ctx); err != nil {
+			return err
+		}
+
+		account, err := tx.Account.
+			Query().
+			Where(
+				entaccount.ID(platform.AccountID),
+			).
+			ForUpdate().
+			Only(ctx)
+		if err != nil {
+			return err
+		}
+
+		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
+			Active:   in.Active,
+			Locked:   in.Locked,
+			LockedBy: in.LockedBy,
+			Blocked:  in.Blocked,
 		}).Save(ctx); err != nil {
 			return err
 		}

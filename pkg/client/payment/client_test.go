@@ -59,7 +59,6 @@ var accReq = &npool.AccountReq{
 func createAccount(t *testing.T) {
 	info, err := CreateAccount(context.Background(), accReq)
 	if assert.Nil(t, err) {
-		acc.ID = info.ID
 		acc.CreatedAt = info.CreatedAt
 		acc.UpdatedAt = info.UpdatedAt
 		acc.AccountID = info.AccountID

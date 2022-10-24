@@ -60,10 +60,10 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 
 		accountID := info1.ID.String()
 		info2, err := platformcrud.CreateSet(tx.Platform.Create(), &mgrpb.AccountReq{
-			CoinTypeID: in.CoinTypeID,
-			UsedFor:    in.UsedFor,
-			AccountID:  &accountID,
-			Backup:     in.Backup,
+			ID:        in.ID,
+			UsedFor:   in.UsedFor,
+			AccountID: &accountID,
+			Backup:    in.Backup,
 		}).Save(ctx)
 		if err != nil {
 			return err

@@ -54,7 +54,6 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 				deposit.FieldID,
 				deposit.FieldAppID,
 				deposit.FieldUserID,
-				deposit.FieldCoinTypeID,
 				deposit.FieldAccountID,
 				deposit.FieldCollectingTid,
 				deposit.FieldCreatedAt,
@@ -71,6 +70,7 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 						t1.C(account.FieldID),
 					).
 					AppendSelect(
+						sql.As(t1.C(account.FieldCoinTypeID), "coin_type_id"),
 						sql.As(t1.C(account.FieldAddress), "address"),
 						sql.As(t1.C(account.FieldActive), "active"),
 						sql.As(t1.C(account.FieldLocked), "locked"),
@@ -113,7 +113,6 @@ func GetAccounts(ctx context.Context,
 			ID:          conds.ID,
 			AppID:       conds.AppID,
 			UserID:      conds.UserID,
-			CoinTypeID:  conds.CoinTypeID,
 			AccountID:   conds.AccountID,
 			ScannableAt: conds.ScannableAt,
 		}, cli)
@@ -128,7 +127,6 @@ func GetAccounts(ctx context.Context,
 				deposit.FieldID,
 				deposit.FieldAppID,
 				deposit.FieldUserID,
-				deposit.FieldCoinTypeID,
 				deposit.FieldAccountID,
 				deposit.FieldCollectingTid,
 				deposit.FieldCreatedAt,
@@ -190,6 +188,7 @@ func GetAccounts(ctx context.Context,
 
 				s.
 					AppendSelect(
+						sql.As(t1.C(account.FieldCoinTypeID), "coin_type_id"),
 						sql.As(t1.C(account.FieldAddress), "address"),
 						sql.As(t1.C(account.FieldActive), "active"),
 						sql.As(t1.C(account.FieldLocked), "locked"),
