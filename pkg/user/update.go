@@ -36,25 +36,6 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 	span = commontracer.TraceInvoker(span, "user", "user", "UpdateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		account, err := tx.Account.
-			Query().
-			Where(
-				entaccount.ID(uuid.MustParse(in.GetAccountID())),
-			).
-			ForUpdate().
-			Only(ctx)
-		if err != nil {
-			return err
-		}
-
-		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
-			Active:  in.Active,
-			Locked:  in.Locked,
-			Blocked: in.Blocked,
-		}).Save(ctx); err != nil {
-			return err
-		}
-
 		user, err := tx.User.
 			Query().
 			Where(
@@ -68,6 +49,25 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 
 		if _, err = usercrud.UpdateSet(user, &usermgrpb.AccountReq{
 			Labels: in.Labels,
+		}).Save(ctx); err != nil {
+			return err
+		}
+
+		account, err := tx.Account.
+			Query().
+			Where(
+				entaccount.ID(user.AccountID),
+			).
+			ForUpdate().
+			Only(ctx)
+		if err != nil {
+			return err
+		}
+
+		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
+			Active:  in.Active,
+			Locked:  in.Locked,
+			Blocked: in.Blocked,
 		}).Save(ctx); err != nil {
 			return err
 		}

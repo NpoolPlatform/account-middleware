@@ -67,7 +67,23 @@ func createAccount(t *testing.T) {
 }
 
 func updateAccount(t *testing.T) {
+	active := false
+	labels := []string{uuid.NewString(), uuid.NewString()}
+	blocked := true
 
+	acc.Active = active
+	acc.Labels = labels
+	acc.Blocked = blocked
+
+	accReq.Active = &active
+	accReq.Labels = labels
+	accReq.Blocked = &blocked
+
+	info, err := UpdateAccount(context.Background(), accReq)
+	if assert.Nil(t, err) {
+		acc.LabelsStr = info.LabelsStr
+		assert.Equal(t, acc, info)
+	}
 }
 
 func TestClient(t *testing.T) {
