@@ -36,26 +36,6 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "UpdateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		account, err := tx.Account.
-			Query().
-			Where(
-				entaccount.ID(uuid.MustParse(in.GetAccountID())),
-			).
-			ForUpdate().
-			Only(ctx)
-		if err != nil {
-			return err
-		}
-
-		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
-			Active:   in.Active,
-			Locked:   in.Locked,
-			LockedBy: in.LockedBy,
-			Blocked:  in.Blocked,
-		}).Save(ctx); err != nil {
-			return err
-		}
-
 		goodBenefit, err := tx.GoodBenefit.
 			Query().
 			Where(
@@ -69,8 +49,27 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 
 		if _, err = goodbenefitcrud.UpdateSet(goodBenefit, &goodbenefitpb.AccountReq{
 			TransactionID: in.TransactionID,
-			AccountID:     in.AccountID,
 			Backup:        in.Backup,
+		}).Save(ctx); err != nil {
+			return err
+		}
+
+		account, err := tx.Account.
+			Query().
+			Where(
+				entaccount.ID(goodBenefit.AccountID),
+			).
+			ForUpdate().
+			Only(ctx)
+		if err != nil {
+			return err
+		}
+
+		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
+			Active:   in.Active,
+			Locked:   in.Locked,
+			LockedBy: in.LockedBy,
+			Blocked:  in.Blocked,
 		}).Save(ctx); err != nil {
 			return err
 		}
