@@ -48,6 +48,7 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 
 		accountID := info1.ID.String()
 		info2, err := usercrud.CreateSet(tx.User.Create(), &mgrpb.AccountReq{
+			ID:         in.ID,
 			AppID:      in.AppID,
 			UserID:     in.UserID,
 			CoinTypeID: in.CoinTypeID,

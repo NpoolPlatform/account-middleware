@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 
 	crud "github.com/NpoolPlatform/account-manager/pkg/crud/user"
 	entuser "github.com/NpoolPlatform/account-manager/pkg/db/ent/user"
@@ -19,7 +20,6 @@ import (
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
-	"github.com/NpoolPlatform/account-manager/pkg/db/ent/deposit"
 
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 
@@ -103,13 +103,14 @@ func join(stm *ent.UserQuery) *ent.UserSelect {
 		entuser.FieldAppID,
 		entuser.FieldUserID,
 		entuser.FieldCoinTypeID,
+		entuser.FieldLabels,
 	).
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(account.Table)
 			s.
 				LeftJoin(t1).
 				On(
-					s.C(deposit.FieldAccountID),
+					s.C(entuser.FieldAccountID),
 					t1.C(account.FieldID),
 				).
 				AppendSelect(
@@ -125,6 +126,7 @@ func join(stm *ent.UserQuery) *ent.UserSelect {
 func expand(infos []*npool.Account) []*npool.Account {
 	for _, info := range infos {
 		info.UsedFor = accountmgrpb.AccountUsedFor(accountmgrpb.AccountUsedFor_value[info.UsedForStr])
+		_ = json.Unmarshal([]byte(info.LabelsStr), &info.Labels) //nolint
 	}
 	return infos
 }
