@@ -126,7 +126,7 @@ func join(stm *ent.UserQuery) *ent.UserSelect {
 func expand(infos []*npool.Account) []*npool.Account {
 	for _, info := range infos {
 		info.UsedFor = accountmgrpb.AccountUsedFor(accountmgrpb.AccountUsedFor_value[info.UsedForStr])
-		_ = json.Unmarshal([]byte(info.LabelsStr), &info.Labels) //nolint
+		_ = json.Unmarshal([]byte(info.LabelsStr), &info.Labels)
 	}
 	return infos
 }
