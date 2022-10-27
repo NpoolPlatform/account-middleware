@@ -100,6 +100,7 @@ func join(stm *ent.PlatformQuery) *ent.PlatformSelect {
 	return stm.Select(
 		entplatform.FieldID,
 		entplatform.FieldBackup,
+		entplatform.FieldGoodID,
 	).
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(account.Table)
