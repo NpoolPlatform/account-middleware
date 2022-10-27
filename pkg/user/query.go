@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	crud "github.com/NpoolPlatform/account-manager/pkg/crud/user"
 	entuser "github.com/NpoolPlatform/account-manager/pkg/db/ent/user"
@@ -56,6 +57,9 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 	}
 
 	infos = expand(infos)
+	if len(infos) == 0 {
+		return nil, fmt.Errorf("no record")
+	}
 
 	return infos[0], nil
 }

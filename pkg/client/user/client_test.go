@@ -86,6 +86,15 @@ func updateAccount(t *testing.T) {
 	}
 }
 
+func deleteAccount(t *testing.T) {
+	info, err := DeleteAccount(context.Background(), acc.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, acc, info)
+	}
+	_, err = GetAccount(context.Background(), info.ID)
+	assert.NotNil(t, err)
+}
+
 func TestClient(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
 		return
@@ -99,4 +108,5 @@ func TestClient(t *testing.T) {
 
 	t.Run("createAccount", createAccount)
 	t.Run("updateAccount", updateAccount)
+	t.Run("deleteAccount", deleteAccount)
 }

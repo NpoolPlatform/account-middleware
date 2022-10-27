@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
@@ -99,7 +98,22 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 		return resp.Info, nil
 	})
 	if err != nil {
-		fmt.Printf("---- error %v\n", err)
+		return nil, err
+	}
+	return info.(*npool.Account), nil
+}
+
+func DeleteAccount(ctx context.Context, id string) (*npool.Account, error) {
+	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.DeleteAccount(ctx, &npool.DeleteAccountRequest{
+			ID: id,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
 		return nil, err
 	}
 	return info.(*npool.Account), nil
