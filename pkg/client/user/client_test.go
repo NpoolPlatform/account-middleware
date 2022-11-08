@@ -62,6 +62,8 @@ func createAccount(t *testing.T) {
 		acc.CreatedAt = info.CreatedAt
 		acc.LabelsStr = info.LabelsStr
 		acc.AccountID = info.AccountID
+		acc.UpdatedAt = info.UpdatedAt
+		acc.DeletedAt = info.DeletedAt
 		assert.Equal(t, acc, info)
 	}
 }
@@ -82,6 +84,9 @@ func updateAccount(t *testing.T) {
 	info, err := UpdateAccount(context.Background(), accReq)
 	if assert.Nil(t, err) {
 		acc.LabelsStr = info.LabelsStr
+		acc.CreatedAt = info.CreatedAt
+		acc.UpdatedAt = info.UpdatedAt
+		acc.DeletedAt = info.DeletedAt
 		assert.Equal(t, acc, info)
 	}
 }
@@ -89,6 +94,9 @@ func updateAccount(t *testing.T) {
 func deleteAccount(t *testing.T) {
 	info, err := DeleteAccount(context.Background(), acc.ID)
 	if assert.Nil(t, err) {
+		acc.CreatedAt = info.CreatedAt
+		acc.UpdatedAt = info.UpdatedAt
+		acc.DeletedAt = info.DeletedAt
 		assert.Equal(t, acc, info)
 	}
 	_, err = GetAccount(context.Background(), info.ID)
