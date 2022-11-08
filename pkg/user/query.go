@@ -112,6 +112,9 @@ func join(stm *ent.UserQuery) *ent.UserSelect {
 					sql.As(t1.C(account.FieldLockedBy), "locked_by"),
 					sql.As(t1.C(account.FieldBlocked), "blocked"),
 					sql.As(t1.C(account.FieldUsedFor), "used_for"),
+					sql.As(t1.C(account.FieldCreatedAt), "created_at"),
+					sql.As(t1.C(account.FieldUpdatedAt), "updated_at"),
+					sql.As(t1.C(account.FieldDeletedAt), "deleted_at"),
 				)
 		})
 }
