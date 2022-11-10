@@ -79,9 +79,9 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := crud.SetQueryConds(&mgrpb.Conds{
-			AppID: conds.AppID,
-			UserID: conds.UserID,
-			UsedFor: conds.UsedFor,
+			AppID:      conds.AppID,
+			UserID:     conds.UserID,
+			UsedFor:    conds.UsedFor,
 			CoinTypeID: conds.CoinTypeID,
 			AccountID:  conds.AccountID,
 		}, cli)
