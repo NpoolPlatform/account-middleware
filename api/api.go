@@ -11,6 +11,7 @@ import (
 
 	account "github.com/NpoolPlatform/message/npool/account/mw/v1"
 
+	account1 "github.com/NpoolPlatform/account-middleware/api/account"
 	"github.com/NpoolPlatform/account-middleware/api/deposit"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -24,6 +25,7 @@ type Server struct {
 func Register(server grpc.ServiceRegistrar) {
 	account.RegisterMiddlewareServer(server, &Server{})
 	deposit.Register(server)
+	account1.Register(server)
 	goodbenefit.Register(server)
 	payment.Register(server)
 	platform.Register(server)
