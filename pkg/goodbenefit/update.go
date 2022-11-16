@@ -47,6 +47,31 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
+		if !in.GetBackup() {
+			gb, err := tx.GoodBenefit.
+				Query().
+				Where(
+					entgoodbenefit.GoodID(goodBenefit.GoodID),
+					entgoodbenefit.Backup(false),
+				).
+				ForUpdate().
+				Only(ctx)
+			if err != nil {
+				if !ent.IsNotFound(err) {
+					return err
+				}
+			}
+
+			if gb != nil {
+				backup := true
+				if _, err = goodbenefitcrud.UpdateSet(gb, &goodbenefitpb.AccountReq{
+					Backup: &backup,
+				}).Save(ctx); err != nil {
+					return err
+				}
+			}
+		}
+
 		if _, err = goodbenefitcrud.UpdateSet(goodBenefit, &goodbenefitpb.AccountReq{
 			TransactionID: in.TransactionID,
 			Backup:        in.Backup,
@@ -76,6 +101,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 
 		return nil
 	})
+
 	if err != nil {
 		return nil, err
 	}
