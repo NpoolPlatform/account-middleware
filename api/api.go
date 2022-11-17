@@ -3,16 +3,15 @@ package api
 import (
 	"context"
 
-	"github.com/NpoolPlatform/account-middleware/api/payment"
-	"github.com/NpoolPlatform/account-middleware/api/platform"
-	"github.com/NpoolPlatform/account-middleware/api/user"
-
-	"github.com/NpoolPlatform/account-middleware/api/goodbenefit"
-
-	account "github.com/NpoolPlatform/message/npool/account/mw/v1"
-
 	account1 "github.com/NpoolPlatform/account-middleware/api/account"
 	"github.com/NpoolPlatform/account-middleware/api/deposit"
+	"github.com/NpoolPlatform/account-middleware/api/goodbenefit"
+	"github.com/NpoolPlatform/account-middleware/api/payment"
+	"github.com/NpoolPlatform/account-middleware/api/platform"
+	"github.com/NpoolPlatform/account-middleware/api/transfer"
+	"github.com/NpoolPlatform/account-middleware/api/user"
+
+	account "github.com/NpoolPlatform/message/npool/account/mw/v1"
 
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
@@ -30,6 +29,7 @@ func Register(server grpc.ServiceRegistrar) {
 	payment.Register(server)
 	platform.Register(server)
 	user.Register(server)
+	transfer.Register(server)
 }
 
 func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
