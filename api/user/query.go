@@ -57,7 +57,7 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 
 	span = commontracer.TraceInvoker(span, "user", "user", "GetAccounts")
 
-	infos, err := user1.GetAccounts(ctx, in.GetConds(), in.GetOffset(), in.GetLimit())
+	infos, total, err := user1.GetAccounts(ctx, in.GetConds(), in.GetOffset(), in.GetLimit())
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "err", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
@@ -65,5 +65,6 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 
 	return &npool.GetAccountsResponse{
 		Infos: infos,
+		Total: total,
 	}, nil
 }

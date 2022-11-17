@@ -95,7 +95,7 @@ func GetAccounts(ctx context.Context,
 	conds *npool.Conds,
 	offset,
 	limit int32,
-) (infos []*npool.Account, err error) {
+) (infos []*npool.Account, total uint32, err error) {
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
 	defer span.End()
 
@@ -121,6 +121,12 @@ func GetAccounts(ctx context.Context,
 		}
 
 		stm.Where(deposit.ScannableAtLT(uint32(time.Now().Unix())))
+
+		_total, err := stm.Count(ctx)
+		if err != nil {
+			return err
+		}
+		total = uint32(_total)
 
 		return stm.
 			Select(
@@ -199,8 +205,8 @@ func GetAccounts(ctx context.Context,
 			Scan(ctx, &infos)
 	})
 	if err != nil {
-		return nil, err
+		return nil, total, err
 	}
 
-	return infos, nil
+	return infos, total, nil
 }

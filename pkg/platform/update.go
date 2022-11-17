@@ -47,6 +47,31 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
+		if !in.GetBackup() {
+			platformAccount, err := tx.Platform.
+				Query().
+				Where(
+					entplatform.UsedFor(platform.UsedFor),
+					entplatform.Backup(false),
+				).
+				ForUpdate().
+				Only(ctx)
+			if err != nil {
+				if !ent.IsNotFound(err) {
+					return err
+				}
+			}
+
+			if platformAccount != nil {
+				backup := true
+				if _, err = platformcrud.UpdateSet(platformAccount, &platformmgrpb.AccountReq{
+					Backup: &backup,
+				}).Save(ctx); err != nil {
+					return err
+				}
+			}
+		}
+
 		if _, err := platformcrud.UpdateSet(platform, &platformmgrpb.AccountReq{
 			Backup: in.Backup,
 		}).Save(ctx); err != nil {
