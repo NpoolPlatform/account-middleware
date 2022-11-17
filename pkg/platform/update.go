@@ -52,6 +52,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 				Query().
 				Where(
 					entplatform.UsedFor(platform.UsedFor),
+					entplatform.Backup(false),
 				).
 				ForUpdate().
 				Only(ctx)
