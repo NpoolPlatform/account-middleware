@@ -2,7 +2,9 @@ package platform
 
 import (
 	"context"
+	"fmt"
 
+	"entgo.io/ent/dialect/sql"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	"go.opentelemetry.io/otel"
@@ -48,43 +50,64 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if !in.GetBackup() {
-			accounts, err := tx.Account.
+			var infos []*npool.Account
+			err = tx.Platform.
 				Query().
-				Where(
-					entaccount.UsedFor(platform.UsedFor),
-					entaccount.CoinTypeID(uuid.MustParse(in.GetCoinTypeID())),
-				).
-				All(ctx)
+				Select(entplatform.FieldID).
+				Modify(func(s *sql.Selector) {
+					t := sql.Table(entaccount.Table)
+					s.LeftJoin(t).
+						On(
+							s.C(entplatform.FieldAccountID),
+							t.C(entaccount.FieldID),
+						).
+						Where(
+							sql.EQ(
+								t.C(entaccount.FieldCoinTypeID),
+								in.GetCoinTypeID(),
+							),
+						).
+						Where(
+							sql.EQ(
+								t.C(entaccount.FieldUsedFor),
+								platform.UsedFor,
+							),
+						).
+						Where(
+							sql.EQ(
+								t.C(entplatform.FieldBackup),
+								false,
+							),
+						)
+				}).Scan(ctx, &infos)
+
 			if err != nil {
 				return err
 			}
-
-			ids := []uuid.UUID{}
-			for _, account := range accounts {
-				ids = append(ids, account.ID)
+			if len(infos) > 1 {
+				return fmt.Errorf("NotSingularError")
 			}
-
-			platformAccount, err := tx.Platform.
-				Query().
-				Where(
-					entplatform.AccountIDIn(ids...),
-					entplatform.UsedFor(platform.UsedFor),
-					entplatform.Backup(false),
-				).
-				ForUpdate().
-				Only(ctx)
-			if err != nil {
-				if !ent.IsNotFound(err) {
-					return err
+			if len(infos) == 1 {
+				platformAccount, err := tx.Platform.
+					Query().
+					Where(
+						entplatform.ID(uuid.MustParse(infos[0].ID)),
+					).
+					ForUpdate().
+					Only(ctx)
+				if err != nil {
+					if !ent.IsNotFound(err) {
+						return err
+					}
 				}
-			}
 
-			if platformAccount != nil {
-				backup := true
-				if _, err = platformcrud.UpdateSet(platformAccount, &platformmgrpb.AccountReq{
-					Backup: &backup,
-				}).Save(ctx); err != nil {
-					return err
+				if platformAccount != nil {
+					backup := true
+					if _, err = platformcrud.UpdateSet(platformAccount, &platformmgrpb.AccountReq{
+						Backup: &backup,
+					}).Save(ctx); err != nil {
+						return err
+					}
 				}
 			}
 		}
