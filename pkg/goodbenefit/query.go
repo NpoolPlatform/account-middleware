@@ -56,7 +56,7 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 		return nil, err
 	}
 	if len(infos) == 0 {
-		return nil, nil
+		return nil, fmt.Errorf("no record")
 	}
 
 	infos = expand(infos)
