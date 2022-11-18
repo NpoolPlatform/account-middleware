@@ -48,9 +48,26 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if !in.GetBackup() {
+			accounts, err := tx.Account.
+				Query().
+				Where(
+					entaccount.UsedFor(platform.UsedFor),
+					entaccount.CoinTypeID(uuid.MustParse(in.GetCoinTypeID())),
+				).
+				All(ctx)
+			if err != nil {
+				return err
+			}
+
+			ids := []uuid.UUID{}
+			for _, account := range accounts {
+				ids = append(ids, account.ID)
+			}
+
 			platformAccount, err := tx.Platform.
 				Query().
 				Where(
+					entplatform.AccountIDIn(ids...),
 					entplatform.UsedFor(platform.UsedFor),
 					entplatform.Backup(false),
 				).
