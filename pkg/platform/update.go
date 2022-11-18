@@ -51,12 +51,16 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 
 		if !in.GetBackup() {
 			var infos []*npool.Account
-			err = tx.Platform.
+			err = tx.
+				Platform.
 				Query().
-				Select(entplatform.FieldID).
+				Select(
+					entplatform.FieldID,
+				).
 				Modify(func(s *sql.Selector) {
 					t := sql.Table(entaccount.Table)
-					s.LeftJoin(t).
+					s.
+						LeftJoin(t).
 						On(
 							s.C(entplatform.FieldAccountID),
 							t.C(entaccount.FieldID),
