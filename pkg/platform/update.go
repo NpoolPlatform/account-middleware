@@ -54,6 +54,9 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			err = tx.
 				Platform.
 				Query().
+				Where(
+					entplatform.Backup(false),
+				).
 				Select(
 					entplatform.FieldID,
 				).
@@ -68,19 +71,13 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 						Where(
 							sql.EQ(
 								t.C(entaccount.FieldCoinTypeID),
-								in.GetCoinTypeID(),
+								uuid.MustParse(in.GetCoinTypeID()),
 							),
 						).
 						Where(
 							sql.EQ(
 								t.C(entaccount.FieldUsedFor),
 								platform.UsedFor,
-							),
-						).
-						Where(
-							sql.EQ(
-								t.C(entplatform.FieldBackup),
-								false,
 							),
 						)
 				}).Scan(ctx, &infos)
@@ -92,7 +89,8 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 				return fmt.Errorf("NotSingularError")
 			}
 			if len(infos) == 1 {
-				platformAccount, err := tx.Platform.
+				platformAccount, err := tx.
+					Platform.
 					Query().
 					Where(
 						entplatform.ID(uuid.MustParse(infos[0].ID)),
@@ -108,6 +106,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 				if platformAccount != nil {
 					backup := true
 					if _, err = platformcrud.UpdateSet(platformAccount, &platformmgrpb.AccountReq{
+						ID:     &infos[0].ID,
 						Backup: &backup,
 					}).Save(ctx); err != nil {
 						return err
@@ -117,6 +116,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if _, err := platformcrud.UpdateSet(platform, &platformmgrpb.AccountReq{
+			ID:     in.ID,
 			Backup: in.Backup,
 		}).Save(ctx); err != nil {
 			return err
@@ -133,7 +133,10 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
+		accountID := platform.AccountID.String()
+
 		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
+			ID:       &accountID,
 			Active:   in.Active,
 			Locked:   in.Locked,
 			LockedBy: in.LockedBy,
