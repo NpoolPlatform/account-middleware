@@ -5,7 +5,7 @@ go 1.17
 require (
 	bou.ke/monkey v1.0.2
 	entgo.io/ent v0.11.2
-	github.com/NpoolPlatform/account-manager v0.0.0-20221118032420-4dc57b32d630
+	github.com/NpoolPlatform/account-manager v0.0.0-20221118041212-4f6a62c464cf
 	github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20220818105452-9457611ae070
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20220821121920-9559f5776d15
