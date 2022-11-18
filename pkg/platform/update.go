@@ -22,7 +22,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Account, err error) {
+func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Account, err error) { //nolint
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateAccount")
 	defer span.End()
 
