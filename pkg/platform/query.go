@@ -55,6 +55,9 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 	if err != nil {
 		return nil, err
 	}
+	if len(infos) == 0 {
+		return nil, nil
+	}
 
 	infos = expand(infos)
 
