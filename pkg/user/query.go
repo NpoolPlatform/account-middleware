@@ -49,7 +49,7 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 			Where(
 				entuser.ID(uuid.MustParse(id)),
 			)
-		return join(stm).
+		return join(stm, &npool.Conds{}).
 			Scan(ctx, &infos)
 	})
 	if err != nil {
@@ -79,11 +79,14 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := crud.SetQueryConds(&mgrpb.Conds{
+			ID:         conds.ID,
 			AppID:      conds.AppID,
 			UserID:     conds.UserID,
 			UsedFor:    conds.UsedFor,
 			CoinTypeID: conds.CoinTypeID,
 			AccountID:  conds.AccountID,
+			IDs:        conds.IDs,
+			AccountIDs: conds.AccountIDs,
 		}, cli)
 		if err != nil {
 			return err
@@ -98,7 +101,7 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 		stm.Offset(int(offset)).
 			Limit(int(limit))
 
-		return join(stm).
+		return join(stm, conds).
 			Scan(ctx, &infos)
 	})
 	if err != nil {
@@ -110,7 +113,7 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	return infos, total, nil
 }
 
-func join(stm *ent.UserQuery) *ent.UserSelect {
+func join(stm *ent.UserQuery, conds *npool.Conds) *ent.UserSelect {
 	return stm.Select(
 		entuser.FieldID,
 		entuser.FieldAppID,
@@ -125,7 +128,26 @@ func join(stm *ent.UserQuery) *ent.UserSelect {
 				On(
 					s.C(entuser.FieldAccountID),
 					t1.C(account.FieldID),
-				).
+				)
+
+			if conds.Active != nil {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldActive),
+						conds.GetActive().GetValue(),
+					),
+				)
+			}
+			if conds.Blocked != nil {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldBlocked),
+						conds.GetBlocked().GetValue(),
+					),
+				)
+			}
+
+			s.
 				AppendSelect(
 					sql.As(t1.C(account.FieldID), "account_id"),
 					sql.As(t1.C(account.FieldAddress), "address"),
