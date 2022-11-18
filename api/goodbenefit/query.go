@@ -14,6 +14,8 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 
 	goodbenefit1 "github.com/NpoolPlatform/account-middleware/pkg/goodbenefit"
+
+	"github.com/google/uuid"
 )
 
 func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*npool.GetAccountResponse, error) {
@@ -28,6 +30,11 @@ func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*
 			span.RecordError(err)
 		}
 	}()
+
+	if _, err := uuid.Parse(in.GetID()); err != nil {
+		logger.Sugar().Errorw("GetAccount", "ID", in.GetID(), "error", err)
+		return &npool.GetAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
 
 	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "GetAccount")
 
