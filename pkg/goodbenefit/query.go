@@ -1,8 +1,8 @@
 package goodbenefit
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
