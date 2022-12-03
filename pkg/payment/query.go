@@ -74,7 +74,9 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := crud.SetQueryConds(&mgrpb.Conds{
-			AccountID: conds.AccountID,
+			ID:         conds.ID,
+			AccountID:  conds.AccountID,
+			AccountIDs: conds.AccountIDs,
 		}, cli)
 		if err != nil {
 			return err
