@@ -113,6 +113,54 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	return infos, total, nil
 }
 
+func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccountOnly")
+	defer span.End()
+
+	var err error
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	infos := []*npool.Account{}
+
+	span = commontracer.TraceInvoker(span, "user", "user", "QueryJoin")
+
+	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
+		stm, err := crud.SetQueryConds(&mgrpb.Conds{
+			ID:         conds.ID,
+			AppID:      conds.AppID,
+			UserID:     conds.UserID,
+			UsedFor:    conds.UsedFor,
+			CoinTypeID: conds.CoinTypeID,
+			AccountID:  conds.AccountID,
+		}, cli)
+		if err != nil {
+			return err
+		}
+
+		return join(stm, conds).
+			Scan(ctx, &infos)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(infos) == 0 {
+		return nil, nil
+	}
+	if len(infos) > 1 {
+		return nil, fmt.Errorf("too many record")
+	}
+
+	infos = expand(infos)
+
+	return infos[0], nil
+}
+
 func join(stm *ent.UserQuery, conds *npool.Conds) *ent.UserSelect {
 	return stm.Select(
 		entuser.FieldID,

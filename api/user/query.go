@@ -1,3 +1,4 @@
+//nolint:dupl
 package user
 
 import (
@@ -66,5 +67,31 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 	return &npool.GetAccountsResponse{
 		Infos: infos,
 		Total: total,
+	}, nil
+}
+
+func (s *Server) GetAccountOnly(ctx context.Context, in *npool.GetAccountOnlyRequest) (*npool.GetAccountOnlyResponse, error) {
+	var err error
+
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccountOnly")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	span = commontracer.TraceInvoker(span, "user", "user", "GetAccountOnly")
+
+	info, err := user1.GetAccountOnly(ctx, in.GetConds())
+	if err != nil {
+		logger.Sugar().Errorw("GetAccountOnly", "err", err)
+		return &npool.GetAccountOnlyResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetAccountOnlyResponse{
+		Info: info,
 	}, nil
 }

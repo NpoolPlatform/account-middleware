@@ -87,6 +87,23 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	return infos.([]*npool.Account), total, nil
 }
 
+func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, error) {
+	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetAccountOnly(ctx, &npool.GetAccountOnlyRequest{
+			Conds: conds,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Account), nil
+}
+
 func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, error) {
 	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.UpdateAccount(ctx, &npool.UpdateAccountRequest{
