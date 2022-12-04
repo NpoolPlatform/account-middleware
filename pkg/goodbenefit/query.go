@@ -115,6 +115,8 @@ func join(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
 		goodbenefit.FieldID,
 		goodbenefit.FieldGoodID,
 		goodbenefit.FieldBackup,
+		goodbenefit.FieldTransactionID,
+		goodbenefit.FieldIntervalHours,
 	).
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(account.Table)

@@ -17,6 +17,8 @@ import (
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 
+	uuid1 "github.com/NpoolPlatform/go-service-framework/pkg/const/uuid"
+
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -34,16 +36,18 @@ func init() {
 }
 
 var acc = &npool.Account{
-	ID:          uuid.NewString(),
-	GoodID:      uuid.NewString(),
-	CoinTypeID:  uuid.NewString(),
-	Address:     uuid.NewString(),
-	Backup:      false,
-	Active:      true,
-	Locked:      false,
-	LockedByStr: accountmgrpb.LockedBy_DefaultLockedBy.String(),
-	LockedBy:    accountmgrpb.LockedBy_DefaultLockedBy,
-	Blocked:     false,
+	ID:            uuid.NewString(),
+	GoodID:        uuid.NewString(),
+	CoinTypeID:    uuid.NewString(),
+	Address:       uuid.NewString(),
+	Backup:        false,
+	Active:        true,
+	Locked:        false,
+	LockedByStr:   accountmgrpb.LockedBy_DefaultLockedBy.String(),
+	LockedBy:      accountmgrpb.LockedBy_DefaultLockedBy,
+	Blocked:       false,
+	IntervalHours: 24,
+	TransactionID: uuid1.InvalidUUIDStr,
 }
 
 var accReq = npool.AccountReq{
