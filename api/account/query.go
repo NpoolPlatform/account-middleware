@@ -17,12 +17,45 @@ import (
 	accmgrcli "github.com/NpoolPlatform/account-manager/pkg/client/account"
 	accmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/account"
+
+	"github.com/google/uuid"
 )
+
+func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*npool.GetAccountResponse, error) {
+	var err error
+
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccount")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	if _, err := uuid.Parse(in.GetID()); err != nil {
+		logger.Sugar().Errorw("GetAccount", "ID", in.GetID(), "err", err)
+		return &npool.GetAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	span = commontracer.TraceInvoker(span, "deposit", "deposit", "GetAccount")
+
+	info, err := accmgrcli.GetAccount(ctx, in.GetID())
+	if err != nil {
+		logger.Sugar().Errorw("GetAccount", "err", err)
+		return &npool.GetAccountResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetAccountResponse{
+		Info: info,
+	}, nil
+}
 
 func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) (*npool.GetAccountsResponse, error) {
 	var err error
 
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
 	defer span.End()
 
 	defer func() {
