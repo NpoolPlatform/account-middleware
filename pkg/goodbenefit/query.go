@@ -59,6 +59,9 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 	if len(infos) == 0 {
 		return nil, fmt.Errorf("no record")
 	}
+	if len(infos) > 1 {
+		return nil, fmt.Errorf("too many record")
+	}
 
 	infos = expand(infos)
 
@@ -108,6 +111,51 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	infos = expand(infos)
 
 	return infos, total, nil
+}
+
+func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccountOnly")
+	defer span.End()
+
+	var err error
+	var infos []*npool.Account
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "QueryJoin")
+
+	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
+		stm, err := curl.SetQueryConds(&mgrpb.Conds{
+			ID:        conds.ID,
+			GoodID:    conds.GoodID,
+			AccountID: conds.AccountID,
+			Backup:    conds.Backup,
+		}, cli)
+		if err != nil {
+			return err
+		}
+
+		return join(stm).
+			Scan(ctx, &infos)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(infos) == 0 {
+		return nil, nil
+	}
+	if len(infos) > 1 {
+		return nil, fmt.Errorf("too many record")
+	}
+
+	infos = expand(infos)
+
+	return infos[0], nil
 }
 
 func join(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {

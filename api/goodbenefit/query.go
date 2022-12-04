@@ -75,3 +75,29 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		Total: total,
 	}, nil
 }
+
+func (s *Server) GetAccountOnly(ctx context.Context, in *npool.GetAccountOnlyRequest) (*npool.GetAccountOnlyResponse, error) {
+	var err error
+
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccountOnly")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "GetAccountOnly")
+
+	info, err := goodbenefit1.GetAccountOnly(ctx, in.GetConds())
+	if err != nil {
+		logger.Sugar().Errorw("GetAccountOnly", "err", err)
+		return &npool.GetAccountOnlyResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetAccountOnlyResponse{
+		Info: info,
+	}, nil
+}
