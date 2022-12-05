@@ -34,7 +34,7 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 	span = commontracer.TraceInvoker(span, "payment", "payment", "CreateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		usedFor := accountpb.AccountUsedFor_GoodBenefit
+		usedFor := accountpb.AccountUsedFor_GoodPayment
 		privateKey := true
 
 		info1, err := accountcrud.CreateSet(tx.Account.Create(), &accountpb.AccountReq{
