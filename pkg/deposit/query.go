@@ -90,7 +90,7 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 	return infos[0], nil
 }
 
-//nolint:funlen
+//nolint
 func GetAccounts(ctx context.Context,
 	conds *npool.Conds,
 	offset,
@@ -207,6 +207,10 @@ func GetAccounts(ctx context.Context,
 	if err != nil {
 		return nil, total, err
 	}
-
+	for key := range infos {
+		if infos[key].CoinTypeID == "" {
+			infos[key].CoinTypeID = uuid.NewString()
+		}
+	}
 	return infos, total, nil
 }
