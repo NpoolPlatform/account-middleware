@@ -2,9 +2,6 @@ package platform
 
 import (
 	"context"
-	"fmt"
-
-	"entgo.io/ent/dialect/sql"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	"go.opentelemetry.io/otel"
@@ -24,7 +21,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Account, err error) { //nolint
+func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Account, err error) {
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateAccount")
 	defer span.End()
 
@@ -61,68 +58,17 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if !in.GetBackup() {
-			var infos []*npool.Account
-			err = tx.
+			_, err = tx.
 				Platform.
-				Query().
+				Update().
+				SetBackup(true).
 				Where(
 					entplatform.Backup(false),
-				).
-				Select(
-					entplatform.FieldID,
-				).
-				Modify(func(s *sql.Selector) {
-					t := sql.Table(entaccount.Table)
-					s.
-						LeftJoin(t).
-						On(
-							s.C(entplatform.FieldAccountID),
-							t.C(entaccount.FieldID),
-						).
-						Where(
-							sql.EQ(
-								t.C(entaccount.FieldCoinTypeID),
-								account.CoinTypeID,
-							),
-						).
-						Where(
-							sql.EQ(
-								t.C(entaccount.FieldUsedFor),
-								platform.UsedFor,
-							),
-						)
-				}).Scan(ctx, &infos)
-
+					entplatform.UsedFor(platform.UsedFor),
+					entplatform.IDNEQ(platform.ID),
+				).Save(ctx)
 			if err != nil {
 				return err
-			}
-			if len(infos) > 1 {
-				return fmt.Errorf("NotSingularError")
-			}
-			if len(infos) == 1 {
-				platformAccount, err := tx.
-					Platform.
-					Query().
-					Where(
-						entplatform.ID(uuid.MustParse(infos[0].ID)),
-					).
-					ForUpdate().
-					Only(ctx)
-				if err != nil {
-					if !ent.IsNotFound(err) {
-						return err
-					}
-				}
-
-				if platformAccount != nil {
-					backup := true
-					if _, err = platformcrud.UpdateSet(platformAccount, &platformmgrpb.AccountReq{
-						ID:     &infos[0].ID,
-						Backup: &backup,
-					}).Save(ctx); err != nil {
-						return err
-					}
-				}
 			}
 		}
 
