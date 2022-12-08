@@ -105,5 +105,3 @@ require (
 )
 
 replace google.golang.org/grpc => github.com/grpc/grpc-go v1.41.0
-
-replace github.com/NpoolPlatform/account-manager => ../account-manager
