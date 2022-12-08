@@ -47,7 +47,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
-		if !in.GetBackup() {
+		if !in.GetBackup() && in.Backup != nil {
 			gb, err := tx.GoodBenefit.
 				Query().
 				Where(
