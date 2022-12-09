@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	crud "github.com/NpoolPlatform/account-manager/pkg/crud/platform"
-	entplatform "github.com/NpoolPlatform/account-manager/pkg/db/ent/platform"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 
@@ -19,8 +18,8 @@ import (
 
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
-	"github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
-	"github.com/NpoolPlatform/account-manager/pkg/db/ent/deposit"
+	entaccount "github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
+	entplatform "github.com/NpoolPlatform/account-manager/pkg/db/ent/platform"
 
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
 
@@ -159,18 +158,18 @@ func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
 		entplatform.FieldBackup,
 	).
 		Modify(func(s *sql.Selector) {
-			t1 := sql.Table(account.Table)
+			t1 := sql.Table(entaccount.Table)
 			s.
 				LeftJoin(t1).
 				On(
-					s.C(deposit.FieldAccountID),
-					t1.C(account.FieldID),
+					s.C(entplatform.FieldAccountID),
+					t1.C(entaccount.FieldID),
 				)
 
 			if conds.CoinTypeID != nil {
 				s.Where(
 					sql.EQ(
-						t1.C(account.FieldCoinTypeID),
+						t1.C(entaccount.FieldCoinTypeID),
 						conds.GetCoinTypeID().GetValue(),
 					),
 				)
@@ -178,7 +177,7 @@ func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
 			if conds.Active != nil {
 				s.Where(
 					sql.EQ(
-						t1.C(account.FieldActive),
+						t1.C(entaccount.FieldActive),
 						conds.GetActive().GetValue(),
 					),
 				)
@@ -186,7 +185,7 @@ func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
 			if conds.Locked != nil {
 				s.Where(
 					sql.EQ(
-						t1.C(account.FieldLocked),
+						t1.C(entaccount.FieldLocked),
 						conds.GetLocked().GetValue(),
 					),
 				)
@@ -194,7 +193,7 @@ func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
 			if conds.LockedBy != nil {
 				s.Where(
 					sql.EQ(
-						t1.C(account.FieldLockedBy),
+						t1.C(entaccount.FieldLockedBy),
 						conds.GetLockedBy().GetValue(),
 					),
 				)
@@ -202,7 +201,7 @@ func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
 			if conds.Blocked != nil {
 				s.Where(
 					sql.EQ(
-						t1.C(account.FieldBlocked),
+						t1.C(entaccount.FieldBlocked),
 						conds.GetBlocked().GetValue(),
 					),
 				)
@@ -210,14 +209,14 @@ func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
 
 			s.
 				AppendSelect(
-					sql.As(t1.C(account.FieldID), "account_id"),
-					sql.As(t1.C(account.FieldAddress), "address"),
-					sql.As(t1.C(account.FieldActive), "active"),
-					sql.As(t1.C(account.FieldLocked), "locked"),
-					sql.As(t1.C(account.FieldLockedBy), "locked_by"),
-					sql.As(t1.C(account.FieldBlocked), "blocked"),
-					sql.As(t1.C(account.FieldUsedFor), "used_for"),
-					sql.As(t1.C(account.FieldCoinTypeID), "coin_type_id"),
+					sql.As(t1.C(entaccount.FieldID), "account_id"),
+					sql.As(t1.C(entaccount.FieldAddress), "address"),
+					sql.As(t1.C(entaccount.FieldActive), "active"),
+					sql.As(t1.C(entaccount.FieldLocked), "locked"),
+					sql.As(t1.C(entaccount.FieldLockedBy), "locked_by"),
+					sql.As(t1.C(entaccount.FieldBlocked), "blocked"),
+					sql.As(t1.C(entaccount.FieldUsedFor), "used_for"),
+					sql.As(t1.C(entaccount.FieldCoinTypeID), "coin_type_id"),
 				)
 		})
 }
