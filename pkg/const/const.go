@@ -1,6 +1,5 @@
 package constant
 
 const (
-	FieldID         = "ID"
-	DefaultRowLimit = 100
+	DefaultRowLimit = int32(100)
 )
