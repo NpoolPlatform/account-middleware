@@ -76,7 +76,7 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 
 	span = commontracer.TraceInvoker(span, "platform", "platform", "QueryJoin")
 
-	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
+	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		stm, err := crud.SetQueryConds(&mgrpb.Conds{
 			ID:        conds.ID,
 			AccountID: conds.AccountID,
@@ -87,17 +87,22 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 			return err
 		}
 
-		_total, err := stm.Count(ctx)
+		sel := join(stm, conds)
+
+		_total, err := sel.Count(ctx)
 		if err != nil {
 			return err
 		}
 		total = uint32(_total)
 
-		stm.Offset(int(offset)).
-			Limit(int(limit))
+		sel = sel.
+			Offset(int(offset)).
+			Limit(int(limit)).
+			Modify(func(s *sql.Selector) {
+			})
 
-		return join(stm, conds).
-			Scan(ctx, &infos)
+		return sel.
+			Scan(_ctx, &infos)
 	})
 	if err != nil {
 		return nil, total, err
@@ -153,10 +158,11 @@ func GetAccountOnly(ctx context.Context, conds *npool.Conds) (info *npool.Accoun
 }
 
 func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
-	return stm.Select(
-		entplatform.FieldID,
-		entplatform.FieldBackup,
-	).
+	return stm.
+		Select(
+			entplatform.FieldID,
+			entplatform.FieldBackup,
+		).
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(entaccount.Table)
 			s.
