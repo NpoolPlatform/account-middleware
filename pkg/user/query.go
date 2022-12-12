@@ -92,16 +92,19 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 			return err
 		}
 
-		_total, err := stm.Count(ctx)
+		sel := join(stm, conds)
+
+		_total, err := sel.Count(ctx)
 		if err != nil {
 			return err
 		}
 		total = uint32(_total)
 
-		stm.Offset(int(offset)).
-			Limit(int(limit))
-
-		return join(stm, conds).
+		return sel.
+			Offset(int(offset)).
+			Limit(int(limit)).
+			Modify(func(s *sql.Selector) {
+			}).
 			Scan(ctx, &infos)
 	})
 	if err != nil {
