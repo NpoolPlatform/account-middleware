@@ -60,8 +60,9 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if account.Locked && !in.GetLocked() {
-			now := uint32(time.Now().Unix())
-			in.AvailableAt = &now
+			const coolDown = uint32(60 * 60)
+			availableAt := uint32(time.Now().Unix()) + coolDown
+			in.AvailableAt = &availableAt
 		}
 
 		if _, err = paymentcrud.UpdateSet(payment, &paymentmgrpb.AccountReq{
