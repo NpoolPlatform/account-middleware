@@ -87,21 +87,20 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 			return err
 		}
 
-		sel := join(stm, conds)
+		var _stm = new(ent.PlatformQuery)
+		*_stm = *stm
 
-		_total, err := sel.Count(ctx)
+		_total, err := count(ctx, stm, conds)
 		if err != nil {
 			return err
 		}
 		total = uint32(_total)
 
-		sel = sel.
+		return join(_stm, conds).
 			Offset(int(offset)).
 			Limit(int(limit)).
 			Modify(func(s *sql.Selector) {
-			})
-
-		return sel.
+			}).
 			Scan(_ctx, &infos)
 	})
 	if err != nil {
@@ -225,6 +224,62 @@ func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
 					sql.As(t1.C(entaccount.FieldCoinTypeID), "coin_type_id"),
 				)
 		})
+}
+
+func count(ctx context.Context, stm *ent.PlatformQuery, conds *npool.Conds) (int, error) {
+	return stm.
+		Modify(func(s *sql.Selector) {
+			t1 := sql.Table(entaccount.Table)
+			s.
+				LeftJoin(t1).
+				On(
+					s.C(entplatform.FieldAccountID),
+					t1.C(entaccount.FieldID),
+				)
+
+			s.Select(sql.Count(s.C(entplatform.FieldID)))
+
+			if conds.CoinTypeID != nil {
+				s.Where(
+					sql.EQ(
+						t1.C(entaccount.FieldCoinTypeID),
+						conds.GetCoinTypeID().GetValue(),
+					),
+				)
+			}
+			if conds.Active != nil {
+				s.Where(
+					sql.EQ(
+						t1.C(entaccount.FieldActive),
+						conds.GetActive().GetValue(),
+					),
+				)
+			}
+			if conds.Locked != nil {
+				s.Where(
+					sql.EQ(
+						t1.C(entaccount.FieldLocked),
+						conds.GetLocked().GetValue(),
+					),
+				)
+			}
+			if conds.LockedBy != nil {
+				s.Where(
+					sql.EQ(
+						t1.C(entaccount.FieldLockedBy),
+						conds.GetLockedBy().GetValue(),
+					),
+				)
+			}
+			if conds.Blocked != nil {
+				s.Where(
+					sql.EQ(
+						t1.C(entaccount.FieldBlocked),
+						conds.GetBlocked().GetValue(),
+					),
+				)
+			}
+		}).Int(ctx)
 }
 
 func expand(infos []*npool.Account) []*npool.Account {

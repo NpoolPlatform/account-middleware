@@ -96,15 +96,16 @@ func GetAccounts(ctx context.Context,
 			return err
 		}
 
-		sel := join(stm, conds)
+		var _stm = new(ent.DepositQuery)
+		*_stm = *stm
 
-		_total, err := sel.Count(ctx)
+		_total, err := count(ctx, stm, conds)
 		if err != nil {
 			return err
 		}
 		total = uint32(_total)
 
-		return sel.
+		return join(_stm, conds).
 			Offset(int(offset)).
 			Limit(int(limit)).
 			Modify(func(s *sql.Selector) {
@@ -202,4 +203,60 @@ func join(stm *ent.DepositQuery, conds *npool.Conds) *ent.DepositSelect {
 					sql.As(t1.C(account.FieldBlocked), "blocked"),
 				)
 		})
+}
+
+func count(ctx context.Context, stm *ent.DepositQuery, conds *npool.Conds) (int, error) {
+	return stm.
+		Modify(func(s *sql.Selector) {
+			t1 := sql.Table(account.Table)
+			s.
+				LeftJoin(t1).
+				On(
+					s.C(deposit.FieldAccountID),
+					t1.C(account.FieldID),
+				)
+
+			s.Select(sql.Count(s.C(deposit.FieldID)))
+
+			if conds.Address != nil && conds.GetAddress().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldAddress),
+						conds.GetAddress().GetValue(),
+					),
+				)
+			}
+			if conds.Active != nil && conds.GetActive().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldActive),
+						conds.GetActive().GetValue(),
+					),
+				)
+			}
+			if conds.Locked != nil && conds.GetLocked().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldLocked),
+						conds.GetLocked().GetValue(),
+					),
+				)
+			}
+			if conds.LockedBy != nil && conds.GetLockedBy().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldLockedBy),
+						accountmgrpb.LockedBy(conds.GetLockedBy().GetValue()).String(),
+					),
+				)
+			}
+			if conds.Blocked != nil && conds.GetBlocked().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldBlocked),
+						conds.GetBlocked().GetValue(),
+					),
+				)
+			}
+		}).Int(ctx)
 }

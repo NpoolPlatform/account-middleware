@@ -85,15 +85,16 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 			return err
 		}
 
-		sel := join(stm, conds)
+		var _stm = new(ent.PaymentQuery)
+		*_stm = *stm
 
-		_total, err := sel.Count(ctx)
+		_total, err := count(ctx, stm, conds)
 		if err != nil {
 			return err
 		}
 		total = uint32(_total)
 
-		return sel.
+		return join(_stm, conds).
 			Offset(int(offset)).
 			Limit(int(limit)).
 			Modify(func(s *sql.Selector) {
@@ -210,6 +211,50 @@ func join(stm *ent.PaymentQuery, conds *npool.Conds) *ent.PaymentSelect {
 					sql.As(t1.C(account.FieldCoinTypeID), "coin_type_id"),
 				)
 		})
+}
+
+func count(ctx context.Context, stm *ent.PaymentQuery, conds *npool.Conds) (int, error) {
+	return stm.
+		Modify(func(s *sql.Selector) {
+			t1 := sql.Table(account.Table)
+			s.
+				LeftJoin(t1).
+				On(
+					s.C(deposit.FieldAccountID),
+					t1.C(account.FieldID),
+				)
+
+			if conds.CoinTypeID != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldCoinTypeID), uuid.MustParse(conds.GetCoinTypeID().GetValue())),
+				)
+			}
+			if conds.Address != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldAddress), conds.GetAddress().GetValue()),
+				)
+			}
+			if conds.Active != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldActive), conds.GetActive().GetValue()),
+				)
+			}
+			if conds.Locked != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldLocked), conds.GetLocked().GetValue()),
+				)
+			}
+			if conds.Blocked != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldBlocked), conds.GetBlocked().GetValue()),
+				)
+			}
+			if conds.LockedBy != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldLockedBy), accountmgrpb.LockedBy(conds.GetLockedBy().GetValue()).String()),
+				)
+			}
+		}).Int(ctx)
 }
 
 func expand(infos []*npool.Account) []*npool.Account {
