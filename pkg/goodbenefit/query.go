@@ -21,8 +21,6 @@ import (
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
-	"github.com/NpoolPlatform/account-manager/pkg/db/ent/deposit"
-
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 
 	"github.com/google/uuid"
@@ -91,14 +89,16 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 		if err != nil {
 			return err
 		}
-		_stm := *stm
-		_total, err := count(ctx, stm)
+
+		sel := join(stm)
+
+		_total, err := sel.Count(ctx)
 		if err != nil {
 			return err
 		}
 		total = uint32(_total)
 
-		return join(&_stm).
+		return sel.
 			Offset(int(offset)).
 			Limit(int(limit)).
 			Modify(func(s *sql.Selector) {
@@ -160,18 +160,15 @@ func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, er
 }
 
 func join(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
-	return stm.Select(
-		goodbenefit.FieldID,
-		goodbenefit.FieldGoodID,
-		goodbenefit.FieldBackup,
-		goodbenefit.FieldTransactionID,
-		goodbenefit.FieldIntervalHours,
-	).
+	return stm.
 		Modify(func(s *sql.Selector) {
 			t1 := sql.Table(account.Table)
 			s.Select(
 				s.C(goodbenefit.FieldID),
 				s.C(goodbenefit.FieldGoodID),
+				s.C(goodbenefit.FieldBackup),
+				s.C(goodbenefit.FieldTransactionID),
+				s.C(goodbenefit.FieldIntervalHours),
 			)
 			s.
 				LeftJoin(t1).
@@ -189,20 +186,6 @@ func join(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
 					sql.As(t1.C(account.FieldBlocked), "blocked"),
 				)
 		})
-}
-
-func count(ctx context.Context, stm *ent.GoodBenefitQuery) (int, error) {
-	return stm.
-		Modify(func(s *sql.Selector) {
-			t1 := sql.Table(account.Table)
-			s.
-				LeftJoin(t1).
-				On(
-					s.C(goodbenefit.FieldAccountID),
-					t1.C(account.FieldID),
-				)
-			s.Select(sql.Count(s.C(deposit.FieldID)))
-		}).Int(ctx)
 }
 
 func expand(infos []*npool.Account) []*npool.Account {
