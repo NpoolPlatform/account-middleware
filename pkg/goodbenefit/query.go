@@ -162,14 +162,16 @@ func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, er
 func join(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
 	return stm.
 		Modify(func(s *sql.Selector) {
+			s.
+				Select(
+					s.C(goodbenefit.FieldID),
+					s.C(goodbenefit.FieldGoodID),
+					s.C(goodbenefit.FieldBackup),
+					s.C(goodbenefit.FieldTransactionID),
+					s.C(goodbenefit.FieldIntervalHours),
+				)
+
 			t1 := sql.Table(account.Table)
-			s.Select(
-				s.C(goodbenefit.FieldID),
-				s.C(goodbenefit.FieldGoodID),
-				s.C(goodbenefit.FieldBackup),
-				s.C(goodbenefit.FieldTransactionID),
-				s.C(goodbenefit.FieldIntervalHours),
-			)
 			s.
 				LeftJoin(t1).
 				On(

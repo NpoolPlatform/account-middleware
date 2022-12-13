@@ -158,10 +158,11 @@ func GetAccountOnly(ctx context.Context, conds *npool.Conds) (info *npool.Accoun
 func join(stm *ent.PlatformQuery, conds *npool.Conds) *ent.PlatformSelect {
 	return stm.
 		Modify(func(s *sql.Selector) {
-			s.Select(
-				s.C(entplatform.FieldID),
-				s.C(entplatform.FieldBackup),
-			)
+			s.
+				Select(
+					s.C(entplatform.FieldID),
+					s.C(entplatform.FieldBackup),
+				)
 
 			t1 := sql.Table(entaccount.Table)
 			s.

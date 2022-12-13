@@ -132,19 +132,21 @@ func expand(infos []*npool.Account) []*npool.Account {
 func join(stm *ent.DepositQuery, conds *npool.Conds) *ent.DepositSelect {
 	return stm.
 		Modify(func(s *sql.Selector) {
+			s.
+				Select(
+					s.C(deposit.FieldID),
+					s.C(deposit.FieldAppID),
+					s.C(deposit.FieldUserID),
+					s.C(deposit.FieldAccountID),
+					s.C(deposit.FieldCollectingTid),
+					s.C(deposit.FieldCreatedAt),
+					s.C(deposit.FieldIncoming),
+					s.C(deposit.FieldIncoming),
+					s.C(deposit.FieldOutcoming),
+					s.C(deposit.FieldScannableAt),
+				)
+
 			t1 := sql.Table(account.Table)
-			s.Select(
-				s.C(deposit.FieldID),
-				s.C(deposit.FieldAppID),
-				s.C(deposit.FieldUserID),
-				s.C(deposit.FieldAccountID),
-				s.C(deposit.FieldCollectingTid),
-				s.C(deposit.FieldCreatedAt),
-				s.C(deposit.FieldIncoming),
-				s.C(deposit.FieldIncoming),
-				s.C(deposit.FieldOutcoming),
-				s.C(deposit.FieldScannableAt),
-			)
 			s.
 				LeftJoin(t1).
 				On(

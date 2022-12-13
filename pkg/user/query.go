@@ -165,14 +165,17 @@ func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, er
 }
 
 func join(stm *ent.UserQuery, conds *npool.Conds) *ent.UserSelect {
-	return stm.Select(
-		entuser.FieldID,
-		entuser.FieldAppID,
-		entuser.FieldUserID,
-		entuser.FieldCoinTypeID,
-		entuser.FieldLabels,
-	).
+	return stm.
 		Modify(func(s *sql.Selector) {
+			s.
+				Select(
+					s.C(entuser.FieldID),
+					s.C(entuser.FieldAppID),
+					s.C(entuser.FieldUserID),
+					s.C(entuser.FieldCoinTypeID),
+					s.C(entuser.FieldLabels),
+				)
+
 			t1 := sql.Table(account.Table)
 			s.
 				LeftJoin(t1).

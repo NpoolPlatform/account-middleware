@@ -156,12 +156,14 @@ func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, er
 func join(stm *ent.PaymentQuery, conds *npool.Conds) *ent.PaymentSelect {
 	return stm.
 		Modify(func(s *sql.Selector) {
+			s.
+				Select(
+					s.C(entpayment.FieldID),
+					s.C(entpayment.FieldCollectingTid),
+					s.C(entpayment.FieldAvailableAt),
+				)
+
 			t1 := sql.Table(account.Table)
-			s.Select(
-				s.C(entpayment.FieldID),
-				s.C(entpayment.FieldCollectingTid),
-				s.C(entpayment.FieldAvailableAt),
-			)
 			s.
 				LeftJoin(t1).
 				On(
