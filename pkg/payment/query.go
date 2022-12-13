@@ -49,7 +49,8 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 			Where(
 				entpayment.ID(uuid.MustParse(id)),
 			)
-		return join(stm).Scan(ctx, &infos)
+		return join(stm, &npool.Conds{}).
+			Scan(ctx, &infos)
 	})
 	if err != nil {
 		return nil, err
@@ -75,24 +76,28 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := crud.SetQueryConds(&mgrpb.Conds{
-			ID:         conds.ID,
-			AccountID:  conds.AccountID,
-			AccountIDs: conds.AccountIDs,
+			ID:          conds.ID,
+			AccountID:   conds.AccountID,
+			AccountIDs:  conds.AccountIDs,
+			AvailableAt: conds.AvailableAt,
 		}, cli)
 		if err != nil {
 			return err
 		}
 
-		_total, err := stm.Count(ctx)
+		sel := join(stm, conds)
+
+		_total, err := sel.Count(ctx)
 		if err != nil {
 			return err
 		}
 		total = uint32(_total)
 
-		stm.Offset(int(offset)).
-			Limit(int(limit))
-
-		return join(stm).
+		return sel.
+			Offset(int(offset)).
+			Limit(int(limit)).
+			Modify(func(s *sql.Selector) {
+			}).
 			Scan(ctx, &infos)
 	})
 	if err != nil {
@@ -130,7 +135,7 @@ func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, er
 			return err
 		}
 
-		return join(stm).
+		return join(stm, conds).
 			Scan(ctx, &infos)
 	})
 	if err != nil {
@@ -148,7 +153,7 @@ func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, er
 	return infos[0], nil
 }
 
-func join(stm *ent.PaymentQuery) *ent.PaymentSelect {
+func join(stm *ent.PaymentQuery, conds *npool.Conds) *ent.PaymentSelect {
 	return stm.Select(
 		entpayment.FieldID,
 		entpayment.FieldCollectingTid,
@@ -161,7 +166,40 @@ func join(stm *ent.PaymentQuery) *ent.PaymentSelect {
 				On(
 					s.C(deposit.FieldAccountID),
 					t1.C(account.FieldID),
-				).
+				)
+
+			if conds.CoinTypeID != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldCoinTypeID), uuid.MustParse(conds.GetCoinTypeID().GetValue())),
+				)
+			}
+			if conds.Address != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldAddress), conds.GetAddress().GetValue()),
+				)
+			}
+			if conds.Active != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldActive), conds.GetActive().GetValue()),
+				)
+			}
+			if conds.Locked != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldLocked), conds.GetLocked().GetValue()),
+				)
+			}
+			if conds.Blocked != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldBlocked), conds.GetBlocked().GetValue()),
+				)
+			}
+			if conds.LockedBy != nil {
+				s.Where(
+					sql.EQ(t1.C(account.FieldLockedBy), accountmgrpb.LockedBy(conds.GetLockedBy().GetValue()).String()),
+				)
+			}
+
+			s.
 				AppendSelect(
 					sql.As(t1.C(account.FieldID), "account_id"),
 					sql.As(t1.C(account.FieldAddress), "address"),
