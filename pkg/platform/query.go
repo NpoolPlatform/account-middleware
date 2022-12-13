@@ -87,8 +87,7 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 			return err
 		}
 
-		var _stm = new(ent.PlatformQuery)
-		*_stm = *stm
+		_stm := *stm
 
 		_total, err := count(ctx, stm, conds)
 		if err != nil {
@@ -96,7 +95,7 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 		}
 		total = uint32(_total)
 
-		return join(_stm, conds).
+		return join(&_stm, conds).
 			Offset(int(offset)).
 			Limit(int(limit)).
 			Modify(func(s *sql.Selector) {
