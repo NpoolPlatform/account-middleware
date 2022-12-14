@@ -63,7 +63,7 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		}
 	}()
 
-	conds := in.Conds
+	conds := in.GetConds()
 	if conds == nil {
 		conds = &npool.Conds{}
 	}

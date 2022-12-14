@@ -3,9 +3,12 @@ package goodbenefit
 import (
 	"context"
 
+	constant1 "github.com/NpoolPlatform/account-middleware/pkg/const"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
+
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
@@ -64,7 +67,17 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 
 	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "GetAccounts")
 
-	infos, total, err := goodbenefit1.GetAccounts(ctx, in.GetConds(), in.GetOffset(), in.GetLimit())
+	limit := constant1.DefaultRowLimit
+	if in.GetLimit() > 0 {
+		limit = in.GetLimit()
+	}
+
+	conds := in.GetConds()
+	if conds == nil {
+		conds = &npool.Conds{}
+	}
+
+	infos, total, err := goodbenefit1.GetAccounts(ctx, conds, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "err", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
