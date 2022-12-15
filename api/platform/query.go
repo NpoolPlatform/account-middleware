@@ -66,7 +66,12 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		limit = in.GetLimit()
 	}
 
-	infos, total, err := platform1.GetAccounts(ctx, in.GetConds(), in.GetOffset(), limit)
+	conds := in.GetConds()
+	if conds == nil {
+		conds = &npool.Conds{}
+	}
+
+	infos, total, err := platform1.GetAccounts(ctx, conds, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "err", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
@@ -93,7 +98,12 @@ func (s *Server) GetAccountOnly(ctx context.Context, in *npool.GetAccountOnlyReq
 
 	span = commontracer.TraceInvoker(span, "platform", "platform", "GetAccountOnly")
 
-	info, err := platform1.GetAccountOnly(ctx, in.GetConds())
+	conds := in.GetConds()
+	if conds == nil {
+		conds = &npool.Conds{}
+	}
+
+	info, err := platform1.GetAccountOnly(ctx, conds)
 	if err != nil {
 		logger.Sugar().Errorw("GetAccountOnly", "err", err)
 		return &npool.GetAccountOnlyResponse{}, status.Error(codes.Internal, err.Error())
