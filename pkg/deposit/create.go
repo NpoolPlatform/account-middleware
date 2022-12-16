@@ -50,10 +50,10 @@ func CreateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		accountID := info1.ID.String()
 
 		info2, err := depositcrud.CreateSet(tx.Deposit.Create(), &mgrpb.AccountReq{
-			AppID:      in.AppID,
-			UserID:     in.UserID,
-			CoinTypeID: in.CoinTypeID,
-			AccountID:  &accountID,
+			ID:        in.ID,
+			AppID:     in.AppID,
+			UserID:    in.UserID,
+			AccountID: &accountID,
 		}).Save(ctx)
 		if err != nil {
 			return err

@@ -2,6 +2,7 @@ package payment
 
 import (
 	"context"
+	"time"
 
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
@@ -36,26 +37,6 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 	span = commontracer.TraceInvoker(span, "payment", "payment", "UpdateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		account, err := tx.Account.
-			Query().
-			Where(
-				entaccount.ID(uuid.MustParse(in.GetAccountID())),
-			).
-			ForUpdate().
-			Only(ctx)
-		if err != nil {
-			return err
-		}
-
-		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
-			Active:   in.Active,
-			Locked:   in.Locked,
-			LockedBy: in.LockedBy,
-			Blocked:  in.Blocked,
-		}).Save(ctx); err != nil {
-			return err
-		}
-
 		payment, err := tx.Payment.
 			Query().
 			Where(
@@ -67,11 +48,36 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 			return err
 		}
 
+		account, err := tx.Account.
+			Query().
+			Where(
+				entaccount.ID(payment.AccountID),
+			).
+			ForUpdate().
+			Only(ctx)
+		if err != nil {
+			return err
+		}
+
+		if account.Locked && !in.GetLocked() {
+			const coolDown = uint32(60 * 60)
+			availableAt := uint32(time.Now().Unix()) + coolDown
+			in.AvailableAt = &availableAt
+		}
+
 		if _, err = paymentcrud.UpdateSet(payment, &paymentmgrpb.AccountReq{
-			CoinTypeID:    in.CoinTypeID,
 			AccountID:     in.AccountID,
 			CollectingTID: in.CollectingTID,
 			AvailableAt:   in.AvailableAt,
+		}).Save(ctx); err != nil {
+			return err
+		}
+
+		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
+			Active:   in.Active,
+			Locked:   in.Locked,
+			LockedBy: in.LockedBy,
+			Blocked:  in.Blocked,
 		}).Save(ctx); err != nil {
 			return err
 		}

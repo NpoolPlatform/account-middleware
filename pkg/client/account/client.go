@@ -1,4 +1,4 @@
-package deposit
+package account
 
 import (
 	"context"
@@ -6,10 +6,12 @@ import (
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 
-	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	commonpb "github.com/NpoolPlatform/message/npool"
+	accmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/account"
 
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 )
 
 var timeout = 10 * time.Second
@@ -32,23 +34,7 @@ func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
 	return handler(_ctx, cli)
 }
 
-func CreateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
-		resp, err := cli.CreateAccount(ctx, &npool.CreateAccountRequest{
-			Info: in,
-		})
-		if err != nil {
-			return nil, err
-		}
-		return resp.Info, nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return info.(*npool.Account), nil
-}
-
-func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
+func GetAccount(ctx context.Context, id string) (*accmgrpb.Account, error) {
 	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetAccount(ctx, &npool.GetAccountRequest{
 			ID: id,
@@ -61,10 +47,10 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	if err != nil {
 		return nil, err
 	}
-	return info.(*npool.Account), nil
+	return info.(*accmgrpb.Account), nil
 }
 
-func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) ([]*npool.Account, uint32, error) {
+func GetAccounts(ctx context.Context, conds *accmgrpb.Conds, offset, limit int32) ([]*accmgrpb.Account, uint32, error) {
 	total := uint32(0)
 
 	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
@@ -84,21 +70,33 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	if err != nil {
 		return nil, 0, err
 	}
-	return infos.([]*npool.Account), total, nil
+	return infos.([]*accmgrpb.Account), total, nil
 }
 
-func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
-		resp, err := cli.UpdateAccount(ctx, &npool.UpdateAccountRequest{
-			Info: in,
+func GetManyAccounts(ctx context.Context, ids []string) ([]*accmgrpb.Account, uint32, error) {
+	total := uint32(0)
+
+	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetAccounts(ctx, &npool.GetAccountsRequest{
+			Conds: &accmgrpb.Conds{
+				IDs: &commonpb.StringSliceVal{
+					Op:    cruder.IN,
+					Value: ids,
+				},
+			},
+			Offset: 0,
+			Limit:  int32(len(ids)),
 		})
 		if err != nil {
 			return nil, err
 		}
-		return resp.Info, nil
+
+		total = resp.Total
+
+		return resp.Infos, nil
 	})
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
-	return info.(*npool.Account), nil
+	return infos.([]*accmgrpb.Account), total, nil
 }

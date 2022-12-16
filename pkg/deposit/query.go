@@ -3,7 +3,6 @@ package deposit
 import (
 	"context"
 	"fmt"
-	"time"
 
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
@@ -44,41 +43,13 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 	span = commontracer.TraceInvoker(span, "deposit", "deposit", "QueryJoin")
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
-		return cli.
+		stm := cli.
 			Deposit.
 			Query().
 			Where(
 				deposit.ID(uuid.MustParse(id)),
-			).
-			Select(
-				deposit.FieldID,
-				deposit.FieldAppID,
-				deposit.FieldUserID,
-				deposit.FieldCoinTypeID,
-				deposit.FieldAccountID,
-				deposit.FieldCollectingTid,
-				deposit.FieldCreatedAt,
-				deposit.FieldIncoming,
-				deposit.FieldOutcoming,
-				deposit.FieldScannableAt,
-			).
-			Modify(func(s *sql.Selector) {
-				t1 := sql.Table(account.Table)
-				s.
-					LeftJoin(t1).
-					On(
-						s.C(deposit.FieldAccountID),
-						t1.C(account.FieldID),
-					).
-					AppendSelect(
-						sql.As(t1.C(account.FieldAddress), "address"),
-						sql.As(t1.C(account.FieldActive), "active"),
-						sql.As(t1.C(account.FieldLocked), "locked"),
-						sql.As(t1.C(account.FieldLockedBy), "locked_by"),
-						sql.As(t1.C(account.FieldBlocked), "blocked"),
-						sql.As(t1.C(account.FieldUsedFor), "used_for"),
-					)
-			}).
+			)
+		return join(stm, &npool.Conds{}).
 			Scan(ctx, &infos)
 	})
 	if err != nil {
@@ -87,16 +58,20 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 	if len(infos) == 0 {
 		return nil, fmt.Errorf("no record")
 	}
+	if len(infos) > 1 {
+		return nil, fmt.Errorf("too many record")
+	}
+
+	infos = expand(infos)
 
 	return infos[0], nil
 }
 
-//nolint:funlen
 func GetAccounts(ctx context.Context,
 	conds *npool.Conds,
 	offset,
 	limit int32,
-) (infos []*npool.Account, err error) {
+) (infos []*npool.Account, total uint32, err error) {
 	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
 	defer span.End()
 
@@ -114,7 +89,6 @@ func GetAccounts(ctx context.Context,
 			ID:          conds.ID,
 			AppID:       conds.AppID,
 			UserID:      conds.UserID,
-			CoinTypeID:  conds.CoinTypeID,
 			AccountID:   conds.AccountID,
 			ScannableAt: conds.ScannableAt,
 		}, cli)
@@ -122,88 +96,113 @@ func GetAccounts(ctx context.Context,
 			return err
 		}
 
-		stm.Where(deposit.ScannableAtLT(uint32(time.Now().Unix())))
+		sel := join(stm, conds)
 
-		return stm.
-			Select(
-				deposit.FieldID,
-				deposit.FieldAppID,
-				deposit.FieldUserID,
-				deposit.FieldCoinTypeID,
-				deposit.FieldAccountID,
-				deposit.FieldCollectingTid,
-				deposit.FieldCreatedAt,
-				deposit.FieldIncoming,
-				deposit.FieldOutcoming,
-				deposit.FieldScannableAt,
-			).
+		_total, err := sel.Count(ctx)
+		if err != nil {
+			return err
+		}
+		total = uint32(_total)
+
+		return sel.
 			Offset(int(offset)).
 			Limit(int(limit)).
 			Modify(func(s *sql.Selector) {
-				t1 := sql.Table(account.Table)
-				s.
-					LeftJoin(t1).
-					On(
-						s.C(deposit.FieldAccountID),
-						t1.C(account.FieldID),
-					)
-
-				if conds.Address != nil && conds.GetAddress().GetOp() == cruder.EQ {
-					s.Where(
-						sql.EQ(
-							t1.C(account.FieldAddress),
-							conds.GetAddress().GetValue(),
-						),
-					)
-				}
-				if conds.Active != nil && conds.GetActive().GetOp() == cruder.EQ {
-					s.Where(
-						sql.EQ(
-							t1.C(account.FieldActive),
-							conds.GetActive().GetValue(),
-						),
-					)
-				}
-				if conds.Locked != nil && conds.GetLocked().GetOp() == cruder.EQ {
-					s.Where(
-						sql.EQ(
-							t1.C(account.FieldLocked),
-							conds.GetLocked().GetValue(),
-						),
-					)
-				}
-				if conds.LockedBy != nil && conds.GetLockedBy().GetOp() == cruder.EQ {
-					s.Where(
-						sql.EQ(
-							t1.C(account.FieldLockedBy),
-							accountmgrpb.LockedBy(conds.GetLockedBy().GetValue()).String(),
-						),
-					)
-				}
-				if conds.Blocked != nil && conds.GetBlocked().GetOp() == cruder.EQ {
-					s.Where(
-						sql.EQ(
-							t1.C(account.FieldBlocked),
-							conds.GetBlocked().GetValue(),
-						),
-					)
-				}
-
-				s.
-					AppendSelect(
-						sql.As(t1.C(account.FieldAddress), "address"),
-						sql.As(t1.C(account.FieldActive), "active"),
-						sql.As(t1.C(account.FieldLocked), "locked"),
-						sql.As(t1.C(account.FieldLockedBy), "locked_by"),
-						sql.As(t1.C(account.FieldBlocked), "blocked"),
-						sql.As(t1.C(account.FieldUsedFor), "used_for"),
-					)
 			}).
 			Scan(ctx, &infos)
 	})
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return infos, nil
+	infos = expand(infos)
+
+	return infos, total, nil
+}
+
+func expand(infos []*npool.Account) []*npool.Account {
+	for key := range infos {
+		if infos[key].CoinTypeID == "" {
+			infos[key].CoinTypeID = uuid.NewString()
+		}
+	}
+	return infos
+}
+
+func join(stm *ent.DepositQuery, conds *npool.Conds) *ent.DepositSelect {
+	return stm.
+		Modify(func(s *sql.Selector) {
+			s.
+				Select(
+					s.C(deposit.FieldID),
+					s.C(deposit.FieldAppID),
+					s.C(deposit.FieldUserID),
+					s.C(deposit.FieldAccountID),
+					s.C(deposit.FieldCollectingTid),
+					s.C(deposit.FieldCreatedAt),
+					s.C(deposit.FieldIncoming),
+					s.C(deposit.FieldIncoming),
+					s.C(deposit.FieldOutcoming),
+					s.C(deposit.FieldScannableAt),
+				)
+
+			t1 := sql.Table(account.Table)
+			s.
+				LeftJoin(t1).
+				On(
+					s.C(deposit.FieldAccountID),
+					t1.C(account.FieldID),
+				)
+
+			if conds.Address != nil && conds.GetAddress().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldAddress),
+						conds.GetAddress().GetValue(),
+					),
+				)
+			}
+			if conds.Active != nil && conds.GetActive().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldActive),
+						conds.GetActive().GetValue(),
+					),
+				)
+			}
+			if conds.Locked != nil && conds.GetLocked().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldLocked),
+						conds.GetLocked().GetValue(),
+					),
+				)
+			}
+			if conds.LockedBy != nil && conds.GetLockedBy().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldLockedBy),
+						accountmgrpb.LockedBy(conds.GetLockedBy().GetValue()).String(),
+					),
+				)
+			}
+			if conds.Blocked != nil && conds.GetBlocked().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldBlocked),
+						conds.GetBlocked().GetValue(),
+					),
+				)
+			}
+
+			s.
+				AppendSelect(
+					sql.As(t1.C(account.FieldCoinTypeID), "coin_type_id"),
+					sql.As(t1.C(account.FieldAddress), "address"),
+					sql.As(t1.C(account.FieldActive), "active"),
+					sql.As(t1.C(account.FieldLocked), "locked"),
+					sql.As(t1.C(account.FieldLockedBy), "locked_by"),
+					sql.As(t1.C(account.FieldBlocked), "blocked"),
+				)
+		})
 }

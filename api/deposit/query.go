@@ -4,6 +4,7 @@ package deposit
 import (
 	"context"
 
+	constant1 "github.com/NpoolPlatform/account-middleware/pkg/const"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
@@ -62,19 +63,19 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		}
 	}()
 
-	conds := in.Conds
+	conds := in.GetConds()
 	if conds == nil {
 		conds = &npool.Conds{}
 	}
 
 	limit := in.GetLimit()
 	if limit == 0 {
-		limit = 1000
+		limit = constant1.DefaultRowLimit
 	}
 
 	span = commontracer.TraceInvoker(span, "deposit", "deposit", "GetAccounts")
 
-	infos, err := deposit1.GetAccounts(ctx, conds, in.GetOffset(), limit)
+	infos, total, err := deposit1.GetAccounts(ctx, conds, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "err", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
@@ -82,5 +83,6 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 
 	return &npool.GetAccountsResponse{
 		Infos: infos,
+		Total: total,
 	}, nil
 }

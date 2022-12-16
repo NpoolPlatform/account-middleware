@@ -19,10 +19,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountRequest) (*npool.UpdateAccountResponse, error) {
+func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountRequest) (*npool.DeleteAccountResponse, error) {
 	var err error
 
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateAccount")
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "DeleteAccount")
 	defer span.End()
 
 	defer func() {
@@ -32,20 +32,20 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 		}
 	}()
 
-	if _, err := uuid.Parse(in.GetInfo().GetID()); err != nil {
-		logger.Sugar().Errorw("UpdateAccount", "ID", in.GetInfo().GetID(), "err", err)
-		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	if _, err := uuid.Parse(in.GetID()); err != nil {
+		logger.Sugar().Errorw("DeleteAccount", "ID", in.GetID(), "err", err)
+		return &npool.DeleteAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	span = commontracer.TraceInvoker(span, "user", "user", "UpdateAccount")
+	span = commontracer.TraceInvoker(span, "user", "user", "DeleteAccount")
 
-	info, err := user1.UpdateAccount(ctx, in.GetInfo())
+	info, err := user1.DeleteAccount(ctx, in.GetID())
 	if err != nil {
-		logger.Sugar().Errorw("UpdateAccount", "err", err)
-		return &npool.UpdateAccountResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw("DeleteAccount", "err", err)
+		return &npool.DeleteAccountResponse{}, status.Error(codes.Internal, err.Error())
 	}
 
-	return &npool.UpdateAccountResponse{
+	return &npool.DeleteAccountResponse{
 		Info: info,
 	}, nil
 }

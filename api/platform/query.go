@@ -3,9 +3,12 @@ package platform
 import (
 	"context"
 
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
+	constant1 "github.com/NpoolPlatform/account-middleware/pkg/const"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
-	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
+
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
@@ -57,7 +60,17 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 
 	span = commontracer.TraceInvoker(span, "platform", "platform", "GetAccounts")
 
-	infos, err := platform1.GetAccounts(ctx, in.GetConds(), in.GetOffset(), in.GetLimit())
+	limit := constant1.DefaultRowLimit
+	if in.GetLimit() > 0 {
+		limit = in.GetLimit()
+	}
+
+	conds := in.GetConds()
+	if conds == nil {
+		conds = &npool.Conds{}
+	}
+
+	infos, total, err := platform1.GetAccounts(ctx, conds, in.GetOffset(), limit)
 	if err != nil {
 		logger.Sugar().Errorw("GetAccounts", "err", err)
 		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, err.Error())
@@ -65,5 +78,37 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 
 	return &npool.GetAccountsResponse{
 		Infos: infos,
+		Total: total,
+	}, nil
+}
+
+func (s *Server) GetAccountOnly(ctx context.Context, in *npool.GetAccountOnlyRequest) (*npool.GetAccountOnlyResponse, error) {
+	var err error
+
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccountOnly")
+	defer span.End()
+
+	defer func() {
+		if err != nil {
+			span.SetStatus(scodes.Error, err.Error())
+			span.RecordError(err)
+		}
+	}()
+
+	span = commontracer.TraceInvoker(span, "platform", "platform", "GetAccountOnly")
+
+	conds := in.GetConds()
+	if conds == nil {
+		conds = &npool.Conds{}
+	}
+
+	info, err := platform1.GetAccountOnly(ctx, conds)
+	if err != nil {
+		logger.Sugar().Errorw("GetAccountOnly", "err", err)
+		return &npool.GetAccountOnlyResponse{}, status.Error(codes.Internal, err.Error())
+	}
+
+	return &npool.GetAccountOnlyResponse{
+		Info: info,
 	}, nil
 }

@@ -1,8 +1,8 @@
-package deposit
+package user
 
 import (
 	"context"
-	"fmt"
+	"time"
 
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
 	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
@@ -10,21 +10,21 @@ import (
 	scodes "go.opentelemetry.io/otel/codes"
 
 	accountcrud "github.com/NpoolPlatform/account-manager/pkg/crud/account"
-	depositcrud "github.com/NpoolPlatform/account-manager/pkg/crud/deposit"
+	usercrud "github.com/NpoolPlatform/account-manager/pkg/crud/user"
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
 	entaccount "github.com/NpoolPlatform/account-manager/pkg/db/ent/account"
-	entdeposit "github.com/NpoolPlatform/account-manager/pkg/db/ent/deposit"
+	entuser "github.com/NpoolPlatform/account-manager/pkg/db/ent/user"
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
-	depositmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/deposit"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	usermgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/user"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 
 	"github.com/google/uuid"
 )
 
-func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Account, err error) {
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateAccount")
+func DeleteAccount(ctx context.Context, id string) (info *npool.Account, err error) {
+	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "DeleteAccount")
 	defer span.End()
 
 	defer func() {
@@ -34,27 +34,36 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 	}()
 
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "UpdateTX")
+	info, err = GetAccount(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	span = commontracer.TraceInvoker(span, "user", "user", "DeleteTX")
+	now := uint32(time.Now().Unix())
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		deposit, err := tx.Deposit.
+		user, err := tx.User.
 			Query().
 			Where(
-				entdeposit.ID(uuid.MustParse(in.GetID())),
+				entuser.ID(uuid.MustParse(id)),
 			).
 			ForUpdate().
 			Only(ctx)
 		if err != nil {
 			return err
 		}
-		if deposit == nil {
-			return fmt.Errorf("invalid deposit")
+
+		if _, err = usercrud.UpdateSet(user, &usermgrpb.AccountReq{
+			DeletedAt: &now,
+		}).Save(ctx); err != nil {
+			return err
 		}
 
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.ID(deposit.AccountID),
+				entaccount.ID(user.AccountID),
 			).
 			ForUpdate().
 			Only(ctx)
@@ -63,25 +72,8 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		}
 
 		if _, err := accountcrud.UpdateSet(account, &accountmgrpb.AccountReq{
-			Active:   in.Active,
-			Locked:   in.Locked,
-			LockedBy: in.LockedBy,
-			Blocked:  in.Blocked,
+			DeletedAt: &now,
 		}).Save(ctx); err != nil {
-			return err
-		}
-
-		u, err := depositcrud.UpdateSet(deposit, &depositmgrpb.AccountReq{
-			CollectingTID: in.CollectingTID,
-			Incoming:      in.Incoming,
-			Outcoming:     in.Outcoming,
-			ScannableAt:   in.ScannableAt,
-		})
-		if err != nil {
-			return err
-		}
-
-		if _, err = u.Save(ctx); err != nil {
 			return err
 		}
 
@@ -91,5 +83,5 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 		return nil, err
 	}
 
-	return GetAccount(ctx, in.GetID())
+	return info, nil
 }
