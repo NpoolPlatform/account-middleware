@@ -72,8 +72,8 @@ github.com/Masterminds/semver v1.4.2/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF0
 github.com/Masterminds/semver v1.5.0/go.mod h1:MB6lktGJrhw8PrUyiEoblNEGEQ+RzHPF078ddwwvV3Y=
 github.com/Masterminds/sprig v2.15.0+incompatible/go.mod h1:y6hNFY5UBTIWBxnzTeuNhlNS5hqE0NB0E6fgfo2Br3o=
 github.com/Masterminds/sprig v2.22.0+incompatible/go.mod h1:y6hNFY5UBTIWBxnzTeuNhlNS5hqE0NB0E6fgfo2Br3o=
-github.com/NpoolPlatform/account-manager v0.0.0-20221213075134-63b956add8a3 h1:iBiaavyVnDpoSlocSKm0pswuIku2Y3JF7DW9UehHLzk=
-github.com/NpoolPlatform/account-manager v0.0.0-20221213075134-63b956add8a3/go.mod h1:/oiqg5gC9rv7K8Nfbt9ygznhdCJC6HocXIgr7QtiPek=
+github.com/NpoolPlatform/account-manager v0.0.0-20221216032354-d0503e803f5d h1:tyNn3zzRuHWmVAQJrKsYdVpKd8wYbLnefpEBXEU01cE=
+github.com/NpoolPlatform/account-manager v0.0.0-20221216032354-d0503e803f5d/go.mod h1:/oiqg5gC9rv7K8Nfbt9ygznhdCJC6HocXIgr7QtiPek=
 github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0 h1:yIEwS7NTQhBBmfpf6yigvPCbxffMOrtBK/yUPM5ukbo=
 github.com/NpoolPlatform/api-manager v0.0.0-20220826022307-d72866fe3ec0/go.mod h1:+Xj8fVgWZWGakBtqZbFn/zY0qd47AywCjLPOGdTqJDU=
 github.com/NpoolPlatform/go-service-framework v0.0.0-20220818105452-9457611ae070 h1:BARdOYP/2s4Oxk7GnM0oXw5oSGevx2TZL+wPfgPz7Nc=
