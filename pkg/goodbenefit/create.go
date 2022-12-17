@@ -49,11 +49,10 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 
 		accountID := info1.ID.String()
 		info2, err := goodbenefitcrud.CreateSet(tx.GoodBenefit.Create(), &mgrpb.AccountReq{
-			ID:            in.ID,
-			GoodID:        in.GoodID,
-			AccountID:     &accountID,
-			Backup:        in.Backup,
-			IntervalHours: in.IntervalHours,
+			ID:        in.ID,
+			GoodID:    in.GoodID,
+			AccountID: &accountID,
+			Backup:    in.Backup,
 		}).Save(ctx)
 		if err != nil {
 			return err

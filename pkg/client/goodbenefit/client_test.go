@@ -46,7 +46,6 @@ var acc = &npool.Account{
 	LockedByStr:   accountmgrpb.LockedBy_DefaultLockedBy.String(),
 	LockedBy:      accountmgrpb.LockedBy_DefaultLockedBy,
 	Blocked:       false,
-	IntervalHours: 24,
 	TransactionID: uuid1.InvalidUUIDStr,
 }
 

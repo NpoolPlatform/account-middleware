@@ -59,10 +59,6 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 			return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 		}
 	}
-	if in.GetInfo().IntervalHours != nil && in.GetInfo().GetIntervalHours() < 1 {
-		logger.Sugar().Errorw("UpdateAccount", "IntervalHours", in.GetInfo().GetIntervalHours(), "error", err)
-		return &npool.UpdateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
 
 	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "UpdateAccount")
 

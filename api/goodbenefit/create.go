@@ -56,10 +56,6 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		logger.Sugar().Errorw("CreateAccount", "Address", in.GetInfo().GetAddress(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
 	}
-	if in.GetInfo().IntervalHours != nil && in.GetInfo().GetIntervalHours() < 1 {
-		logger.Sugar().Errorw("CreateAccount", "IntervalHours", in.GetInfo().GetIntervalHours(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
 
 	exist, err := accountmgrcli.ExistAccountConds(ctx, &accountmgrpb.Conds{
 		CoinTypeID: &commonpb.StringVal{

@@ -168,7 +168,6 @@ func join(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
 					s.C(goodbenefit.FieldGoodID),
 					s.C(goodbenefit.FieldBackup),
 					s.C(goodbenefit.FieldTransactionID),
-					s.C(goodbenefit.FieldIntervalHours),
 				)
 
 			t1 := sql.Table(account.Table)
