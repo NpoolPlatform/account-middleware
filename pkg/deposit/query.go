@@ -123,7 +123,7 @@ func GetAccounts(ctx context.Context,
 func expand(infos []*npool.Account) []*npool.Account {
 	for key := range infos {
 		if infos[key].CoinTypeID == "" {
-			infos[key].CoinTypeID = uuid.NewString()
+			infos[key].CoinTypeID = uuid.UUID{}.String()
 		}
 	}
 	return infos
@@ -154,6 +154,14 @@ func join(stm *ent.DepositQuery, conds *npool.Conds) *ent.DepositSelect {
 					t1.C(account.FieldID),
 				)
 
+			if conds.CoinTypeID != nil && conds.GetCoinTypeID().GetOp() == cruder.EQ {
+				s.Where(
+					sql.EQ(
+						t1.C(account.FieldCoinTypeID),
+						uuid.MustParse(conds.GetCoinTypeID().GetValue()),
+					),
+				)
+			}
 			if conds.Address != nil && conds.GetAddress().GetOp() == cruder.EQ {
 				s.Where(
 					sql.EQ(
