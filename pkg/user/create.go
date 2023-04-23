@@ -55,6 +55,7 @@ func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account
 			AccountID:  &accountID,
 			UsedFor:    in.UsedFor,
 			Labels:     in.Labels,
+			Memo:       in.Memo,
 		}).Save(ctx)
 		if err != nil {
 			return err

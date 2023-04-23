@@ -49,6 +49,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Accou
 
 		if _, err = usercrud.UpdateSet(user, &usermgrpb.AccountReq{
 			Labels: in.Labels,
+			Memo:   in.Memo,
 		}).Save(ctx); err != nil {
 			return err
 		}

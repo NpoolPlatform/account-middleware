@@ -174,6 +174,7 @@ func join(stm *ent.UserQuery, conds *npool.Conds) *ent.UserSelect {
 					s.C(entuser.FieldUserID),
 					s.C(entuser.FieldCoinTypeID),
 					s.C(entuser.FieldLabels),
+					s.C(entuser.FieldMemo),
 				)
 
 			t1 := sql.Table(account.Table)
