@@ -4,16 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
-
-	accountmgrcli "github.com/NpoolPlatform/account-manager/pkg/client/account"
 	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
+	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	user1 "github.com/NpoolPlatform/account-middleware/pkg/user"
-
-	commonpb "github.com/NpoolPlatform/message/npool"
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
-
-	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	"go.opentelemetry.io/otel"
 	scodes "go.opentelemetry.io/otel/codes"
@@ -61,25 +55,6 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	if in.GetInfo().GetAddress() == "" {
 		logger.Sugar().Errorw("CreateAccount", "Address", in.GetInfo().GetAddress(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, fmt.Sprintf("Address is invalid: %v", err))
-	}
-
-	exist, err := accountmgrcli.ExistAccountConds(ctx, &accountmgrpb.Conds{
-		CoinTypeID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: in.GetInfo().GetCoinTypeID(),
-		},
-		Address: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: in.GetInfo().GetAddress(),
-		},
-	})
-	if err != nil {
-		logger.Sugar().Errorw("CreateAccount", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "Address", in.GetInfo().GetAddress(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, fmt.Sprintf("Address is invalid: %v", err))
-	}
-	if exist {
-		logger.Sugar().Errorw("CreateAccount", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "Address", in.GetInfo().GetAddress(), "exist", exist)
-		return &npool.CreateAccountResponse{}, status.Error(codes.AlreadyExists, "Address already exists")
 	}
 
 	span = commontracer.TraceInvoker(span, "user", "user", "CreateAccount")
