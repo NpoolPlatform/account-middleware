@@ -88,7 +88,7 @@ func UpdateSet(u *ent.DepositUpdateOne, req *Req) (*ent.DepositUpdateOne, error)
 }
 
 type Conds struct {
-	accountcrud.Conds
+	*accountcrud.Conds
 	AppID       *cruder.Cond
 	UserID      *cruder.Cond
 	AccountID   *cruder.Cond
