@@ -1,15 +1,13 @@
-package deposit
+package goodbenefit
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/shopspring/decimal"
-
 	constant "github.com/NpoolPlatform/account-middleware/pkg/const"
-	depositcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/deposit"
+	goodbenefitcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/goodbenefit"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"github.com/google/uuid"
@@ -17,20 +15,17 @@ import (
 
 type Handler struct {
 	ID            *uuid.UUID
-	AppID         *uuid.UUID
-	UserID        *uuid.UUID
+	GoodID        *uuid.UUID
 	CoinTypeID    *uuid.UUID
 	AccountID     *uuid.UUID
 	Address       *string
+	Backup        *bool
 	Active        *bool
 	Locked        *bool
 	LockedBy      *basetypes.AccountLockedBy
 	Blocked       *bool
-	CollectingTID *uuid.UUID
-	Incoming      *decimal.Decimal
-	Outcoming     *decimal.Decimal
-	ScannableAt   *uint32
-	Conds         *depositcrud.Conds
+	TransactionID *uuid.UUID
+	Conds         *goodbenefitcrud.Conds
 	Offset        int32
 	Limit         int32
 }
@@ -59,7 +54,7 @@ func WithID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAppID(id *string) func(context.Context, *Handler) error {
+func WithGoodID(id *string) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
 			return nil
@@ -68,21 +63,7 @@ func WithAppID(id *string) func(context.Context, *Handler) error {
 		if err != nil {
 			return err
 		}
-		h.AppID = &_id
-		return nil
-	}
-}
-
-func WithUserID(id *string) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		if id == nil {
-			return nil
-		}
-		_id, err := uuid.Parse(*id)
-		if err != nil {
-			return err
-		}
-		h.UserID = &_id
+		h.GoodID = &_id
 		return nil
 	}
 }
@@ -128,6 +109,13 @@ func WithAddress(addr *string) func(context.Context, *Handler) error {
 	}
 }
 
+func WithBackup(backup *bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		h.Backup = backup
+		return nil
+	}
+}
+
 func WithActive(active *bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Active = active
@@ -165,7 +153,7 @@ func WithBlocked(blocked *bool) func(context.Context, *Handler) error {
 	}
 }
 
-func WithCollectingTID(id *string) func(context.Context, *Handler) error {
+func WithTransactionID(id *string) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
 			return nil
@@ -174,49 +162,14 @@ func WithCollectingTID(id *string) func(context.Context, *Handler) error {
 		if err != nil {
 			return err
 		}
-		h.CollectingTID = &_id
-		return nil
-	}
-}
-
-func WithIncoming(value *string) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		if value == nil {
-			return nil
-		}
-		amount, err := decimal.NewFromString(*value)
-		if err != nil {
-			return err
-		}
-		h.Incoming = &amount
-		return nil
-	}
-}
-
-func WithOutcoming(value *string) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		if value == nil {
-			return nil
-		}
-		amount, err := decimal.NewFromString(*value)
-		if err != nil {
-			return err
-		}
-		h.Outcoming = &amount
-		return nil
-	}
-}
-
-func WithScannableAt(at *uint32) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		h.ScannableAt = at
+		h.TransactionID = &_id
 		return nil
 	}
 }
 
 func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		h.Conds = &depositcrud.Conds{}
+		h.Conds = &goodbenefitcrud.Conds{}
 		if conds == nil {
 			return nil
 		}
@@ -227,12 +180,25 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 			}
 			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: id}
 		}
+		if conds.GoodID != nil {
+			id, err := uuid.Parse(conds.GetGoodID().GetValue())
+			if err != nil {
+				return err
+			}
+			h.Conds.GoodID = &cruder.Cond{Op: conds.GetGoodID().GetOp(), Val: id}
+		}
 		if conds.CoinTypeID != nil {
 			id, err := uuid.Parse(conds.GetCoinTypeID().GetValue())
 			if err != nil {
 				return err
 			}
 			h.Conds.CoinTypeID = &cruder.Cond{Op: conds.GetCoinTypeID().GetOp(), Val: id}
+		}
+		if conds.Backup != nil {
+			h.Conds.Backup = &cruder.Cond{
+				Op:  conds.GetBackup().GetOp(),
+				Val: conds.GetBackup().GetValue(),
+			}
 		}
 		if conds.Address != nil {
 			h.Conds.Address = &cruder.Cond{
@@ -262,12 +228,6 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 			h.Conds.Blocked = &cruder.Cond{
 				Op:  conds.GetBlocked().GetOp(),
 				Val: conds.GetBlocked().GetValue(),
-			}
-		}
-		if conds.ScannableAt != nil {
-			h.Conds.ScannableAt = &cruder.Cond{
-				Op:  conds.GetScannableAt().GetOp(),
-				Val: conds.GetScannableAt().GetValue(),
 			}
 		}
 		return nil
