@@ -115,7 +115,7 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 		handler.stm.
 			Offset(int(h.Offset)).
 			Limit(int(h.Limit)).
-			Order(ent.Desc(entaccount.CreatedAt))
+			Order(ent.Desc(entaccount.FieldCreatedAt))
 
 		return handler.scan(_ctx)
 	})
