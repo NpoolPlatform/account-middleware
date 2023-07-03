@@ -9,14 +9,11 @@ import (
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
 	entaccount "github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/account"
 )
 
 type existHandler struct {
 	*Handler
-	stm   *ent.AccountQuery
-	infos []*npool.Account
-	total uint32
+	stm *ent.AccountQuery
 }
 
 func (h *existHandler) queryAccount(cli *ent.Client) {
@@ -28,7 +25,7 @@ func (h *existHandler) queryAccount(cli *ent.Client) {
 		)
 }
 
-func (h *existHandler) queryAccounts(ctx context.Context, cli *ent.Client) error {
+func (h *existHandler) queryAccounts(cli *ent.Client) error {
 	stm, err := accountcrud.SetQueryConds(cli.Account.Query(), h.Conds)
 	if err != nil {
 		return err
@@ -72,7 +69,7 @@ func (h *Handler) ExistAccountConds(ctx context.Context) (bool, error) {
 	exist := false
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryAccounts(_ctx, cli); err != nil {
+		if err := handler.queryAccounts(cli); err != nil {
 			return err
 		}
 		_exist, err := handler.stm.Exist(_ctx)

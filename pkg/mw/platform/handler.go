@@ -105,7 +105,7 @@ func WithAddress(addr *string) func(context.Context, *Handler) error {
 		if addr == nil {
 			return nil
 		}
-		if len(*addr) == 0 {
+		if *addr == "" {
 			return fmt.Errorf("invalid address")
 		}
 		h.Address = addr

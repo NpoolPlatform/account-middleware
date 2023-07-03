@@ -3,80 +3,53 @@ package platform
 import (
 	"context"
 
-	accountmgrcli "github.com/NpoolPlatform/account-manager/pkg/client/account"
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
-
-	commonpb "github.com/NpoolPlatform/message/npool"
-
-	platform1 "github.com/NpoolPlatform/account-middleware/pkg/platform"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
-	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-
+	platform1 "github.com/NpoolPlatform/account-middleware/pkg/mw/platform"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
 
-	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
-	var err error
-
-	if err := validate(ctx, in.GetInfo()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, "invalid argument")
 	}
-
-	if in.GetInfo().ID != nil {
-		if _, err := uuid.Parse(in.GetInfo().GetID()); err != nil {
-			logger.Sugar().Errorw("CreateAccount", "ID", in.GetInfo().GetID(), "err", err)
-			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-		}
-	}
-	if _, err := uuid.Parse(in.GetInfo().GetCoinTypeID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if in.GetInfo().GetAddress() == "" {
-		logger.Sugar().Errorw("CreateAccount", "Address", in.GetInfo().GetAddress(), "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	switch in.GetInfo().GetUsedFor() {
-	case accountmgrpb.AccountUsedFor_UserBenefitHot:
-	case accountmgrpb.AccountUsedFor_UserBenefitCold:
-	case accountmgrpb.AccountUsedFor_PlatformBenefitCold:
-	case accountmgrpb.AccountUsedFor_GasProvider:
-	case accountmgrpb.AccountUsedFor_PaymentCollector:
-	default:
-		logger.Sugar().Errorw("CreateAccount", "UsedFor", in.GetInfo().GetUsedFor(), "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	exist, err := accountmgrcli.ExistAccountConds(ctx, &accountmgrpb.Conds{
-		CoinTypeID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: in.GetInfo().GetCoinTypeID(),
-		},
-		Address: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: in.GetInfo().GetAddress(),
-		},
-	})
+	handler, err := platform1.NewHandler(
+		ctx,
+		platform1.WithID(req.ID),
+		platform1.WithCoinTypeID(req.CoinTypeID),
+		platform1.WithUsedFor(req.UsedFor),
+		platform1.WithAccountID(req.AccountID),
+		platform1.WithAddress(req.Address),
+		platform1.WithBackup(req.Backup),
+		platform1.WithActive(req.Active),
+		platform1.WithLocked(req.Locked),
+		platform1.WithLockedBy(req.LockedBy),
+		platform1.WithBlocked(req.Blocked),
+	)
 	if err != nil {
-		logger.Sugar().Errorw("validate", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "Address", in.GetInfo().GetAddress(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if exist {
-		logger.Sugar().Errorw("validate", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "Address", in.GetInfo().GetAddress(), "exist", exist)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, err.Error())
 	}
 
-	info, err := platform1.CreateAccount(ctx, in.GetInfo())
+	info, err := handler.CreateAccount(ctx)
 	if err != nil {
-		logger.Sugar().Errorw("CreateAccount", "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, err.Error())
 	}
 
 	return &npool.CreateAccountResponse{

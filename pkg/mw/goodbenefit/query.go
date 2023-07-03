@@ -47,7 +47,7 @@ func (h *queryHandler) queryAccount(cli *ent.Client) {
 	)
 }
 
-func (h *queryHandler) queryAccounts(ctx context.Context, cli *ent.Client) error {
+func (h *queryHandler) queryAccounts(cli *ent.Client) error {
 	stm, err := goodbenefitcrud.SetQueryConds(cli.GoodBenefit.Query(), h.Conds)
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func (h *queryHandler) queryAccounts(ctx context.Context, cli *ent.Client) error
 	return nil
 }
 
-func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
+func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 	t := sql.Table(entaccount.Table)
 	s.LeftJoin(t).
 		On(
@@ -130,10 +130,12 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
 	return nil
 }
 
-func (h *queryHandler) queryJoin() {
+func (h *queryHandler) queryJoin() error {
+	var err error
 	h.stm.Modify(func(s *sql.Selector) {
-		h.queryJoinAccount(s)
+		err = h.queryJoinAccount(s)
 	})
+	return err
 }
 
 func (h *queryHandler) scan(ctx context.Context) error {
@@ -159,7 +161,9 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		handler.queryAccount(cli)
-		handler.queryJoin()
+		if err := handler.queryJoin(); err != nil {
+			return err
+		}
 		return handler.scan(_ctx)
 	})
 	if err != nil {
@@ -183,10 +187,12 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryAccounts(ctx, cli); err != nil {
+		if err := handler.queryAccounts(cli); err != nil {
 			return err
 		}
-		handler.queryJoin()
+		if err := handler.queryJoin(); err != nil {
+			return err
+		}
 
 		_total, err := handler.stm.Count(_ctx)
 		if err != nil {

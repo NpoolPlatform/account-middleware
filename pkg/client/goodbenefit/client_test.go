@@ -11,8 +11,8 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/goodbenefit"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -43,8 +43,8 @@ var acc = &npool.Account{
 	Backup:        false,
 	Active:        true,
 	Locked:        false,
-	LockedByStr:   accountmgrpb.LockedBy_DefaultLockedBy.String(),
-	LockedBy:      accountmgrpb.LockedBy_DefaultLockedBy,
+	LockedByStr:   basetypes.AccountLockedBy_DefaultLockedBy.String(),
+	LockedBy:      basetypes.AccountLockedBy_DefaultLockedBy,
 	Blocked:       false,
 	TransactionID: uuid1.InvalidUUIDStr,
 }
@@ -75,7 +75,7 @@ func createAccount(t *testing.T) {
 
 func updateAccount(t *testing.T) {
 	locked := true
-	lockedBy := accountmgrpb.LockedBy_Collecting
+	lockedBy := basetypes.AccountLockedBy_Collecting
 	blocked := true
 	active := false
 

@@ -11,8 +11,8 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -36,14 +36,14 @@ func init() {
 var acc = &npool.Account{
 	ID:          uuid.NewString(),
 	CoinTypeID:  uuid.NewString(),
-	UsedFor:     accountmgrpb.AccountUsedFor_UserBenefitHot,
-	UsedForStr:  accountmgrpb.AccountUsedFor_UserBenefitHot.String(),
+	UsedFor:     basetypes.AccountUsedFor_UserBenefitHot,
+	UsedForStr:  basetypes.AccountUsedFor_UserBenefitHot.String(),
 	Address:     uuid.NewString(),
 	Backup:      false,
 	Active:      true,
 	Locked:      false,
-	LockedBy:    accountmgrpb.LockedBy_DefaultLockedBy,
-	LockedByStr: accountmgrpb.LockedBy_DefaultLockedBy.String(),
+	LockedBy:    basetypes.AccountLockedBy_DefaultLockedBy,
+	LockedByStr: basetypes.AccountLockedBy_DefaultLockedBy.String(),
 	Blocked:     false,
 }
 
@@ -67,7 +67,7 @@ func createAccount(t *testing.T) {
 func updateAccount(t *testing.T) {
 	backup := true
 	locked := true
-	lockedBy := accountmgrpb.LockedBy_Collecting
+	lockedBy := basetypes.AccountLockedBy_Collecting
 	blocked := true
 
 	acc.Backup = backup

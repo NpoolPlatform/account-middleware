@@ -1,4 +1,3 @@
-//nolint:dupl
 package deposit
 
 import (
@@ -95,7 +94,7 @@ type Conds struct {
 	ScannableAt *cruder.Cond
 }
 
-func SetQueryConds(q *ent.DepositQuery, conds *Conds) (*ent.DepositQuery, error) {
+func SetQueryConds(q *ent.DepositQuery, conds *Conds) (*ent.DepositQuery, error) { //nolint
 	if conds.ID != nil {
 		id, ok := conds.ID.Val.(uuid.UUID)
 		if !ok {
