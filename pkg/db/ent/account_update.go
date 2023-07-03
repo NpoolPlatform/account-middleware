@@ -18,8 +18,9 @@ import (
 // AccountUpdate is the builder for updating Account entities.
 type AccountUpdate struct {
 	config
-	hooks    []Hook
-	mutation *AccountMutation
+	hooks     []Hook
+	mutation  *AccountMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the AccountUpdate builder.
@@ -317,6 +318,12 @@ func (au *AccountUpdate) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (au *AccountUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AccountUpdate {
+	au.modifiers = append(au.modifiers, modifiers...)
+	return au
+}
+
 func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -481,6 +488,7 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: account.FieldBlocked,
 		})
 	}
+	_spec.Modifiers = au.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, au.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{account.Label}
@@ -495,9 +503,10 @@ func (au *AccountUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // AccountUpdateOne is the builder for updating a single Account entity.
 type AccountUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *AccountMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *AccountMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -802,6 +811,12 @@ func (auo *AccountUpdateOne) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (auo *AccountUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *AccountUpdateOne {
+	auo.modifiers = append(auo.modifiers, modifiers...)
+	return auo
+}
+
 func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -983,6 +998,7 @@ func (auo *AccountUpdateOne) sqlSave(ctx context.Context) (_node *Account, err e
 			Column: account.FieldBlocked,
 		})
 	}
+	_spec.Modifiers = auo.modifiers
 	_node = &Account{config: auo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

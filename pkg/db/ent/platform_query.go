@@ -480,6 +480,12 @@ func (pq *PlatformQuery) ForShare(opts ...sql.LockOption) *PlatformQuery {
 	return pq
 }
 
+// Modify adds a query modifier for attaching custom logic to queries.
+func (pq *PlatformQuery) Modify(modifiers ...func(s *sql.Selector)) *PlatformSelect {
+	pq.modifiers = append(pq.modifiers, modifiers...)
+	return pq.Select()
+}
+
 // PlatformGroupBy is the group-by builder for Platform entities.
 type PlatformGroupBy struct {
 	config
@@ -570,4 +576,10 @@ func (ps *PlatformSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ps *PlatformSelect) Modify(modifiers ...func(s *sql.Selector)) *PlatformSelect {
+	ps.modifiers = append(ps.modifiers, modifiers...)
+	return ps
 }

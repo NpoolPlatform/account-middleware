@@ -19,8 +19,9 @@ import (
 // DepositUpdate is the builder for updating Deposit entities.
 type DepositUpdate struct {
 	config
-	hooks    []Hook
-	mutation *DepositMutation
+	hooks     []Hook
+	mutation  *DepositMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the DepositUpdate builder.
@@ -305,6 +306,12 @@ func (du *DepositUpdate) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (du *DepositUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DepositUpdate {
+	du.modifiers = append(du.modifiers, modifiers...)
+	return du
+}
+
 func (du *DepositUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -463,6 +470,7 @@ func (du *DepositUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: deposit.FieldScannableAt,
 		})
 	}
+	_spec.Modifiers = du.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{deposit.Label}
@@ -477,9 +485,10 @@ func (du *DepositUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // DepositUpdateOne is the builder for updating a single Deposit entity.
 type DepositUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *DepositMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *DepositMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -771,6 +780,12 @@ func (duo *DepositUpdateOne) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (duo *DepositUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DepositUpdateOne {
+	duo.modifiers = append(duo.modifiers, modifiers...)
+	return duo
+}
+
 func (duo *DepositUpdateOne) sqlSave(ctx context.Context) (_node *Deposit, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -946,6 +961,7 @@ func (duo *DepositUpdateOne) sqlSave(ctx context.Context) (_node *Deposit, err e
 			Column: deposit.FieldScannableAt,
 		})
 	}
+	_spec.Modifiers = duo.modifiers
 	_node = &Deposit{config: duo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

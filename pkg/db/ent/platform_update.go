@@ -18,8 +18,9 @@ import (
 // PlatformUpdate is the builder for updating Platform entities.
 type PlatformUpdate struct {
 	config
-	hooks    []Hook
-	mutation *PlatformMutation
+	hooks     []Hook
+	mutation  *PlatformMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the PlatformUpdate builder.
@@ -217,6 +218,12 @@ func (pu *PlatformUpdate) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (pu *PlatformUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PlatformUpdate {
+	pu.modifiers = append(pu.modifiers, modifiers...)
+	return pu
+}
+
 func (pu *PlatformUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -316,6 +323,7 @@ func (pu *PlatformUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: platform.FieldBackup,
 		})
 	}
+	_spec.Modifiers = pu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{platform.Label}
@@ -330,9 +338,10 @@ func (pu *PlatformUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // PlatformUpdateOne is the builder for updating a single Platform entity.
 type PlatformUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *PlatformMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *PlatformMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -537,6 +546,12 @@ func (puo *PlatformUpdateOne) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (puo *PlatformUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *PlatformUpdateOne {
+	puo.modifiers = append(puo.modifiers, modifiers...)
+	return puo
+}
+
 func (puo *PlatformUpdateOne) sqlSave(ctx context.Context) (_node *Platform, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -653,6 +668,7 @@ func (puo *PlatformUpdateOne) sqlSave(ctx context.Context) (_node *Platform, err
 			Column: platform.FieldBackup,
 		})
 	}
+	_spec.Modifiers = puo.modifiers
 	_node = &Platform{config: puo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

@@ -480,6 +480,12 @@ func (lq *LimitationQuery) ForShare(opts ...sql.LockOption) *LimitationQuery {
 	return lq
 }
 
+// Modify adds a query modifier for attaching custom logic to queries.
+func (lq *LimitationQuery) Modify(modifiers ...func(s *sql.Selector)) *LimitationSelect {
+	lq.modifiers = append(lq.modifiers, modifiers...)
+	return lq.Select()
+}
+
 // LimitationGroupBy is the group-by builder for Limitation entities.
 type LimitationGroupBy struct {
 	config
@@ -570,4 +576,10 @@ func (ls *LimitationSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ls *LimitationSelect) Modify(modifiers ...func(s *sql.Selector)) *LimitationSelect {
+	ls.modifiers = append(ls.modifiers, modifiers...)
+	return ls
 }

@@ -480,6 +480,12 @@ func (tq *TransferQuery) ForShare(opts ...sql.LockOption) *TransferQuery {
 	return tq
 }
 
+// Modify adds a query modifier for attaching custom logic to queries.
+func (tq *TransferQuery) Modify(modifiers ...func(s *sql.Selector)) *TransferSelect {
+	tq.modifiers = append(tq.modifiers, modifiers...)
+	return tq.Select()
+}
+
 // TransferGroupBy is the group-by builder for Transfer entities.
 type TransferGroupBy struct {
 	config
@@ -570,4 +576,10 @@ func (ts *TransferSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ts *TransferSelect) Modify(modifiers ...func(s *sql.Selector)) *TransferSelect {
+	ts.modifiers = append(ts.modifiers, modifiers...)
+	return ts
 }

@@ -480,6 +480,12 @@ func (gbq *GoodBenefitQuery) ForShare(opts ...sql.LockOption) *GoodBenefitQuery 
 	return gbq
 }
 
+// Modify adds a query modifier for attaching custom logic to queries.
+func (gbq *GoodBenefitQuery) Modify(modifiers ...func(s *sql.Selector)) *GoodBenefitSelect {
+	gbq.modifiers = append(gbq.modifiers, modifiers...)
+	return gbq.Select()
+}
+
 // GoodBenefitGroupBy is the group-by builder for GoodBenefit entities.
 type GoodBenefitGroupBy struct {
 	config
@@ -570,4 +576,10 @@ func (gbs *GoodBenefitSelect) sqlScan(ctx context.Context, v interface{}) error 
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (gbs *GoodBenefitSelect) Modify(modifiers ...func(s *sql.Selector)) *GoodBenefitSelect {
+	gbs.modifiers = append(gbs.modifiers, modifiers...)
+	return gbs
 }

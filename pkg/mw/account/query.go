@@ -111,6 +111,12 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 		if err := handler.queryAccounts(_ctx, cli); err != nil {
 			return err
 		}
+
+		handler.stm.
+			Offset(int(h.Offset)).
+			Limit(int(h.Limit)).
+			Order(ent.Desc(entaccount.CreatedAt))
+
 		return handler.scan(_ctx)
 	})
 	if err != nil {

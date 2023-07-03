@@ -19,8 +19,9 @@ import (
 // LimitationUpdate is the builder for updating Limitation entities.
 type LimitationUpdate struct {
 	config
-	hooks    []Hook
-	mutation *LimitationMutation
+	hooks     []Hook
+	mutation  *LimitationMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the LimitationUpdate builder.
@@ -218,6 +219,12 @@ func (lu *LimitationUpdate) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (lu *LimitationUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LimitationUpdate {
+	lu.modifiers = append(lu.modifiers, modifiers...)
+	return lu
+}
+
 func (lu *LimitationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -317,6 +324,7 @@ func (lu *LimitationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: limitation.FieldAmount,
 		})
 	}
+	_spec.Modifiers = lu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{limitation.Label}
@@ -331,9 +339,10 @@ func (lu *LimitationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // LimitationUpdateOne is the builder for updating a single Limitation entity.
 type LimitationUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *LimitationMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *LimitationMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -538,6 +547,12 @@ func (luo *LimitationUpdateOne) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (luo *LimitationUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *LimitationUpdateOne {
+	luo.modifiers = append(luo.modifiers, modifiers...)
+	return luo
+}
+
 func (luo *LimitationUpdateOne) sqlSave(ctx context.Context) (_node *Limitation, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -654,6 +669,7 @@ func (luo *LimitationUpdateOne) sqlSave(ctx context.Context) (_node *Limitation,
 			Column: limitation.FieldAmount,
 		})
 	}
+	_spec.Modifiers = luo.modifiers
 	_node = &Limitation{config: luo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

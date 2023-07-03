@@ -480,6 +480,12 @@ func (pq *PaymentQuery) ForShare(opts ...sql.LockOption) *PaymentQuery {
 	return pq
 }
 
+// Modify adds a query modifier for attaching custom logic to queries.
+func (pq *PaymentQuery) Modify(modifiers ...func(s *sql.Selector)) *PaymentSelect {
+	pq.modifiers = append(pq.modifiers, modifiers...)
+	return pq.Select()
+}
+
 // PaymentGroupBy is the group-by builder for Payment entities.
 type PaymentGroupBy struct {
 	config
@@ -570,4 +576,10 @@ func (ps *PaymentSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ps *PaymentSelect) Modify(modifiers ...func(s *sql.Selector)) *PaymentSelect {
+	ps.modifiers = append(ps.modifiers, modifiers...)
+	return ps
 }

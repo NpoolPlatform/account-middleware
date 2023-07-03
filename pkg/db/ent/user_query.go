@@ -480,6 +480,12 @@ func (uq *UserQuery) ForShare(opts ...sql.LockOption) *UserQuery {
 	return uq
 }
 
+// Modify adds a query modifier for attaching custom logic to queries.
+func (uq *UserQuery) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
+	uq.modifiers = append(uq.modifiers, modifiers...)
+	return uq.Select()
+}
+
 // UserGroupBy is the group-by builder for User entities.
 type UserGroupBy struct {
 	config
@@ -570,4 +576,10 @@ func (us *UserSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (us *UserSelect) Modify(modifiers ...func(s *sql.Selector)) *UserSelect {
+	us.modifiers = append(us.modifiers, modifiers...)
+	return us
 }

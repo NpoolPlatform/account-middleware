@@ -480,6 +480,12 @@ func (dq *DepositQuery) ForShare(opts ...sql.LockOption) *DepositQuery {
 	return dq
 }
 
+// Modify adds a query modifier for attaching custom logic to queries.
+func (dq *DepositQuery) Modify(modifiers ...func(s *sql.Selector)) *DepositSelect {
+	dq.modifiers = append(dq.modifiers, modifiers...)
+	return dq.Select()
+}
+
 // DepositGroupBy is the group-by builder for Deposit entities.
 type DepositGroupBy struct {
 	config
@@ -570,4 +576,10 @@ func (ds *DepositSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (ds *DepositSelect) Modify(modifiers ...func(s *sql.Selector)) *DepositSelect {
+	ds.modifiers = append(ds.modifiers, modifiers...)
+	return ds
 }

@@ -18,8 +18,9 @@ import (
 // GoodBenefitUpdate is the builder for updating GoodBenefit entities.
 type GoodBenefitUpdate struct {
 	config
-	hooks    []Hook
-	mutation *GoodBenefitMutation
+	hooks     []Hook
+	mutation  *GoodBenefitMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // Where appends a list predicates to the GoodBenefitUpdate builder.
@@ -237,6 +238,12 @@ func (gbu *GoodBenefitUpdate) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (gbu *GoodBenefitUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodBenefitUpdate {
+	gbu.modifiers = append(gbu.modifiers, modifiers...)
+	return gbu
+}
+
 func (gbu *GoodBenefitUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -349,6 +356,7 @@ func (gbu *GoodBenefitUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: goodbenefit.FieldTransactionID,
 		})
 	}
+	_spec.Modifiers = gbu.modifiers
 	if n, err = sqlgraph.UpdateNodes(ctx, gbu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{goodbenefit.Label}
@@ -363,9 +371,10 @@ func (gbu *GoodBenefitUpdate) sqlSave(ctx context.Context) (n int, err error) {
 // GoodBenefitUpdateOne is the builder for updating a single GoodBenefit entity.
 type GoodBenefitUpdateOne struct {
 	config
-	fields   []string
-	hooks    []Hook
-	mutation *GoodBenefitMutation
+	fields    []string
+	hooks     []Hook
+	mutation  *GoodBenefitMutation
+	modifiers []func(*sql.UpdateBuilder)
 }
 
 // SetCreatedAt sets the "created_at" field.
@@ -590,6 +599,12 @@ func (gbuo *GoodBenefitUpdateOne) defaults() error {
 	return nil
 }
 
+// Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
+func (gbuo *GoodBenefitUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *GoodBenefitUpdateOne {
+	gbuo.modifiers = append(gbuo.modifiers, modifiers...)
+	return gbuo
+}
+
 func (gbuo *GoodBenefitUpdateOne) sqlSave(ctx context.Context) (_node *GoodBenefit, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -719,6 +734,7 @@ func (gbuo *GoodBenefitUpdateOne) sqlSave(ctx context.Context) (_node *GoodBenef
 			Column: goodbenefit.FieldTransactionID,
 		})
 	}
+	_spec.Modifiers = gbuo.modifiers
 	_node = &GoodBenefit{config: gbuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues

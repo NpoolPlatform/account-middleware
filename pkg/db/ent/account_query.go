@@ -480,6 +480,12 @@ func (aq *AccountQuery) ForShare(opts ...sql.LockOption) *AccountQuery {
 	return aq
 }
 
+// Modify adds a query modifier for attaching custom logic to queries.
+func (aq *AccountQuery) Modify(modifiers ...func(s *sql.Selector)) *AccountSelect {
+	aq.modifiers = append(aq.modifiers, modifiers...)
+	return aq.Select()
+}
+
 // AccountGroupBy is the group-by builder for Account entities.
 type AccountGroupBy struct {
 	config
@@ -570,4 +576,10 @@ func (as *AccountSelect) sqlScan(ctx context.Context, v interface{}) error {
 	}
 	defer rows.Close()
 	return sql.ScanSlice(rows, v)
+}
+
+// Modify adds a query modifier for attaching custom logic to queries.
+func (as *AccountSelect) Modify(modifiers ...func(s *sql.Selector)) *AccountSelect {
+	as.modifiers = append(as.modifiers, modifiers...)
+	return as
 }
