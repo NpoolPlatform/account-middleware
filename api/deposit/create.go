@@ -3,77 +3,53 @@ package deposit
 import (
 	"context"
 
-	accountmgrcli "github.com/NpoolPlatform/account-manager/pkg/client/account"
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
-
-	deposit1 "github.com/NpoolPlatform/account-middleware/pkg/deposit"
-
-	commonpb "github.com/NpoolPlatform/message/npool"
-
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-
-	cruder "github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-
+	deposit1 "github.com/NpoolPlatform/account-middleware/pkg/mw/deposit"
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
 
-	"github.com/google/uuid"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
-func (s *Server) CreateAccount(
-	ctx context.Context, in *npool.CreateAccountRequest,
-) (
-	*npool.CreateAccountResponse, error,
-) {
-	var err error
-
-	if in.GetInfo().ID != nil {
-		if _, err := uuid.Parse(in.GetInfo().GetID()); err != nil {
-			logger.Sugar().Errorw("CreateAccount", "ID", in.GetInfo().GetID(), "error", err)
-			return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-		}
+func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
+	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, "invalid argument")
 	}
-	if _, err := uuid.Parse(in.GetInfo().GetAppID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "AppID", in.GetInfo().GetAppID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if _, err := uuid.Parse(in.GetInfo().GetUserID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "UserID", in.GetInfo().GetUserID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if _, err := uuid.Parse(in.GetInfo().GetCoinTypeID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if in.GetInfo().GetAddress() == "" {
-		logger.Sugar().Errorw("CreateAccount", "Address", in.GetInfo().GetAddress(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	exist, err := accountmgrcli.ExistAccountConds(ctx, &accountmgrpb.Conds{
-		CoinTypeID: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: in.GetInfo().GetCoinTypeID(),
-		},
-		Address: &commonpb.StringVal{
-			Op:    cruder.EQ,
-			Value: in.GetInfo().GetAddress(),
-		},
-	})
+	handler, err := deposit1.NewHandler(
+		ctx,
+		deposit1.WithID(req.ID),
+		deposit1.WithAppID(req.AppID),
+		deposit1.WithUserID(req.UserID),
+		deposit1.WithCoinTypeID(req.CoinTypeID),
+		deposit1.WithAccountID(req.AccountID),
+		deposit1.WithAddress(req.Address),
+		deposit1.WithActive(req.Active),
+		deposit1.WithLocked(req.Locked),
+		deposit1.WithLockedBy(req.LockedBy),
+		deposit1.WithBlocked(req.Blocked),
+	)
 	if err != nil {
-		logger.Sugar().Errorw("validate", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "Address", in.GetInfo().GetAddress(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if exist {
-		logger.Sugar().Errorw("validate", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "Address", in.GetInfo().GetAddress(), "exist", exist)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, err.Error())
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, err.Error())
 	}
 
-	info, err := deposit1.CreateAccount(ctx, in.GetInfo())
+	info, err := handler.CreateAccount(ctx)
 	if err != nil {
-		logger.Sugar().Errorw("CreateAccount", "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, err.Error())
 	}
 
 	return &npool.CreateAccountResponse{
