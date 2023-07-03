@@ -4,11 +4,6 @@ import (
 	"context"
 	"time"
 
-	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
-
 	accountcrud "github.com/NpoolPlatform/account-manager/pkg/crud/account"
 	paymentcrud "github.com/NpoolPlatform/account-manager/pkg/crud/payment"
 	"github.com/NpoolPlatform/account-manager/pkg/db"
@@ -24,18 +19,6 @@ import (
 )
 
 func UpdateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Account, err error) {
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "UpdateAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "payment", "payment", "UpdateTX")
-
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		payment, err := tx.Payment.
 			Query().

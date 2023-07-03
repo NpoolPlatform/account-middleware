@@ -5,14 +5,9 @@ import (
 	"fmt"
 
 	crud "github.com/NpoolPlatform/account-manager/pkg/crud/platform"
-	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/platform"
-
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
 
 	"entgo.io/ent/dialect/sql"
 
@@ -28,18 +23,6 @@ import (
 
 func GetAccount(ctx context.Context, id string) (info *npool.Account, err error) {
 	var infos []*npool.Account
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "platform", "platform", "QueryJoin")
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm := cli.
@@ -64,18 +47,6 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 }
 
 func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (infos []*npool.Account, total uint32, err error) {
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "platform", "platform", "QueryJoin")
-
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		stm, err := crud.SetQueryConds(&mgrpb.Conds{
 			ID:        conds.ID,
@@ -112,18 +83,6 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 }
 
 func GetAccountOnly(ctx context.Context, conds *npool.Conds) (info *npool.Account, err error) {
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccountOnly")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "platform", "platform", "QueryJoin")
-
 	infos := []*npool.Account{}
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {

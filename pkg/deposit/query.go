@@ -4,11 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
-
 	"entgo.io/ent/dialect/sql"
 
 	"github.com/NpoolPlatform/account-manager/pkg/db"
@@ -29,18 +24,6 @@ import (
 
 func GetAccount(ctx context.Context, id string) (info *npool.Account, err error) {
 	infos := []*npool.Account{}
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "QueryJoin")
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm := cli.
@@ -72,18 +55,6 @@ func GetAccounts(ctx context.Context,
 	offset,
 	limit int32,
 ) (infos []*npool.Account, total uint32, err error) {
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "QueryJoin")
-
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm, err := depositcrud.SetQueryConds(&depositmgrpb.Conds{
 			ID:          conds.ID,

@@ -4,13 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
-
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
-
-	curl "github.com/NpoolPlatform/account-manager/pkg/crud/goodbenefit"
+	crud "github.com/NpoolPlatform/account-manager/pkg/crud/goodbenefit"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent/goodbenefit"
 
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
@@ -28,18 +22,6 @@ import (
 
 func GetAccount(ctx context.Context, id string) (info *npool.Account, err error) {
 	var infos []*npool.Account
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "QueryJoin")
 
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
 		stm := cli.
@@ -67,20 +49,8 @@ func GetAccount(ctx context.Context, id string) (info *npool.Account, err error)
 }
 
 func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (infos []*npool.Account, total uint32, err error) {
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccounts")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "QueryJoin")
-
 	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
-		stm, err := curl.SetQueryConds(&mgrpb.Conds{
+		stm, err := crud.SetQueryConds(&mgrpb.Conds{
 			ID:        conds.ID,
 			GoodID:    conds.GoodID,
 			AccountID: conds.AccountID,
@@ -115,23 +85,9 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 }
 
 func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, error) {
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "GetAccountOnly")
-	defer span.End()
-
-	var err error
-	var infos []*npool.Account
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "goodbenefit", "goodbenefit", "QueryJoin")
-
-	err = db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
-		stm, err := curl.SetQueryConds(&mgrpb.Conds{
+	infos := []*npool.Account{}
+	err := db.WithClient(ctx, func(ctx context.Context, cli *ent.Client) error {
+		stm, err := crud.SetQueryConds(&mgrpb.Conds{
 			ID:        conds.ID,
 			GoodID:    conds.GoodID,
 			AccountID: conds.AccountID,

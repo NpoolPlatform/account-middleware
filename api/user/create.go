@@ -4,13 +4,9 @@ import (
 	"context"
 	"fmt"
 
-	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	user1 "github.com/NpoolPlatform/account-middleware/pkg/user"
 	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -22,16 +18,6 @@ import (
 
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
 	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
 
 	switch in.GetInfo().GetUsedFor() {
 	case accountmgrpb.AccountUsedFor_UserWithdraw:
@@ -56,8 +42,6 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		logger.Sugar().Errorw("CreateAccount", "Address", in.GetInfo().GetAddress(), "error", err)
 		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, fmt.Sprintf("Address is invalid: %v", err))
 	}
-
-	span = commontracer.TraceInvoker(span, "user", "user", "CreateAccount")
 
 	info, err := user1.CreateAccount(ctx, in.GetInfo())
 	if err != nil {

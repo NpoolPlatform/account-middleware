@@ -3,11 +3,6 @@ package user
 import (
 	"context"
 
-	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
-
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
 
@@ -20,18 +15,6 @@ import (
 
 func CreateAccount(ctx context.Context, in *mwpb.AccountReq) (info *mwpb.Account, err error) {
 	var id string
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "user", "user", "CreateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		privateKey := true

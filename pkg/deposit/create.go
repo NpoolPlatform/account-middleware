@@ -3,11 +3,7 @@ package deposit
 import (
 	"context"
 
-	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
 	mgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/deposit"
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
 
 	"github.com/NpoolPlatform/account-manager/pkg/db"
 	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
@@ -20,18 +16,6 @@ import (
 
 func CreateAccount(ctx context.Context, in *npool.AccountReq) (info *npool.Account, err error) {
 	var id string
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateAccount")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	span = commontracer.TraceInvoker(span, "deposit", "deposit", "CreateTX")
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		usedFor := accountpb.AccountUsedFor_UserDeposit
