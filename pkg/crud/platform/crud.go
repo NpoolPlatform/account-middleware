@@ -3,8 +3,8 @@ package platform
 import (
 	"fmt"
 
-	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
-	entplatform "github.com/NpoolPlatform/account-manager/pkg/db/ent/platform"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
+	entplatform "github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
