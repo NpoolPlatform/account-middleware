@@ -11,8 +11,8 @@ import (
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/payment"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -39,8 +39,8 @@ var acc = &npool.Account{
 	Address:       uuid.NewString(),
 	Active:        true,
 	Locked:        false,
-	LockedBy:      accountmgrpb.LockedBy_DefaultLockedBy,
-	LockedByStr:   accountmgrpb.LockedBy_DefaultLockedBy.String(),
+	LockedBy:      basetypes.AccountLockedBy_DefaultLockedBy,
+	LockedByStr:   basetypes.AccountLockedBy_DefaultLockedBy.String(),
 	Blocked:       false,
 	CollectingTID: uuid.UUID{}.String(),
 }
