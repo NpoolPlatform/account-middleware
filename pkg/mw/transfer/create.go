@@ -10,7 +10,6 @@ import (
 	transfercrud "github.com/NpoolPlatform/account-middleware/pkg/crud/transfer"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/transfer"
-	transfermwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/transfer"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
@@ -39,7 +38,7 @@ func (h *Handler) CreateTransfer(ctx context.Context) (*npool.Transfer, error) {
 
 	handler, err := NewHandler(
 		ctx,
-		WithConds(&transfermwpb.Conds{
+		WithConds(&npool.Conds{
 			AppID:        &basetypes.StringVal{Op: cruder.EQ, Value: h.AppID.String()},
 			UserID:       &basetypes.StringVal{Op: cruder.EQ, Value: h.UserID.String()},
 			TargetUserID: &basetypes.StringVal{Op: cruder.EQ, Value: h.TargetUserID.String()},

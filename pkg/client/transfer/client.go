@@ -8,7 +8,6 @@ import (
 
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/transfer"
-	transfermwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/transfer"
 
 	servicename "github.com/NpoolPlatform/account-middleware/pkg/servicename"
 )
@@ -89,7 +88,6 @@ func GetTransfers(ctx context.Context, conds *npool.Conds, offset, limit int32) 
 }
 
 func GetTransferOnly(ctx context.Context, conds *npool.Conds) (*npool.Transfer, error) {
-
 	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetTransfers(ctx, &npool.GetTransfersRequest{
 			Conds: conds,
@@ -138,7 +136,7 @@ func ExistTransfer(ctx context.Context, id string) (bool, error) {
 	return exist.(bool), err
 }
 
-func ExistTransferConds(ctx context.Context, conds *transfermwpb.Conds) (bool, error) {
+func ExistTransferConds(ctx context.Context, conds *npool.Conds) (bool, error) {
 	exist, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.ExistTransferConds(ctx, &npool.ExistTransferCondsRequest{
 			Conds: conds,

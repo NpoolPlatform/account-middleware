@@ -43,7 +43,7 @@ func (h *createHandler) validate() error {
 	return nil
 }
 
-func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { //nolint
+func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	handler := &createHandler{
 		Handler: h,
 	}
