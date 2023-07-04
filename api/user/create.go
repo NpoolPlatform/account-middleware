@@ -2,51 +2,57 @@ package user
 
 import (
 	"context"
-	"fmt"
 
-	user1 "github.com/NpoolPlatform/account-middleware/pkg/user"
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
+	user1 "github.com/NpoolPlatform/account-middleware/pkg/mw/user"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
-
-	"github.com/google/uuid"
 )
 
 func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountRequest) (*npool.CreateAccountResponse, error) {
-	var err error
-
-	switch in.GetInfo().GetUsedFor() {
-	case accountmgrpb.AccountUsedFor_UserWithdraw:
-	case accountmgrpb.AccountUsedFor_UserDirectBenefit:
-	default:
-		logger.Sugar().Errorw("CreateAccount", "UsedFor", in.GetInfo().GetUsedFor())
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, "UsedFor is invalid")
+	req := in.GetInfo()
+	if req == nil {
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, "invalid argument")
 	}
-	if _, err := uuid.Parse(in.GetInfo().GetAppID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "AppID", in.GetInfo().GetAppID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, fmt.Sprintf("AppID is invalid: %v", err))
-	}
-	if _, err := uuid.Parse(in.GetInfo().GetUserID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "UserID", in.GetInfo().GetUserID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, fmt.Sprintf("UserID is invalid: %v", err))
-	}
-	if _, err := uuid.Parse(in.GetInfo().GetCoinTypeID()); err != nil {
-		logger.Sugar().Errorw("CreateAccount", "CoinTypeID", in.GetInfo().GetCoinTypeID(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, fmt.Sprintf("CoinTypeID is invalid: %v", err))
-	}
-	if in.GetInfo().GetAddress() == "" {
-		logger.Sugar().Errorw("CreateAccount", "Address", in.GetInfo().GetAddress(), "error", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.InvalidArgument, fmt.Sprintf("Address is invalid: %v", err))
-	}
-
-	info, err := user1.CreateAccount(ctx, in.GetInfo())
+	handler, err := user1.NewHandler(
+		ctx,
+		user1.WithID(req.ID),
+		user1.WithAppID(req.AppID),
+		user1.WithUserID(req.UserID),
+		user1.WithCoinTypeID(req.CoinTypeID),
+		user1.WithAccountID(req.AccountID),
+		user1.WithAddress(req.Address),
+		user1.WithUsedFor(req.UsedFor),
+		user1.WithLabels(req.Labels),
+		user1.WithActive(req.Active),
+		user1.WithLocked(req.Locked),
+		user1.WithBlocked(req.Blocked),
+		user1.WithMemo(req.Memo),
+	)
 	if err != nil {
-		logger.Sugar().Errorw("CreateAccount", "err", err)
-		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	info, err := handler.CreateAccount(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"CreateAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, err.Error())
 	}
 
 	return &npool.CreateAccountResponse{

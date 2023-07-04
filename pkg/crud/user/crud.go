@@ -3,8 +3,8 @@ package user
 import (
 	"fmt"
 
-	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
-	entuser "github.com/NpoolPlatform/account-manager/pkg/db/ent/user"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
+	entuser "github.com/NpoolPlatform/account-middleware/pkg/db/ent/user"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 

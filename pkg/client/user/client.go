@@ -120,10 +120,10 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 	return info.(*npool.Account), nil
 }
 
-func DeleteAccount(ctx context.Context, id string) (*npool.Account, error) {
+func DeleteAccount(ctx context.Context, req *npool.AccountReq) (*npool.Account, error) {
 	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.DeleteAccount(ctx, &npool.DeleteAccountRequest{
-			ID: id,
+			Info: req,
 		})
 		if err != nil {
 			return nil, err

@@ -10,9 +10,8 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
-
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -40,8 +39,8 @@ var acc = &npool.Account{
 	CoinTypeID: uuid.NewString(),
 	Address:    uuid.NewString(),
 	Active:     true,
-	UsedFor:    accountmgrpb.AccountUsedFor_UserWithdraw,
-	UsedForStr: accountmgrpb.AccountUsedFor_UserWithdraw.String(),
+	UsedFor:    basetypes.AccountUsedFor_UserWithdraw,
+	UsedForStr: basetypes.AccountUsedFor_UserWithdraw.String(),
 	Labels:     []string{uuid.NewString(), uuid.NewString()},
 }
 
@@ -92,7 +91,10 @@ func updateAccount(t *testing.T) {
 }
 
 func deleteAccount(t *testing.T) {
-	info, err := DeleteAccount(context.Background(), acc.ID)
+	req := &npool.AccountReq{
+		ID: &acc.ID,
+	}
+	info, err := DeleteAccount(context.Background(), req)
 	if assert.Nil(t, err) {
 		acc.CreatedAt = info.CreatedAt
 		acc.UpdatedAt = info.UpdatedAt
