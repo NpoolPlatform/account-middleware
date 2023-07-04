@@ -3,8 +3,8 @@ package transfer
 import (
 	"fmt"
 
-	"github.com/NpoolPlatform/account-manager/pkg/db/ent"
-	enttransfer "github.com/NpoolPlatform/account-manager/pkg/db/ent/transfer"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
+	enttransfer "github.com/NpoolPlatform/account-middleware/pkg/db/ent/transfer"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
@@ -34,6 +34,13 @@ func CreateSet(c *ent.TransferCreate, req *Req) *ent.TransferCreate {
 		c.SetTargetUserID(*req.TargetUserID)
 	}
 	return c
+}
+
+func UpdateSet(u *ent.TransferUpdateOne, req *Req) *ent.TransferUpdateOne {
+	if req.DeletedAt != nil {
+		u.SetDeletedAt(*req.DeletedAt)
+	}
+	return u
 }
 
 type Conds struct {
