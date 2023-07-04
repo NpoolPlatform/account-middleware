@@ -183,6 +183,12 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 				Val: basetypes.AccountUsedFor(conds.GetUsedFor().GetValue()),
 			}
 		}
+		if conds.Address != nil {
+			h.Conds.Address = &cruder.Cond{
+				Op:  conds.GetAddress().GetOp(),
+				Val: conds.GetAddress().GetValue(),
+			}
+		}
 		if conds.Backup != nil {
 			h.Conds.Backup = &cruder.Cond{
 				Op:  conds.GetBackup().GetOp(),

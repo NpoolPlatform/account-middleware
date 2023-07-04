@@ -116,6 +116,15 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 			sql.EQ(t.C(entaccount.FieldBlocked), blocked),
 		)
 	}
+	if h.Conds != nil && h.Conds.Address != nil {
+		blocked, ok := h.Conds.Address.Val.(string)
+		if !ok {
+			return fmt.Errorf("invalid platform address")
+		}
+		s.Where(
+			sql.EQ(t.C(entaccount.FieldAddress), blocked),
+		)
+	}
 
 	s.AppendSelect(
 		sql.As(t.C(entaccount.FieldCoinTypeID), "coin_type_id"),
