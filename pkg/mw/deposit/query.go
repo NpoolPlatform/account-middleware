@@ -16,34 +16,23 @@ import (
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 type queryHandler struct {
 	*Handler
-	stm   *ent.DepositSelect
-	infos []*npool.Account
-	total uint32
+	stmSelect *ent.DepositSelect
+	stmCount  *ent.DepositSelect
+	infos     []*npool.Account
+	total     uint32
 }
 
-func (h *queryHandler) selectAccount(stm *ent.DepositQuery) {
-	h.stm = stm.Select(
-		entdeposit.FieldID,
-		entdeposit.FieldAppID,
-		entdeposit.FieldUserID,
-		entdeposit.FieldAccountID,
-		entdeposit.FieldCollectingTid,
-		entdeposit.FieldCreatedAt,
-		entdeposit.FieldIncoming,
-		entdeposit.FieldIncoming,
-		entdeposit.FieldOutcoming,
-		entdeposit.FieldScannableAt,
-		entdeposit.FieldCreatedAt,
-		entdeposit.FieldUpdatedAt,
-	)
+func (h *queryHandler) selectAccount(stm *ent.DepositQuery) *ent.DepositSelect {
+	return stm.Select(entdeposit.FieldID)
 }
 
 func (h *queryHandler) queryAccount(cli *ent.Client) {
-	h.selectAccount(
+	h.stmSelect = h.selectAccount(
 		cli.Deposit.
 			Query().
 			Where(
@@ -53,13 +42,29 @@ func (h *queryHandler) queryAccount(cli *ent.Client) {
 	)
 }
 
-func (h *queryHandler) queryAccounts(cli *ent.Client) error {
+func (h *queryHandler) queryAccounts(cli *ent.Client) (*ent.DepositSelect, error) {
 	stm, err := depositcrud.SetQueryConds(cli.Deposit.Query(), h.Conds)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	h.selectAccount(stm)
-	return nil
+	return h.selectAccount(stm), nil
+}
+
+func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
+	t := sql.Table(entdeposit.Table)
+	s.AppendSelect(
+		t.C(entdeposit.FieldAppID),
+		t.C(entdeposit.FieldUserID),
+		t.C(entdeposit.FieldAccountID),
+		t.C(entdeposit.FieldCollectingTid),
+		t.C(entdeposit.FieldCreatedAt),
+		t.C(entdeposit.FieldIncoming),
+		t.C(entdeposit.FieldIncoming),
+		t.C(entdeposit.FieldOutcoming),
+		t.C(entdeposit.FieldScannableAt),
+		t.C(entdeposit.FieldCreatedAt),
+		t.C(entdeposit.FieldUpdatedAt),
+	)
 }
 
 func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
@@ -138,14 +143,24 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 
 func (h *queryHandler) queryJoin() error {
 	var err error
-	h.stm.Modify(func(s *sql.Selector) {
+	h.stmSelect.Modify(func(s *sql.Selector) {
+		h.queryJoinMyself(s)
+		err = h.queryJoinAccount(s)
+	})
+	if err != nil {
+		return err
+	}
+	if h.stmCount == nil {
+		return nil
+	}
+	h.stmCount.Modify(func(s *sql.Selector) {
 		err = h.queryJoinAccount(s)
 	})
 	return err
 }
 
 func (h *queryHandler) scan(ctx context.Context) error {
-	return h.stm.Scan(ctx, &h.infos)
+	return h.stmSelect.Scan(ctx, &h.infos)
 }
 
 func (h *queryHandler) formalize() {
@@ -153,6 +168,17 @@ func (h *queryHandler) formalize() {
 		if _, err := uuid.Parse(info.CoinTypeID); err != nil {
 			info.CoinTypeID = uuid.Nil.String()
 		}
+		if amount, err := decimal.NewFromString(info.Incoming); err == nil {
+			info.Incoming = amount.String()
+		} else {
+			info.Incoming = decimal.NewFromFloat(0).String()
+		}
+		if amount, err := decimal.NewFromString(info.Outcoming); err == nil {
+			info.Outcoming = amount.String()
+		} else {
+			info.Outcoming = decimal.NewFromFloat(0).String()
+		}
+		info.LockedBy = basetypes.AccountLockedBy(basetypes.AccountLockedBy_value[info.LockedByStr])
 	}
 }
 
@@ -192,21 +218,28 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 		Handler: h,
 	}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryAccounts(cli); err != nil {
+	var err error
+	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		handler.stmSelect, err = handler.queryAccounts(cli)
+		if err != nil {
 			return err
 		}
+		handler.stmCount, err = handler.queryAccounts(cli)
+		if err != nil {
+			return err
+		}
+
 		if err := handler.queryJoin(); err != nil {
 			return err
 		}
 
-		_total, err := handler.stm.Count(_ctx)
+		_total, err := handler.stmCount.Count(_ctx)
 		if err != nil {
 			return err
 		}
 		handler.total = uint32(_total)
 
-		handler.stm.
+		handler.stmSelect.
 			Offset(int(h.Offset)).
 			Limit(int(h.Limit)).
 			Order(ent.Desc(entdeposit.FieldCreatedAt))

@@ -3,6 +3,7 @@ package deposit
 import (
 	"context"
 	"fmt"
+	"time"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
 	depositcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/deposit"
@@ -10,6 +11,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 	entaccount "github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	entdeposit "github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
+	timedef "github.com/NpoolPlatform/go-service-framework/pkg/const/time"
 
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
 )
@@ -45,6 +47,25 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 			return err
 		}
 
+		var _scannableAt *uint32
+		if account.Locked && h.Locked != nil && !*h.Locked {
+			scannableAt := uint32(time.Now().Unix()) + timedef.SecondsPerHour
+			_scannableAt = &scannableAt
+		}
+
+		incoming := deposit.Incoming
+		if h.Incoming != nil {
+			incoming = incoming.Add(*h.Incoming)
+		}
+		outcoming := deposit.Outcoming
+		if h.Outcoming != nil {
+			outcoming = outcoming.Add(*h.Outcoming)
+		}
+
+		if incoming.Cmp(outcoming) < 0 {
+			return fmt.Errorf("incoming (%v) < outcoming (%v)", incoming, outcoming)
+		}
+
 		if _, err := accountcrud.UpdateSet(
 			account.Update(),
 			&accountcrud.Req{
@@ -61,9 +82,9 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 			deposit.Update(),
 			&depositcrud.Req{
 				CollectingTID: h.CollectingTID,
-				Incoming:      h.Incoming,
-				Outcoming:     h.Outcoming,
-				ScannableAt:   h.ScannableAt,
+				Incoming:      &incoming,
+				Outcoming:     &outcoming,
+				ScannableAt:   _scannableAt,
 			},
 		)
 		if err != nil {

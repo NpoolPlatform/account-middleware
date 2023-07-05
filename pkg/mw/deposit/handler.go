@@ -29,7 +29,6 @@ type Handler struct {
 	CollectingTID *uuid.UUID
 	Incoming      *decimal.Decimal
 	Outcoming     *decimal.Decimal
-	ScannableAt   *uint32
 	Conds         *depositcrud.Conds
 	Offset        int32
 	Limit         int32
@@ -203,13 +202,6 @@ func WithOutcoming(value *string) func(context.Context, *Handler) error {
 			return err
 		}
 		h.Outcoming = &amount
-		return nil
-	}
-}
-
-func WithScannableAt(at *uint32) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		h.ScannableAt = at
 		return nil
 	}
 }

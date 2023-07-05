@@ -52,31 +52,11 @@ func UpdateSet(u *ent.DepositUpdateOne, req *Req) (*ent.DepositUpdateOne, error)
 	if req.CollectingTID != nil {
 		u.SetCollectingTid(*req.CollectingTID)
 	}
-
-	incoming, ok := u.Mutation().Incoming()
-	if !ok {
-		return nil, fmt.Errorf("invalid incoming")
-	}
 	if req.Incoming != nil {
-		incoming = incoming.Add(*req.Incoming)
-	}
-	outcoming, ok := u.Mutation().Outcoming()
-	if !ok {
-		return nil, fmt.Errorf("invalid outcoming")
+		u.SetIncoming(*req.Incoming)
 	}
 	if req.Outcoming != nil {
-		outcoming = outcoming.Add(*req.Outcoming)
-	}
-
-	if incoming.Cmp(outcoming) < 0 {
-		return nil, fmt.Errorf("incoming (%v) < outcoming (%v)", incoming, outcoming)
-	}
-
-	if req.Incoming != nil {
-		u.SetIncoming(incoming)
-	}
-	if req.Outcoming != nil {
-		u.SetOutcoming(outcoming)
+		u.SetOutcoming(*req.Outcoming)
 	}
 
 	if req.ScannableAt != nil {
@@ -87,7 +67,7 @@ func UpdateSet(u *ent.DepositUpdateOne, req *Req) (*ent.DepositUpdateOne, error)
 }
 
 type Conds struct {
-	*accountcrud.Conds
+	accountcrud.Conds
 	AppID       *cruder.Cond
 	UserID      *cruder.Cond
 	AccountID   *cruder.Cond
