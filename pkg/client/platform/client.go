@@ -160,3 +160,21 @@ func ExistAccountConds(ctx context.Context, conds *npool.Conds) (bool, error) {
 	}
 	return info.(bool), nil
 }
+
+func DeleteAccount(ctx context.Context, id string) (*npool.Account, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.DeleteAccount(ctx, &npool.DeleteAccountRequest{
+			Info: &npool.AccountReq{
+				ID: &id,
+			},
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Account), nil
+}

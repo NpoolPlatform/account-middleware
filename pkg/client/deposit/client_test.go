@@ -35,7 +35,7 @@ func init() {
 	}
 }
 
-var ret = &npool.Account{
+var ret = npool.Account{
 	ID:            uuid.NewString(),
 	AppID:         uuid.NewString(),
 	UserID:        uuid.NewString(),
@@ -69,7 +69,7 @@ func createAccount(t *testing.T) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
 		ret.ScannableAt = info.ScannableAt
-		assert.Equal(t, info, ret)
+		assert.Equal(t, info, &ret)
 	}
 }
 
@@ -92,7 +92,7 @@ func updateAccount(t *testing.T) {
 
 	info, err := UpdateAccount(context.Background(), &req)
 	if assert.Nil(t, err) {
-		assert.Equal(t, info, ret)
+		assert.Equal(t, info, &ret)
 	}
 
 	ret.Locked = false
@@ -104,14 +104,14 @@ func updateAccount(t *testing.T) {
 	if assert.Nil(t, err) {
 		assert.NotEqual(t, info.ScannableAt, ret.ScannableAt)
 		ret.ScannableAt = info.ScannableAt
-		assert.Equal(t, info, ret)
+		assert.Equal(t, info, &ret)
 	}
 }
 
 func getAccount(t *testing.T) {
 	info, err := GetAccount(context.Background(), ret.ID)
 	if assert.Nil(t, err) {
-		assert.Equal(t, info, ret)
+		assert.Equal(t, info, &ret)
 	}
 }
 
@@ -135,7 +135,7 @@ func getAccounts(t *testing.T) {
 	)
 	if assert.Nil(t, err) {
 		if assert.Equal(t, total, uint32(1)) {
-			assert.Equal(t, infos[0], ret)
+			assert.Equal(t, infos[0], &ret)
 		}
 	}
 }
@@ -143,7 +143,7 @@ func getAccounts(t *testing.T) {
 func deleteAccount(t *testing.T) {
 	info, err := DeleteAccount(context.Background(), ret.ID)
 	if assert.Nil(t, err) {
-		assert.Equal(t, info, ret)
+		assert.Equal(t, info, &ret)
 	}
 
 	info, err = DeleteAccount(context.Background(), ret.ID)
