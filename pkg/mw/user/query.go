@@ -20,24 +20,14 @@ import (
 
 type queryHandler struct {
 	*Handler
-	stm   *ent.UserSelect
-	infos []*npool.Account
-	total uint32
+	stmSelect *ent.UserSelect
+	stmCount  *ent.UserSelect
+	infos     []*npool.Account
+	total     uint32
 }
 
-func (h *queryHandler) selectAccount(stm *ent.UserQuery) {
-	h.stm = stm.Select(
-		entuser.FieldID,
-		entuser.FieldAppID,
-		entuser.FieldUserID,
-		entuser.FieldCoinTypeID,
-		entuser.FieldAccountID,
-		entuser.FieldUsedFor,
-		entuser.FieldLabels,
-		entuser.FieldMemo,
-		entuser.FieldCreatedAt,
-		entuser.FieldUpdatedAt,
-	)
+func (h *queryHandler) selectAccount(stm *ent.UserQuery) *ent.UserSelect {
+	return stm.Select(entuser.FieldID)
 }
 
 func (h *queryHandler) queryAccount(cli *ent.Client) {
@@ -51,13 +41,27 @@ func (h *queryHandler) queryAccount(cli *ent.Client) {
 	)
 }
 
-func (h *queryHandler) queryAccounts(cli *ent.Client) error {
+func (h *queryHandler) queryAccounts(cli *ent.Client) (*ent.UserSelect, error) {
 	stm, err := usercrud.SetQueryConds(cli.User.Query(), h.Conds)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	h.selectAccount(stm)
-	return nil
+	return h.selectAccount(stm), nil
+}
+
+func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
+	t := sql.Table(entuser.Table)
+	s.AppendSelect(
+		t.C(entuser.FieldAppID),
+		t.C(entuser.FieldUserID),
+		t.C(entuser.FieldCoinTypeID),
+		t.C(entuser.FieldAccountID),
+		t.C(entuser.FieldUsedFor),
+		t.C(entuser.FieldLabels),
+		t.C(entuser.FieldMemo),
+		t.C(entuser.FieldCreatedAt),
+		t.C(entuser.FieldUpdatedAt),
+	)
 }
 
 func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
@@ -66,6 +70,9 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
 		On(
 			s.C(entuser.FieldAccountID),
 			t.C(entaccount.FieldID),
+		).
+		OnP(
+			sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
 		)
 
 	if h.Conds != nil && h.Conds.Active != nil {
@@ -98,14 +105,24 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
 
 func (h *queryHandler) queryJoin() error {
 	var err error
-	h.stm.Modify(func(s *sql.Selector) {
+	h.stmSelect.Modify(func(s *sql.Selector) {
+		h.queryJoinMyself(s)
+		err = h.queryJoinAccount(s)
+	})
+	if err != nil {
+		return err
+	}
+	if h.stmCount == nil {
+		return nil
+	}
+	h.stmCount.Modify(func(s *sql.Selector) {
 		err = h.queryJoinAccount(s)
 	})
 	return err
 }
 
 func (h *queryHandler) scan(ctx context.Context) error {
-	return h.stm.Scan(ctx, &h.infos)
+	return h.stmSelect.Scan(ctx, &h.infos)
 }
 
 func (h *queryHandler) formalize() {
@@ -152,21 +169,28 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 		Handler: h,
 	}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryAccounts(cli); err != nil {
+	var err error
+	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		handler.stmSelect, err = handler.queryAccounts(cli)
+		if err != nil {
 			return err
 		}
+		handler.stmCount, err = handler.queryAccounts(cli)
+		if err != nil {
+			return err
+		}
+
 		if err := handler.queryJoin(); err != nil {
 			return err
 		}
 
-		_total, err := handler.stm.Count(_ctx)
+		_total, err := handler.stmCount.Count(_ctx)
 		if err != nil {
 			return err
 		}
 		handler.total = uint32(_total)
 
-		handler.stm.
+		handler.stmSelect.
 			Offset(int(h.Offset)).
 			Limit(int(h.Limit)).
 			Order(ent.Desc(entuser.FieldCreatedAt))
@@ -187,15 +211,19 @@ func (h *Handler) GetAccountOnly(ctx context.Context) (*npool.Account, error) {
 		Handler: h,
 	}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryAccounts(cli); err != nil {
+	var err error
+	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		handler.stmSelect, err = handler.queryAccounts(cli)
+		if err != nil {
 			return err
 		}
+
 		if err := handler.queryJoin(); err != nil {
 			return err
 		}
+
 		const singleRowLimit = 2
-		handler.stm.
+		handler.stmSelect.
 			Offset(0).
 			Limit(singleRowLimit).
 			Order(ent.Desc(entuser.FieldCreatedAt))
