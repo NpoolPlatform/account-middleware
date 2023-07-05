@@ -60,7 +60,7 @@ func (h *queryHandler) queryAccounts(cli *ent.Client) error {
 	return nil
 }
 
-func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
+func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
 	t := sql.Table(entaccount.Table)
 	s.LeftJoin(t).
 		On(

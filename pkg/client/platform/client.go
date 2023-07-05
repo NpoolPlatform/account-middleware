@@ -89,11 +89,12 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 }
 
 func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, error) {
+	const limit = 2
 	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetAccounts(ctx, &npool.GetAccountsRequest{
 			Conds:  conds,
 			Offset: 0,
-			Limit:  2, //nolint
+			Limit:  limit,
 		})
 		if err != nil {
 			return nil, err
