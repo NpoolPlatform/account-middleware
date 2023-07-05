@@ -64,8 +64,7 @@ func UpdateSet(u *ent.DepositUpdateOne, req *Req) *ent.DepositUpdateOne {
 	if req.DeletedAt != nil {
 		u.SetDeletedAt(*req.DeletedAt)
 	}
-
-	return u, nil
+	return u
 }
 
 type Conds struct {

@@ -78,7 +78,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 			return err
 		}
 
-		u, err := depositcrud.UpdateSet(
+		if _, err := depositcrud.UpdateSet(
 			deposit.Update(),
 			&depositcrud.Req{
 				CollectingTID: h.CollectingTID,
@@ -86,12 +86,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 				Outcoming:     &outcoming,
 				ScannableAt:   _scannableAt,
 			},
-		)
-		if err != nil {
-			return err
-		}
-
-		if _, err := u.Save(_ctx); err != nil {
+		).Save(_ctx); err != nil {
 			return err
 		}
 		return nil

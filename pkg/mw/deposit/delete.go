@@ -58,17 +58,12 @@ func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
 			return err
 		}
 
-		u, err := depositcrud.UpdateSet(
+		if _, err := depositcrud.UpdateSet(
 			deposit.Update(),
 			&depositcrud.Req{
 				DeletedAt: &now,
 			},
-		)
-		if err != nil {
-			return err
-		}
-
-		if _, err := u.Save(_ctx); err != nil {
+		).Save(_ctx); err != nil {
 			return err
 		}
 		return nil

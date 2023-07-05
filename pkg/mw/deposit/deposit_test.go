@@ -102,6 +102,32 @@ func updateAccount(t *testing.T) {
 		ret.ScannableAt = info.ScannableAt
 		assert.Equal(t, info, &ret)
 	}
+
+	handler, err = NewHandler(
+		context.Background(),
+		WithID(&ret.ID),
+		WithIncoming(&ret.Incoming),
+		WithOutcoming(&ret.Outcoming),
+	)
+	assert.Nil(t, err)
+
+	info, err = handler.UpdateAccount(context.Background())
+	if assert.Nil(t, err) {
+		assert.NotEqual(t, info, &ret)
+		ret.Incoming = "0.24"
+		ret.Outcoming = "0.2"
+		assert.Equal(t, info, &ret)
+	}
+
+	handler, err = NewHandler(
+		context.Background(),
+		WithID(&ret.ID),
+		WithOutcoming(&ret.Outcoming),
+	)
+	assert.Nil(t, err)
+
+	_, err = handler.UpdateAccount(context.Background())
+	assert.NotNil(t, err)
 }
 
 func getAccount(t *testing.T) {
