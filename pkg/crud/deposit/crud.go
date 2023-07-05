@@ -48,7 +48,7 @@ func CreateSet(c *ent.DepositCreate, req *Req) *ent.DepositCreate {
 	return c
 }
 
-func UpdateSet(u *ent.DepositUpdateOne, req *Req) (*ent.DepositUpdateOne, error) {
+func UpdateSet(u *ent.DepositUpdateOne, req *Req) *ent.DepositUpdateOne {
 	if req.CollectingTID != nil {
 		u.SetCollectingTid(*req.CollectingTID)
 	}

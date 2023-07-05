@@ -18,6 +18,7 @@ type Req struct {
 	AccountID     *uuid.UUID
 	TransactionID *uuid.UUID
 	Backup        *bool
+	DeletedAt     *uint32
 }
 
 func CreateSet(c *ent.GoodBenefitCreate, req *Req) *ent.GoodBenefitCreate {
@@ -46,11 +47,14 @@ func UpdateSet(u *ent.GoodBenefitUpdateOne, req *Req) *ent.GoodBenefitUpdateOne 
 	if req.AccountID != nil {
 		u.SetAccountID(*req.AccountID)
 	}
+	if req.DeletedAt != nil {
+		u.SetDeletedAt(*req.DeletedAt)
+	}
 	return u
 }
 
 type Conds struct {
-	*accountcrud.Conds
+	accountcrud.Conds
 	GoodID    *cruder.Cond
 	AccountID *cruder.Cond
 	Backup    *cruder.Cond

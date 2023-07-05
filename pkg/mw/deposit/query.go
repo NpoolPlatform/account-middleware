@@ -57,7 +57,6 @@ func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
 		t.C(entdeposit.FieldUserID),
 		t.C(entdeposit.FieldAccountID),
 		t.C(entdeposit.FieldCollectingTid),
-		t.C(entdeposit.FieldCreatedAt),
 		t.C(entdeposit.FieldIncoming),
 		t.C(entdeposit.FieldIncoming),
 		t.C(entdeposit.FieldOutcoming),

@@ -20,24 +20,18 @@ import (
 
 type queryHandler struct {
 	*Handler
-	stm   *ent.GoodBenefitSelect
-	infos []*npool.Account
-	total uint32
+	stmSelect *ent.GoodBenefitSelect
+	stmCount  *ent.GoodBenefitSelect
+	infos     []*npool.Account
+	total     uint32
 }
 
-func (h *queryHandler) selectAccount(stm *ent.GoodBenefitQuery) {
-	h.stm = stm.Select(
-		entgoodbenefit.FieldID,
-		entgoodbenefit.FieldGoodID,
-		entgoodbenefit.FieldBackup,
-		entgoodbenefit.FieldTransactionID,
-		entgoodbenefit.FieldCreatedAt,
-		entgoodbenefit.FieldUpdatedAt,
-	)
+func (h *queryHandler) selectAccount(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
+	return stm.Select(entgoodbenefit.FieldID)
 }
 
 func (h *queryHandler) queryAccount(cli *ent.Client) {
-	h.selectAccount(
+	h.stmSelect = h.selectAccount(
 		cli.GoodBenefit.
 			Query().
 			Where(
@@ -47,13 +41,25 @@ func (h *queryHandler) queryAccount(cli *ent.Client) {
 	)
 }
 
-func (h *queryHandler) queryAccounts(cli *ent.Client) error {
+func (h *queryHandler) queryAccounts(cli *ent.Client) (*ent.GoodBenefitSelect, error) {
 	stm, err := goodbenefitcrud.SetQueryConds(cli.GoodBenefit.Query(), h.Conds)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	h.selectAccount(stm)
-	return nil
+	return h.selectAccount(stm), nil
+}
+
+func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
+	t := sql.Table(entgoodbenefit.Table)
+	s.AppendSelect(
+		t.C(entgoodbenefit.FieldID),
+		t.C(entgoodbenefit.FieldGoodID),
+		t.C(entgoodbenefit.FieldAccountID),
+		t.C(entgoodbenefit.FieldBackup),
+		t.C(entgoodbenefit.FieldTransactionID),
+		t.C(entgoodbenefit.FieldCreatedAt),
+		t.C(entgoodbenefit.FieldUpdatedAt),
+	)
 }
 
 func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
@@ -132,14 +138,24 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 
 func (h *queryHandler) queryJoin() error {
 	var err error
-	h.stm.Modify(func(s *sql.Selector) {
+	h.stmSelect.Modify(func(s *sql.Selector) {
+		h.queryJoinMyself(s)
+		err = h.queryJoinAccount(s)
+	})
+	if err != nil {
+		return err
+	}
+	if h.stmCount == nil {
+		return nil
+	}
+	h.stmCount.Modify(func(s *sql.Selector) {
 		err = h.queryJoinAccount(s)
 	})
 	return err
 }
 
 func (h *queryHandler) scan(ctx context.Context) error {
-	return h.stm.Scan(ctx, &h.infos)
+	return h.stmSelect.Scan(ctx, &h.infos)
 }
 
 func (h *queryHandler) formalize() {
@@ -147,6 +163,7 @@ func (h *queryHandler) formalize() {
 		if _, err := uuid.Parse(info.CoinTypeID); err != nil {
 			info.CoinTypeID = uuid.Nil.String()
 		}
+		info.LockedBy = basetypes.AccountLockedBy(basetypes.AccountLockedBy_value[info.LockedByStr])
 	}
 }
 
@@ -186,21 +203,28 @@ func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, er
 		Handler: h,
 	}
 
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryAccounts(cli); err != nil {
+	var err error
+	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
+		handler.stmSelect, err = handler.queryAccounts(cli)
+		if err != nil {
 			return err
 		}
+		handler.stmCount, err = handler.queryAccounts(cli)
+		if err != nil {
+			return err
+		}
+
 		if err := handler.queryJoin(); err != nil {
 			return err
 		}
 
-		_total, err := handler.stm.Count(_ctx)
+		_total, err := handler.stmCount.Count(_ctx)
 		if err != nil {
 			return err
 		}
 		handler.total = uint32(_total)
 
-		handler.stm.
+		handler.stmSelect.
 			Offset(int(h.Offset)).
 			Limit(int(h.Limit)).
 			Order(ent.Desc(entgoodbenefit.FieldCreatedAt))
