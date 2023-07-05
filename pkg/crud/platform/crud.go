@@ -18,6 +18,7 @@ type Req struct {
 	AccountID *uuid.UUID
 	UsedFor   *basetypes.AccountUsedFor
 	Backup    *bool
+	DeletedAt *uint32
 }
 
 func CreateSet(c *ent.PlatformCreate, req *Req) *ent.PlatformCreate {
@@ -40,11 +41,14 @@ func UpdateSet(u *ent.PlatformUpdateOne, req *Req) *ent.PlatformUpdateOne {
 	if req.Backup != nil {
 		u.SetBackup(*req.Backup)
 	}
+	if req.DeletedAt != nil {
+		u.SetDeletedAt(*req.DeletedAt)
+	}
 	return u
 }
 
 type Conds struct {
-	*accountcrud.Conds
+	accountcrud.Conds
 	AccountID *cruder.Cond
 	UsedFor   *cruder.Cond
 	Backup    *cruder.Cond
