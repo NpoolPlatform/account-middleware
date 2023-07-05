@@ -7,21 +7,13 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
-	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-
-	"bou.ke/monkey"
-	"github.com/stretchr/testify/assert"
-
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/transfer"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
-
-	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
-
 	"github.com/google/uuid"
+	"github.com/stretchr/testify/assert"
+
+	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
 )
 
 func init() {
@@ -40,75 +32,75 @@ var ret = npool.Transfer{
 	TargetUserID: uuid.NewString(),
 }
 
-var req = npool.TransferReq{
-	ID:           &ret.ID,
-	AppID:        &ret.AppID,
-	UserID:       &ret.UserID,
-	TargetUserID: &ret.TargetUserID,
-}
-
 func createTransfer(t *testing.T) {
-	info, err := CreateTransfer(context.Background(), &req)
+	handler, err := NewHandler(
+		context.Background(),
+		WithID(&ret.ID),
+		WithAppID(&ret.AppID),
+		WithUserID(&ret.UserID),
+		WithTargetUserID(&ret.TargetUserID),
+	)
+	assert.Nil(t, err)
+	info, err := handler.CreateTransfer(context.Background())
 	if assert.Nil(t, err) {
-		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.CreatedAt = info.CreatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
 
 func getTransfer(t *testing.T) {
-	info, err := GetTransfer(context.Background(), ret.ID)
+	handler, err := NewHandler(
+		context.Background(),
+		WithID(&ret.ID),
+	)
+	assert.Nil(t, err)
+	info, err := handler.GetTransfer(context.Background())
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
 }
 
 func getTransfers(t *testing.T) {
-	infos, total, err := GetTransfers(
+	handler, err := NewHandler(
 		context.Background(),
-		&npool.Conds{
+		WithConds(&npool.Conds{
 			ID:           &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
 			AppID:        &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
 			UserID:       &basetypes.StringVal{Op: cruder.EQ, Value: ret.UserID},
 			TargetUserID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.TargetUserID},
-		},
-		0,
-		int32(2),
+		}),
+		WithOffset(0),
+		WithLimit(2),
 	)
+	assert.Nil(t, err)
+	infos, _, err := handler.GetTransfers(context.Background())
 	if assert.Nil(t, err) {
-		if assert.Equal(t, total, uint32(1)) {
-			assert.Equal(t, infos[0], &ret)
-		}
+		assert.NotEqual(t, len(infos), 0)
+		assert.Equal(t, infos[0], &ret)
 	}
 }
 
 func deleteTransfer(t *testing.T) {
-	info, err := DeleteTransfer(context.Background(), &npool.TransferReq{
-		ID: &ret.ID,
-	})
+	handler, err := NewHandler(
+		context.Background(),
+		WithID(&ret.ID),
+	)
+	assert.Nil(t, err)
+	info, err := handler.DeleteTransfer(context.Background())
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
 
-	info, err = DeleteTransfer(context.Background(), &npool.TransferReq{
-		ID: &ret.ID,
-	})
-	if assert.Nil(t, err) {
-		assert.Nil(t, info)
-	}
+	info, err = handler.GetTransfer(context.Background())
+	assert.Nil(t, err)
+	assert.Nil(t, info)
 }
 
-func TestClient(t *testing.T) {
+func TestMainOrder(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
 		return
 	}
-
-	gport := config.GetIntValueWithNameSpace("", config.KeyGRPCPort)
-
-	monkey.Patch(grpc2.GetGRPCConn, func(service string, tags ...string) (*grpc.ClientConn, error) {
-		return grpc.Dial(fmt.Sprintf("localhost:%v", gport), grpc.WithTransportCredentials(insecure.NewCredentials()))
-	})
-
 	t.Run("createTransfer", createTransfer)
 	t.Run("getTransfer", getTransfer)
 	t.Run("getTransfers", getTransfers)
