@@ -73,6 +73,9 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 		On(
 			s.C(entdeposit.FieldAccountID),
 			t.C(entaccount.FieldID),
+		).
+		OnP(
+			sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
 		)
 
 	if h.Conds != nil && h.Conds.CoinTypeID != nil {

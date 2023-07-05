@@ -142,35 +142,6 @@ func getAccounts(t *testing.T) {
 	}
 }
 
-/*
-func getUserAccounts(t *testing.T) {
-	handler, err := NewHandler(
-		context.Background(),
-		WithUserID(ret.CreatedBy),
-		WithOffset(0),
-		WithLimit(10),
-	)
-	assert.Nil(t, err)
-	infos, _, err := handler.GetAccounts(context.Background())
-	if assert.Nil(t, err) {
-		assert.Equal(t, infos[0], &ret)
-	}
-}
-
-func getManyAccounts(t *testing.T) {
-	handler, err := NewHandler(
-		context.Background(),
-		WithIDs([]string{ret.ID}),
-		WithOffset(0),
-		WithLimit(1),
-	)
-	assert.Nil(t, err)
-	infos, _, err := handler.GetAccounts(context.Background())
-	if assert.Nil(t, err) {
-		assert.Equal(t, infos[0], &ret)
-	}
-}
-
 func deleteAccount(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
@@ -186,7 +157,6 @@ func deleteAccount(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Nil(t, info)
 }
-*/
 
 func TestMainOrder(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
@@ -196,7 +166,5 @@ func TestMainOrder(t *testing.T) {
 	t.Run("updateAccount", updateAccount)
 	t.Run("getAccount", getAccount)
 	t.Run("getAccounts", getAccounts)
-	// t.Run("getUserAccounts", getUserAccounts)
-	// t.Run("getManyAccounts", getManyAccounts)
-	// t.Run("deleteAccount", deleteAccount)
+	t.Run("deleteAccount", deleteAccount)
 }

@@ -58,9 +58,11 @@ func UpdateSet(u *ent.DepositUpdateOne, req *Req) (*ent.DepositUpdateOne, error)
 	if req.Outcoming != nil {
 		u.SetOutcoming(*req.Outcoming)
 	}
-
 	if req.ScannableAt != nil {
 		u.SetScannableAt(*req.ScannableAt)
+	}
+	if req.DeletedAt != nil {
+		u.SetDeletedAt(*req.DeletedAt)
 	}
 
 	return u, nil
