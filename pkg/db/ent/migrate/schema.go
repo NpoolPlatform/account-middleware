@@ -66,22 +66,6 @@ var (
 		Columns:    GoodBenefitsColumns,
 		PrimaryKey: []*schema.Column{GoodBenefitsColumns[0]},
 	}
-	// LimitationsColumns holds the columns for the "limitations" table.
-	LimitationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
-		{Name: "created_at", Type: field.TypeUint32},
-		{Name: "updated_at", Type: field.TypeUint32},
-		{Name: "deleted_at", Type: field.TypeUint32},
-		{Name: "coin_type_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "limitation", Type: field.TypeString, Nullable: true, Default: "DefaultLimitationType"},
-		{Name: "amount", Type: field.TypeOther, Nullable: true, SchemaType: map[string]string{"mysql": "decimal(37,18)"}},
-	}
-	// LimitationsTable holds the schema information for the "limitations" table.
-	LimitationsTable = &schema.Table{
-		Name:       "limitations",
-		Columns:    LimitationsColumns,
-		PrimaryKey: []*schema.Column{LimitationsColumns[0]},
-	}
 	// PaymentsColumns holds the columns for the "payments" table.
 	PaymentsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -155,7 +139,6 @@ var (
 		AccountsTable,
 		DepositsTable,
 		GoodBenefitsTable,
-		LimitationsTable,
 		PaymentsTable,
 		PlatformsTable,
 		TransfersTable,

@@ -6,7 +6,6 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
-	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/limitation"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/payment"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/transfer"
@@ -20,7 +19,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 8)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 7)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   account.Table,
@@ -90,25 +89,6 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
-			Table:   limitation.Table,
-			Columns: limitation.Columns,
-			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
-				Column: limitation.FieldID,
-			},
-		},
-		Type: "Limitation",
-		Fields: map[string]*sqlgraph.FieldSpec{
-			limitation.FieldCreatedAt:  {Type: field.TypeUint32, Column: limitation.FieldCreatedAt},
-			limitation.FieldUpdatedAt:  {Type: field.TypeUint32, Column: limitation.FieldUpdatedAt},
-			limitation.FieldDeletedAt:  {Type: field.TypeUint32, Column: limitation.FieldDeletedAt},
-			limitation.FieldCoinTypeID: {Type: field.TypeUUID, Column: limitation.FieldCoinTypeID},
-			limitation.FieldLimitation: {Type: field.TypeString, Column: limitation.FieldLimitation},
-			limitation.FieldAmount:     {Type: field.TypeOther, Column: limitation.FieldAmount},
-		},
-	}
-	graph.Nodes[4] = &sqlgraph.Node{
-		NodeSpec: sqlgraph.NodeSpec{
 			Table:   payment.Table,
 			Columns: payment.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -126,7 +106,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			payment.FieldAvailableAt:   {Type: field.TypeUint32, Column: payment.FieldAvailableAt},
 		},
 	}
-	graph.Nodes[5] = &sqlgraph.Node{
+	graph.Nodes[4] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   platform.Table,
 			Columns: platform.Columns,
@@ -145,7 +125,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			platform.FieldBackup:    {Type: field.TypeBool, Column: platform.FieldBackup},
 		},
 	}
-	graph.Nodes[6] = &sqlgraph.Node{
+	graph.Nodes[5] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   transfer.Table,
 			Columns: transfer.Columns,
@@ -164,7 +144,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			transfer.FieldTargetUserID: {Type: field.TypeUUID, Column: transfer.FieldTargetUserID},
 		},
 	}
-	graph.Nodes[7] = &sqlgraph.Node{
+	graph.Nodes[6] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -457,76 +437,6 @@ func (f *GoodBenefitFilter) WhereTransactionID(p entql.ValueP) {
 }
 
 // addPredicate implements the predicateAdder interface.
-func (lq *LimitationQuery) addPredicate(pred func(s *sql.Selector)) {
-	lq.predicates = append(lq.predicates, pred)
-}
-
-// Filter returns a Filter implementation to apply filters on the LimitationQuery builder.
-func (lq *LimitationQuery) Filter() *LimitationFilter {
-	return &LimitationFilter{config: lq.config, predicateAdder: lq}
-}
-
-// addPredicate implements the predicateAdder interface.
-func (m *LimitationMutation) addPredicate(pred func(s *sql.Selector)) {
-	m.predicates = append(m.predicates, pred)
-}
-
-// Filter returns an entql.Where implementation to apply filters on the LimitationMutation builder.
-func (m *LimitationMutation) Filter() *LimitationFilter {
-	return &LimitationFilter{config: m.config, predicateAdder: m}
-}
-
-// LimitationFilter provides a generic filtering capability at runtime for LimitationQuery.
-type LimitationFilter struct {
-	predicateAdder
-	config
-}
-
-// Where applies the entql predicate on the query filter.
-func (f *LimitationFilter) Where(p entql.P) {
-	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
-			s.AddError(err)
-		}
-	})
-}
-
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *LimitationFilter) WhereID(p entql.ValueP) {
-	f.Where(p.Field(limitation.FieldID))
-}
-
-// WhereCreatedAt applies the entql uint32 predicate on the created_at field.
-func (f *LimitationFilter) WhereCreatedAt(p entql.Uint32P) {
-	f.Where(p.Field(limitation.FieldCreatedAt))
-}
-
-// WhereUpdatedAt applies the entql uint32 predicate on the updated_at field.
-func (f *LimitationFilter) WhereUpdatedAt(p entql.Uint32P) {
-	f.Where(p.Field(limitation.FieldUpdatedAt))
-}
-
-// WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
-func (f *LimitationFilter) WhereDeletedAt(p entql.Uint32P) {
-	f.Where(p.Field(limitation.FieldDeletedAt))
-}
-
-// WhereCoinTypeID applies the entql [16]byte predicate on the coin_type_id field.
-func (f *LimitationFilter) WhereCoinTypeID(p entql.ValueP) {
-	f.Where(p.Field(limitation.FieldCoinTypeID))
-}
-
-// WhereLimitation applies the entql string predicate on the limitation field.
-func (f *LimitationFilter) WhereLimitation(p entql.StringP) {
-	f.Where(p.Field(limitation.FieldLimitation))
-}
-
-// WhereAmount applies the entql other predicate on the amount field.
-func (f *LimitationFilter) WhereAmount(p entql.OtherP) {
-	f.Where(p.Field(limitation.FieldAmount))
-}
-
-// addPredicate implements the predicateAdder interface.
 func (pq *PaymentQuery) addPredicate(pred func(s *sql.Selector)) {
 	pq.predicates = append(pq.predicates, pred)
 }
@@ -555,7 +465,7 @@ type PaymentFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PaymentFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -625,7 +535,7 @@ type PlatformFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PlatformFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -695,7 +605,7 @@ type TransferFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TransferFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -765,7 +675,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

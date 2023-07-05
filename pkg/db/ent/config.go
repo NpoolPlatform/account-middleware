@@ -31,7 +31,6 @@ type hooks struct {
 	Account     []ent.Hook
 	Deposit     []ent.Hook
 	GoodBenefit []ent.Hook
-	Limitation  []ent.Hook
 	Payment     []ent.Hook
 	Platform    []ent.Hook
 	Transfer    []ent.Hook

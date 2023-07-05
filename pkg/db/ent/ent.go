@@ -13,7 +13,6 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
-	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/limitation"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/payment"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/transfer"
@@ -41,7 +40,6 @@ func columnChecker(table string) func(string) error {
 		account.Table:     account.ValidColumn,
 		deposit.Table:     deposit.ValidColumn,
 		goodbenefit.Table: goodbenefit.ValidColumn,
-		limitation.Table:  limitation.ValidColumn,
 		payment.Table:     payment.ValidColumn,
 		platform.Table:    platform.ValidColumn,
 		transfer.Table:    transfer.ValidColumn,

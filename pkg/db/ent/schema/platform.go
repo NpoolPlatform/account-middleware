@@ -4,9 +4,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/mixin"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	"github.com/google/uuid"
-
-	account "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 )
 
 // Platform holds the schema definition for the Platform entity.
@@ -36,7 +35,7 @@ func (Platform) Fields() []ent.Field {
 		field.
 			String("used_for").
 			Optional().
-			Default(account.AccountUsedFor_DefaultAccountUsedFor.String()),
+			Default(basetypes.AccountUsedFor_DefaultAccountUsedFor.String()),
 		field.
 			Bool("backup").
 			Optional().

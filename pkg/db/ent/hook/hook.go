@@ -48,19 +48,6 @@ func (f GoodBenefitFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return f(ctx, mv)
 }
 
-// The LimitationFunc type is an adapter to allow the use of ordinary
-// function as Limitation mutator.
-type LimitationFunc func(context.Context, *ent.LimitationMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f LimitationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.LimitationMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LimitationMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // The PaymentFunc type is an adapter to allow the use of ordinary
 // function as Payment mutator.
 type PaymentFunc func(context.Context, *ent.PaymentMutation) (ent.Value, error)

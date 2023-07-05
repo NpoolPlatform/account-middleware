@@ -8,7 +8,6 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
-	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/limitation"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/payment"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/schema"
@@ -197,50 +196,6 @@ func init() {
 	goodbenefitDescID := goodbenefitFields[0].Descriptor()
 	// goodbenefit.DefaultID holds the default value on creation for the id field.
 	goodbenefit.DefaultID = goodbenefitDescID.Default.(func() uuid.UUID)
-	limitationMixin := schema.Limitation{}.Mixin()
-	limitation.Policy = privacy.NewPolicies(limitationMixin[0], schema.Limitation{})
-	limitation.Hooks[0] = func(next ent.Mutator) ent.Mutator {
-		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-			if err := limitation.Policy.EvalMutation(ctx, m); err != nil {
-				return nil, err
-			}
-			return next.Mutate(ctx, m)
-		})
-	}
-	limitationMixinFields0 := limitationMixin[0].Fields()
-	_ = limitationMixinFields0
-	limitationFields := schema.Limitation{}.Fields()
-	_ = limitationFields
-	// limitationDescCreatedAt is the schema descriptor for created_at field.
-	limitationDescCreatedAt := limitationMixinFields0[0].Descriptor()
-	// limitation.DefaultCreatedAt holds the default value on creation for the created_at field.
-	limitation.DefaultCreatedAt = limitationDescCreatedAt.Default.(func() uint32)
-	// limitationDescUpdatedAt is the schema descriptor for updated_at field.
-	limitationDescUpdatedAt := limitationMixinFields0[1].Descriptor()
-	// limitation.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	limitation.DefaultUpdatedAt = limitationDescUpdatedAt.Default.(func() uint32)
-	// limitation.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	limitation.UpdateDefaultUpdatedAt = limitationDescUpdatedAt.UpdateDefault.(func() uint32)
-	// limitationDescDeletedAt is the schema descriptor for deleted_at field.
-	limitationDescDeletedAt := limitationMixinFields0[2].Descriptor()
-	// limitation.DefaultDeletedAt holds the default value on creation for the deleted_at field.
-	limitation.DefaultDeletedAt = limitationDescDeletedAt.Default.(func() uint32)
-	// limitationDescCoinTypeID is the schema descriptor for coin_type_id field.
-	limitationDescCoinTypeID := limitationFields[1].Descriptor()
-	// limitation.DefaultCoinTypeID holds the default value on creation for the coin_type_id field.
-	limitation.DefaultCoinTypeID = limitationDescCoinTypeID.Default.(func() uuid.UUID)
-	// limitationDescLimitation is the schema descriptor for limitation field.
-	limitationDescLimitation := limitationFields[2].Descriptor()
-	// limitation.DefaultLimitation holds the default value on creation for the limitation field.
-	limitation.DefaultLimitation = limitationDescLimitation.Default.(string)
-	// limitationDescAmount is the schema descriptor for amount field.
-	limitationDescAmount := limitationFields[3].Descriptor()
-	// limitation.DefaultAmount holds the default value on creation for the amount field.
-	limitation.DefaultAmount = limitationDescAmount.Default.(decimal.Decimal)
-	// limitationDescID is the schema descriptor for id field.
-	limitationDescID := limitationFields[0].Descriptor()
-	// limitation.DefaultID holds the default value on creation for the id field.
-	limitation.DefaultID = limitationDescID.Default.(func() uuid.UUID)
 	paymentMixin := schema.Payment{}.Mixin()
 	payment.Policy = privacy.NewPolicies(paymentMixin[0], schema.Payment{})
 	payment.Hooks[0] = func(next ent.Mutator) ent.Mutator {

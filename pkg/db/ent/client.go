@@ -14,7 +14,6 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
-	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/limitation"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/payment"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/transfer"
@@ -35,8 +34,6 @@ type Client struct {
 	Deposit *DepositClient
 	// GoodBenefit is the client for interacting with the GoodBenefit builders.
 	GoodBenefit *GoodBenefitClient
-	// Limitation is the client for interacting with the Limitation builders.
-	Limitation *LimitationClient
 	// Payment is the client for interacting with the Payment builders.
 	Payment *PaymentClient
 	// Platform is the client for interacting with the Platform builders.
@@ -61,7 +58,6 @@ func (c *Client) init() {
 	c.Account = NewAccountClient(c.config)
 	c.Deposit = NewDepositClient(c.config)
 	c.GoodBenefit = NewGoodBenefitClient(c.config)
-	c.Limitation = NewLimitationClient(c.config)
 	c.Payment = NewPaymentClient(c.config)
 	c.Platform = NewPlatformClient(c.config)
 	c.Transfer = NewTransferClient(c.config)
@@ -102,7 +98,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Account:     NewAccountClient(cfg),
 		Deposit:     NewDepositClient(cfg),
 		GoodBenefit: NewGoodBenefitClient(cfg),
-		Limitation:  NewLimitationClient(cfg),
 		Payment:     NewPaymentClient(cfg),
 		Platform:    NewPlatformClient(cfg),
 		Transfer:    NewTransferClient(cfg),
@@ -129,7 +124,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Account:     NewAccountClient(cfg),
 		Deposit:     NewDepositClient(cfg),
 		GoodBenefit: NewGoodBenefitClient(cfg),
-		Limitation:  NewLimitationClient(cfg),
 		Payment:     NewPaymentClient(cfg),
 		Platform:    NewPlatformClient(cfg),
 		Transfer:    NewTransferClient(cfg),
@@ -166,7 +160,6 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Account.Use(hooks...)
 	c.Deposit.Use(hooks...)
 	c.GoodBenefit.Use(hooks...)
-	c.Limitation.Use(hooks...)
 	c.Payment.Use(hooks...)
 	c.Platform.Use(hooks...)
 	c.Transfer.Use(hooks...)
@@ -444,97 +437,6 @@ func (c *GoodBenefitClient) GetX(ctx context.Context, id uuid.UUID) *GoodBenefit
 func (c *GoodBenefitClient) Hooks() []Hook {
 	hooks := c.hooks.GoodBenefit
 	return append(hooks[:len(hooks):len(hooks)], goodbenefit.Hooks[:]...)
-}
-
-// LimitationClient is a client for the Limitation schema.
-type LimitationClient struct {
-	config
-}
-
-// NewLimitationClient returns a client for the Limitation from the given config.
-func NewLimitationClient(c config) *LimitationClient {
-	return &LimitationClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `limitation.Hooks(f(g(h())))`.
-func (c *LimitationClient) Use(hooks ...Hook) {
-	c.hooks.Limitation = append(c.hooks.Limitation, hooks...)
-}
-
-// Create returns a builder for creating a Limitation entity.
-func (c *LimitationClient) Create() *LimitationCreate {
-	mutation := newLimitationMutation(c.config, OpCreate)
-	return &LimitationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of Limitation entities.
-func (c *LimitationClient) CreateBulk(builders ...*LimitationCreate) *LimitationCreateBulk {
-	return &LimitationCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Limitation.
-func (c *LimitationClient) Update() *LimitationUpdate {
-	mutation := newLimitationMutation(c.config, OpUpdate)
-	return &LimitationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *LimitationClient) UpdateOne(l *Limitation) *LimitationUpdateOne {
-	mutation := newLimitationMutation(c.config, OpUpdateOne, withLimitation(l))
-	return &LimitationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *LimitationClient) UpdateOneID(id uuid.UUID) *LimitationUpdateOne {
-	mutation := newLimitationMutation(c.config, OpUpdateOne, withLimitationID(id))
-	return &LimitationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Limitation.
-func (c *LimitationClient) Delete() *LimitationDelete {
-	mutation := newLimitationMutation(c.config, OpDelete)
-	return &LimitationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *LimitationClient) DeleteOne(l *Limitation) *LimitationDeleteOne {
-	return c.DeleteOneID(l.ID)
-}
-
-// DeleteOne returns a builder for deleting the given entity by its id.
-func (c *LimitationClient) DeleteOneID(id uuid.UUID) *LimitationDeleteOne {
-	builder := c.Delete().Where(limitation.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &LimitationDeleteOne{builder}
-}
-
-// Query returns a query builder for Limitation.
-func (c *LimitationClient) Query() *LimitationQuery {
-	return &LimitationQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a Limitation entity by its id.
-func (c *LimitationClient) Get(ctx context.Context, id uuid.UUID) (*Limitation, error) {
-	return c.Query().Where(limitation.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *LimitationClient) GetX(ctx context.Context, id uuid.UUID) *Limitation {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// Hooks returns the client hooks.
-func (c *LimitationClient) Hooks() []Hook {
-	hooks := c.hooks.Limitation
-	return append(hooks[:len(hooks):len(hooks)], limitation.Hooks[:]...)
 }
 
 // PaymentClient is a client for the Payment schema.

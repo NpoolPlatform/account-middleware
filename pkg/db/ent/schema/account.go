@@ -4,9 +4,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/mixin"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	"github.com/google/uuid"
-
-	npool "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 )
 
 // Account holds the schema definition for the Account entity.
@@ -40,7 +39,7 @@ func (Account) Fields() []ent.Field {
 		field.
 			String("used_for").
 			Optional().
-			Default(npool.AccountUsedFor_DefaultAccountUsedFor.String()),
+			Default(basetypes.AccountUsedFor_DefaultAccountUsedFor.String()),
 		field.
 			Bool("platform_hold_private_key").
 			Optional().
@@ -56,7 +55,7 @@ func (Account) Fields() []ent.Field {
 		field.
 			String("locked_by").
 			Optional().
-			Default(npool.LockedBy_DefaultLockedBy.String()),
+			Default(basetypes.AccountLockedBy_DefaultLockedBy.String()),
 		field.
 			Bool("blocked").
 			Optional().
