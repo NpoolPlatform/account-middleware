@@ -30,7 +30,6 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 		deposit1.WithCollectingTID(req.CollectingTID),
 		deposit1.WithIncoming(req.Incoming),
 		deposit1.WithOutcoming(req.Outcoming),
-		deposit1.WithScannableAt(req.ScannableAt),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

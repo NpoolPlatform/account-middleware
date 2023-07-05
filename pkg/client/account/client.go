@@ -71,31 +71,3 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 	}
 	return infos.([]*npool.Account), total, nil
 }
-
-func GetManyAccounts(ctx context.Context, ids []string) ([]*npool.Account, uint32, error) {
-	total := uint32(0)
-
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
-		resp, err := cli.GetAccounts(ctx, &npool.GetAccountsRequest{
-			Conds: &npool.Conds{
-				IDs: &basetypes.StringSliceVal{
-					Op:    cruder.IN,
-					Value: ids,
-				},
-			},
-			Offset: 0,
-			Limit:  int32(len(ids)),
-		})
-		if err != nil {
-			return nil, err
-		}
-
-		total = resp.Total
-
-		return resp.Infos, nil
-	})
-	if err != nil {
-		return nil, 0, err
-	}
-	return infos.([]*npool.Account), total, nil
-}
