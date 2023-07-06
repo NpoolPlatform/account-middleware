@@ -41,11 +41,18 @@ func (h *queryHandler) queryTransfer(cli *ent.Client) {
 	)
 }
 
-func (h *queryHandler) queryTransfers(cli *ent.Client) error {
+func (h *queryHandler) queryTransfers(ctx context.Context, cli *ent.Client) error {
 	stm, err := transfercrud.SetQueryConds(cli.Transfer.Query(), h.Conds)
 	if err != nil {
 		return err
 	}
+
+	_total, err := stm.Count(ctx)
+	if err != nil {
+		return err
+	}
+
+	h.total = uint32(_total)
 	h.selectTransfer(stm)
 	return nil
 }
@@ -86,7 +93,7 @@ func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, 
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryTransfers(cli); err != nil {
+		if err := handler.queryTransfers(_ctx, cli); err != nil {
 			return err
 		}
 
