@@ -6,7 +6,6 @@ import (
 	"os"
 	"strconv"
 	"testing"
-	"time"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
@@ -41,8 +40,8 @@ var ret = &npool.Account{
 	Address:       uuid.NewString(),
 	Active:        true,
 	Locked:        false,
-	LockedBy:      basetypes.AccountLockedBy_DefaultLockedBy,
-	LockedByStr:   basetypes.AccountLockedBy_DefaultLockedBy.String(),
+	LockedBy:      basetypes.AccountLockedBy_Payment,
+	LockedByStr:   basetypes.AccountLockedBy_Payment.String(),
 	Blocked:       false,
 	CollectingTID: uuid.UUID{}.String(),
 }
@@ -104,14 +103,13 @@ func getAccounts(t *testing.T) {
 	infos, total, err := GetAccounts(
 		context.Background(),
 		&npool.Conds{
-			ID:          &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
-			CoinTypeID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
-			AccountID:   &basetypes.StringVal{Op: cruder.EQ, Value: ret.AccountID},
-			Address:     &basetypes.StringVal{Op: cruder.EQ, Value: ret.Address},
-			Active:      &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Active},
-			Locked:      &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Locked},
-			Blocked:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Blocked},
-			AvailableAt: &basetypes.Uint32Val{Op: cruder.GT, Value: uint32(time.Now().Unix())},
+			ID:         &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
+			AccountID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.AccountID},
+			Address:    &basetypes.StringVal{Op: cruder.EQ, Value: ret.Address},
+			Active:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Active},
+			Locked:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Locked},
+			Blocked:    &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Blocked},
 		},
 		0,
 		int32(2),

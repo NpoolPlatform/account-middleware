@@ -127,7 +127,6 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 	}
 
 	s.AppendSelect(
-		sql.As(t.C(entaccount.FieldID), "account_id"),
 		sql.As(t.C(entaccount.FieldAddress), "address"),
 		sql.As(t.C(entaccount.FieldActive), "active"),
 		sql.As(t.C(entaccount.FieldLocked), "locked"),
