@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"entgo.io/ent/dialect/sql"
@@ -128,8 +129,10 @@ func (h *queryHandler) scan(ctx context.Context) error {
 func (h *queryHandler) formalize() {
 	for _, info := range h.infos {
 		if _, err := uuid.Parse(info.CoinTypeID); err != nil {
-			info.UsedFor = basetypes.AccountUsedFor(basetypes.AccountUsedFor_value[info.UsedForStr])
+			info.CoinTypeID = uuid.Nil.String()
 		}
+		info.UsedFor = basetypes.AccountUsedFor(basetypes.AccountUsedFor_value[info.UsedForStr])
+		_ = json.Unmarshal([]byte(info.LabelsStr), &info.Labels)
 	}
 }
 
