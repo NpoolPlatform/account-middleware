@@ -109,33 +109,3 @@ func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, 
 
 	return handler.infos, handler.total, nil
 }
-
-func (h *Handler) GetTransferOnly(ctx context.Context) (*npool.Transfer, error) {
-	handler := &queryHandler{
-		Handler: h,
-	}
-
-	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryTransfers(cli); err != nil {
-			return err
-		}
-		const singleRowLimit = 2
-		handler.stm.
-			Offset(0).
-			Limit(singleRowLimit).
-			Order(ent.Desc(enttransfer.FieldCreatedAt))
-
-		return handler.scan(_ctx)
-	})
-	if err != nil {
-		return nil, err
-	}
-	if len(handler.infos) == 0 {
-		return nil, nil
-	}
-	if len(handler.infos) > 1 {
-		return nil, fmt.Errorf("too many records")
-	}
-
-	return handler.infos[0], nil
-}

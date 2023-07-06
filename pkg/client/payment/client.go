@@ -2,6 +2,7 @@ package payment
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
@@ -16,7 +17,7 @@ var timeout = 10 * time.Second
 
 type handler func(context.Context, npool.MiddlewareClient) (cruder.Any, error)
 
-func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
+func do(ctx context.Context, handler handler) (cruder.Any, error) {
 	_ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -33,7 +34,7 @@ func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
 }
 
 func CreateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.CreateAccount(ctx, &npool.CreateAccountRequest{
 			Info: in,
 		})
@@ -49,7 +50,7 @@ func CreateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 }
 
 func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetAccount(ctx, &npool.GetAccountRequest{
 			ID: id,
 		})
@@ -67,7 +68,7 @@ func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) ([]*npool.Account, uint32, error) {
 	total := uint32(0)
 
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetAccounts(ctx, &npool.GetAccountsRequest{
 			Conds:  conds,
 			Offset: offset,
@@ -88,23 +89,32 @@ func GetAccounts(ctx context.Context, conds *npool.Conds, offset, limit int32) (
 }
 
 func GetAccountOnly(ctx context.Context, conds *npool.Conds) (*npool.Account, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
-		resp, err := cli.GetAccountOnly(ctx, &npool.GetAccountOnlyRequest{
-			Conds: conds,
+	const limit = 2
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.GetAccounts(ctx, &npool.GetAccountsRequest{
+			Conds:  conds,
+			Offset: 0,
+			Limit:  limit,
 		})
 		if err != nil {
 			return nil, err
 		}
-		return resp.Info, nil
+		return resp.Infos, nil
 	})
 	if err != nil {
 		return nil, err
 	}
-	return info.(*npool.Account), nil
+	if len(infos.([]*npool.Account)) == 0 {
+		return nil, nil
+	}
+	if len(infos.([]*npool.Account)) > 1 {
+		return nil, fmt.Errorf("too many records")
+	}
+	return infos.([]*npool.Account)[0], nil
 }
 
 func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.UpdateAccount(ctx, &npool.UpdateAccountRequest{
 			Info: in,
 		})

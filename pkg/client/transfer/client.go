@@ -2,6 +2,7 @@ package transfer
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
@@ -16,7 +17,7 @@ var timeout = 10 * time.Second
 
 type handler func(context.Context, npool.MiddlewareClient) (cruder.Any, error)
 
-func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
+func do(ctx context.Context, handler handler) (cruder.Any, error) {
 	_ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
@@ -33,7 +34,7 @@ func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
 }
 
 func CreateTransfer(ctx context.Context, in *npool.TransferReq) (*npool.Transfer, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.CreateTransfer(ctx, &npool.CreateTransferRequest{
 			Info: in,
 		})
@@ -49,7 +50,7 @@ func CreateTransfer(ctx context.Context, in *npool.TransferReq) (*npool.Transfer
 }
 
 func GetTransfer(ctx context.Context, id string) (*npool.Transfer, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetTransfer(ctx, &npool.GetTransferRequest{
 			ID: id,
 		})
@@ -67,7 +68,7 @@ func GetTransfer(ctx context.Context, id string) (*npool.Transfer, error) {
 func GetTransfers(ctx context.Context, conds *npool.Conds, offset, limit int32) ([]*npool.Transfer, uint32, error) {
 	total := uint32(0)
 
-	infos, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetTransfers(ctx, &npool.GetTransfersRequest{
 			Conds:  conds,
 			Offset: offset,
@@ -88,9 +89,12 @@ func GetTransfers(ctx context.Context, conds *npool.Conds, offset, limit int32) 
 }
 
 func GetTransferOnly(ctx context.Context, conds *npool.Conds) (*npool.Transfer, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	const limit = 2
+	infos, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetTransfers(ctx, &npool.GetTransfersRequest{
-			Conds: conds,
+			Conds:  conds,
+			Offset: 0,
+			Limit:  limit,
 		})
 		if err != nil {
 			return nil, err
@@ -100,11 +104,17 @@ func GetTransferOnly(ctx context.Context, conds *npool.Conds) (*npool.Transfer, 
 	if err != nil {
 		return nil, err
 	}
-	return info.(*npool.Transfer), nil
+	if len(infos.([]*npool.Transfer)) == 0 {
+		return nil, nil
+	}
+	if len(infos.([]*npool.Transfer)) > 1 {
+		return nil, fmt.Errorf("too many records")
+	}
+	return infos.([]*npool.Transfer)[0], nil
 }
 
 func DeleteTransfer(ctx context.Context, in *npool.TransferReq) (*npool.Transfer, error) {
-	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.DeleteTransfer(ctx, &npool.DeleteTransferRequest{
 			Info: in,
 		})
@@ -120,7 +130,7 @@ func DeleteTransfer(ctx context.Context, in *npool.TransferReq) (*npool.Transfer
 }
 
 func ExistTransfer(ctx context.Context, id string) (bool, error) {
-	exist, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	exist, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.ExistTransfer(ctx, &npool.ExistTransferRequest{
 			ID: id,
 		})
@@ -137,7 +147,7 @@ func ExistTransfer(ctx context.Context, id string) (bool, error) {
 }
 
 func ExistTransferConds(ctx context.Context, conds *npool.Conds) (bool, error) {
-	exist, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+	exist, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.ExistTransferConds(ctx, &npool.ExistTransferCondsRequest{
 			Conds: conds,
 		})
