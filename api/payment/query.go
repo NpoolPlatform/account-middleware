@@ -72,32 +72,3 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 		Total: total,
 	}, nil
 }
-
-func (s *Server) GetAccountOnly(ctx context.Context, in *npool.GetAccountOnlyRequest) (*npool.GetAccountOnlyResponse, error) {
-	handler, err := payment1.NewHandler(
-		ctx,
-		payment1.WithConds(in.GetConds()),
-	)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetAccountOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetAccountOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-
-	info, err := handler.GetAccountOnly(ctx)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetAccountOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetAccountOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-
-	return &npool.GetAccountOnlyResponse{
-		Info: info,
-	}, nil
-}

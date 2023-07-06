@@ -73,32 +73,3 @@ func (s *Server) GetTransfers(ctx context.Context, in *npool.GetTransfersRequest
 		Total: total,
 	}, nil
 }
-
-func (s *Server) GetTransferOnly(ctx context.Context, in *npool.GetTransferOnlyRequest) (*npool.GetTransferOnlyResponse, error) {
-	handler, err := transfer1.NewHandler(
-		ctx,
-		transfer1.WithConds(in.GetConds()),
-	)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetTransferOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetTransferOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-
-	info, err := handler.GetTransferOnly(ctx)
-	if err != nil {
-		logger.Sugar().Errorw(
-			"GetTransferOnly",
-			"In", in,
-			"Error", err,
-		)
-		return &npool.GetTransferOnlyResponse{}, status.Error(codes.Aborted, err.Error())
-	}
-
-	return &npool.GetTransferOnlyResponse{
-		Info: info,
-	}, nil
-}
