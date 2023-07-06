@@ -67,7 +67,7 @@ func UpdateSet(u *ent.UserUpdateOne, req *Req) *ent.UserUpdateOne {
 }
 
 type Conds struct {
-	*accountcrud.Conds
+	accountcrud.Conds
 	AppID      *cruder.Cond
 	UserID     *cruder.Cond
 	CoinTypeID *cruder.Cond

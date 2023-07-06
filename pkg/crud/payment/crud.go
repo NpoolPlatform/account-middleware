@@ -43,7 +43,7 @@ func UpdateSet(u *ent.PaymentUpdateOne, req *Req) *ent.PaymentUpdateOne {
 }
 
 type Conds struct {
-	*accountcrud.Conds
+	accountcrud.Conds
 	AccountID   *cruder.Cond
 	AccountIDs  *cruder.Cond
 	AvailableAt *cruder.Cond

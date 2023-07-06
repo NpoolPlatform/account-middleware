@@ -7,8 +7,6 @@ import (
 	enttransfer "github.com/NpoolPlatform/account-middleware/pkg/db/ent/transfer"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
-	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
-
 	"github.com/google/uuid"
 )
 
@@ -44,7 +42,7 @@ func UpdateSet(u *ent.TransferUpdateOne, req *Req) *ent.TransferUpdateOne {
 }
 
 type Conds struct {
-	*accountcrud.Conds
+	ID           *cruder.Cond
 	AppID        *cruder.Cond
 	UserID       *cruder.Cond
 	TargetUserID *cruder.Cond
