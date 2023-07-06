@@ -31,7 +31,7 @@ func (h *queryHandler) selectAccount(stm *ent.PaymentQuery) *ent.PaymentSelect {
 }
 
 func (h *queryHandler) queryAccount(cli *ent.Client) {
-	h.selectAccount(
+	h.stmSelect = h.selectAccount(
 		cli.Payment.
 			Query().
 			Where(

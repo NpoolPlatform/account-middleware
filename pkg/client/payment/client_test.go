@@ -37,6 +37,7 @@ func init() {
 var ret = &npool.Account{
 	ID:            uuid.NewString(),
 	CoinTypeID:    uuid.NewString(),
+	AccountID:     uuid.NewString(),
 	Address:       uuid.NewString(),
 	Active:        true,
 	Locked:        false,
@@ -49,6 +50,7 @@ var ret = &npool.Account{
 var retReq = &npool.AccountReq{
 	ID:            &ret.ID,
 	CoinTypeID:    &ret.CoinTypeID,
+	AccountID:     &ret.AccountID,
 	Address:       &ret.Address,
 	Active:        &ret.Active,
 	Locked:        &ret.Locked,

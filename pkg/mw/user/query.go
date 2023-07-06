@@ -32,7 +32,7 @@ func (h *queryHandler) selectAccount(stm *ent.UserQuery) *ent.UserSelect {
 }
 
 func (h *queryHandler) queryAccount(cli *ent.Client) {
-	h.selectAccount(
+	h.stmSelect = h.selectAccount(
 		cli.User.
 			Query().
 			Where(

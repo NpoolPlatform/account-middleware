@@ -67,7 +67,6 @@ func getTransfers(t *testing.T) {
 	infos, total, err := GetTransfers(
 		context.Background(),
 		&npool.Conds{
-			ID:           &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
 			AppID:        &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
 			UserID:       &basetypes.StringVal{Op: cruder.EQ, Value: ret.UserID},
 			TargetUserID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.TargetUserID},
