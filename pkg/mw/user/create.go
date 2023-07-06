@@ -51,7 +51,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, err
 	}
 
-	key := fmt.Sprintf("%v:%v:%v", basetypes.Prefix_PrefixCreateUserAccount, *h.CoinTypeID, *h.Address)
+	key := fmt.Sprintf("%v:%v:%v:%v:%v:%v", basetypes.Prefix_PrefixCreateUserAccount, *h.AppID, *h.UserID, *h.CoinTypeID, *h.Address, *h.Memo)
 	if err := redis2.TryLock(key, 0); err != nil {
 		return nil, err
 	}
