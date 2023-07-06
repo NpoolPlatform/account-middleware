@@ -29,9 +29,6 @@ func CreateSet(c *ent.PaymentCreate, req *Req) *ent.PaymentCreate {
 	if req.CollectingTID != nil {
 		c.SetCollectingTid(*req.CollectingTID)
 	}
-	if req.AvailableAt != nil {
-		c.SetAvailableAt(*req.AvailableAt)
-	}
 	return c
 }
 

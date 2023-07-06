@@ -87,7 +87,6 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 				ID:            h.ID,
 				AccountID:     h.AccountID,
 				CollectingTID: h.CollectingTID,
-				AvailableAt:   h.AvailableAt,
 			},
 		).Save(ctx); err != nil {
 			return err

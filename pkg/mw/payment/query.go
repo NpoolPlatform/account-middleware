@@ -162,6 +162,7 @@ func (h *queryHandler) scan(ctx context.Context) error {
 
 func (h *queryHandler) formalize() {
 	for _, info := range h.infos {
+		info.LockedBy = basetypes.AccountLockedBy(basetypes.AccountLockedBy_value[info.LockedByStr])
 		if _, err := uuid.Parse(info.CoinTypeID); err != nil {
 			info.CoinTypeID = uuid.Nil.String()
 		}
