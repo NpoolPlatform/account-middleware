@@ -90,18 +90,15 @@ func (h *Handler) GetTransfers(ctx context.Context) ([]*npool.Transfer, uint32, 
 			return err
 		}
 
-		_total, err := handler.stm.Count(_ctx)
-		if err != nil {
+		handler.
+			stm.
+			Offset(int(handler.Offset)).
+			Limit(int(handler.Limit)).
+			Order(ent.Desc(enttransfer.FieldCreatedAt))
+		if err := handler.scan(ctx); err != nil {
 			return err
 		}
-		handler.total = uint32(_total)
-
-		handler.stm.
-			Offset(int(h.Offset)).
-			Limit(int(h.Limit)).
-			Order(ent.Desc(enttransfer.FieldCreatedAt))
-
-		return handler.scan(_ctx)
+		return nil
 	})
 	if err != nil {
 		return nil, 0, err
