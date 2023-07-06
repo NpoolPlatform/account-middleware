@@ -34,7 +34,7 @@ func (h *createHandler) validate() error {
 	if h.CoinTypeID == nil {
 		return fmt.Errorf("invalid cointypeid")
 	}
-	if h.Address == nil || *h.Address == "" {
+	if h.Address == nil {
 		return fmt.Errorf("invalid address")
 	}
 	if h.UsedFor == nil {

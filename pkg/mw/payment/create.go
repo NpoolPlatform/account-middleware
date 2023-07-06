@@ -24,7 +24,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	if h.CoinTypeID == nil {
 		return nil, fmt.Errorf("invalid cointypeid")
 	}
-	if h.Address == nil || *h.Address == "" {
+	if h.Address == nil {
 		return nil, fmt.Errorf("invalid address")
 	}
 
