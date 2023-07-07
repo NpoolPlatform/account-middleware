@@ -74,14 +74,17 @@ func updateAccount(t *testing.T) {
 	active := false
 	labels := []string{uuid.NewString(), uuid.NewString()}
 	blocked := true
+	memo := uuid.NewString()
 
 	ret.Active = active
 	ret.Labels = labels
 	ret.Blocked = blocked
+	ret.Memo = memo
 
 	retReq.Active = &active
 	retReq.Labels = labels
 	retReq.Blocked = &blocked
+	retReq.Memo = &memo
 
 	info, err := UpdateAccount(context.Background(), retReq)
 	if assert.Nil(t, err) {

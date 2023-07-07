@@ -27,6 +27,8 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 		user1.WithActive(req.Active),
 		user1.WithLocked(req.Locked),
 		user1.WithBlocked(req.Blocked),
+		user1.WithLabels(req.Labels),
+		user1.WithMemo(req.Memo),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
