@@ -54,6 +54,7 @@ var retReq = &npool.AccountReq{
 	Address:    &ret.Address,
 	UsedFor:    &ret.UsedFor,
 	Labels:     ret.Labels,
+	Memo:       &ret.Memo,
 }
 
 func createAccount(t *testing.T) {
