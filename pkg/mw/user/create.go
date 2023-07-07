@@ -40,6 +40,9 @@ func (h *createHandler) validate() error {
 	if h.UsedFor == nil {
 		return fmt.Errorf("invalid usedfor")
 	}
+	if h.Memo == nil {
+		return fmt.Errorf("invalid memo")
+	}
 	return nil
 }
 

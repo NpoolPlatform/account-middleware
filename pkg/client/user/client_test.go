@@ -43,6 +43,7 @@ var ret = &npool.Account{
 	UsedFor:    basetypes.AccountUsedFor_UserWithdraw,
 	UsedForStr: basetypes.AccountUsedFor_UserWithdraw.String(),
 	Labels:     []string{uuid.NewString(), uuid.NewString()},
+	Memo:       uuid.NewString(),
 }
 
 var retReq = &npool.AccountReq{
