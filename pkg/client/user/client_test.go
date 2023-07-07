@@ -37,6 +37,7 @@ var ret = &npool.Account{
 	ID:         uuid.NewString(),
 	AppID:      uuid.NewString(),
 	UserID:     uuid.NewString(),
+	AccountID:  uuid.NewString(),
 	CoinTypeID: uuid.NewString(),
 	Address:    uuid.NewString(),
 	Active:     true,
@@ -50,6 +51,7 @@ var retReq = &npool.AccountReq{
 	ID:         &ret.ID,
 	AppID:      &ret.AppID,
 	UserID:     &ret.UserID,
+	AccountID:  &ret.AccountID,
 	CoinTypeID: &ret.CoinTypeID,
 	Address:    &ret.Address,
 	UsedFor:    &ret.UsedFor,
@@ -63,7 +65,6 @@ func createAccount(t *testing.T) {
 		ret.ID = info.ID
 		ret.CreatedAt = info.CreatedAt
 		ret.LabelsStr = info.LabelsStr
-		ret.AccountID = info.AccountID
 		ret.UpdatedAt = info.UpdatedAt
 		ret.DeletedAt = info.DeletedAt
 		assert.Equal(t, ret, info)
@@ -99,7 +100,7 @@ func updateAccount(t *testing.T) {
 func getAccount(t *testing.T) {
 	info, err := GetAccount(context.Background(), ret.ID)
 	if assert.Nil(t, err) {
-		assert.Equal(t, info, &ret)
+		assert.Equal(t, info, ret)
 	}
 }
 
@@ -121,7 +122,7 @@ func getAccounts(t *testing.T) {
 	)
 	if assert.Nil(t, err) {
 		if assert.Equal(t, total, uint32(1)) {
-			assert.Equal(t, infos[0], &ret)
+			assert.Equal(t, infos[0], ret)
 		}
 	}
 }
