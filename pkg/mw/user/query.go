@@ -94,6 +94,15 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
 			sql.EQ(t.C(entaccount.FieldBlocked), blocked),
 		)
 	}
+	if h.Conds != nil && h.Conds.Address != nil {
+		addr, ok := h.Conds.Address.Val.(string)
+		if !ok {
+			return fmt.Errorf("invalid user address")
+		}
+		s.Where(
+			sql.EQ(t.C(entaccount.FieldAddress), addr),
+		)
+	}
 
 	s.AppendSelect(
 		sql.As(t.C(entaccount.FieldAddress), "address"),
