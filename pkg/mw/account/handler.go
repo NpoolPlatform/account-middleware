@@ -116,6 +116,12 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 			}
 			h.Conds.IDs = &cruder.Cond{Op: conds.GetIDs().GetOp(), Val: ids}
 		}
+		if conds.CreatedAt != nil {
+			h.Conds.CreatedAt = &cruder.Cond{
+				Op:  conds.GetCreatedAt().GetOp(),
+				Val: conds.GetCreatedAt().GetValue(),
+			}
+		}
 		return nil
 	}
 }

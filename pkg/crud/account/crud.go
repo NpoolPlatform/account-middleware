@@ -85,6 +85,7 @@ type Conds struct {
 	Locked                 *cruder.Cond
 	LockedBy               *cruder.Cond
 	Blocked                *cruder.Cond
+	CreatedAt              *cruder.Cond
 }
 
 func SetQueryConds(q *ent.AccountQuery, conds *Conds) (*ent.AccountQuery, error) { // nolint
@@ -204,6 +205,20 @@ func SetQueryConds(q *ent.AccountQuery, conds *Conds) (*ent.AccountQuery, error)
 		switch conds.IDs.Op {
 		case cruder.IN:
 			q.Where(entaccount.IDIn(ids...))
+		default:
+			return nil, fmt.Errorf("invalid account field")
+		}
+	}
+	if conds.CreatedAt != nil {
+		at, ok := conds.CreatedAt.Val.(uint32)
+		if !ok {
+			return nil, fmt.Errorf("invalid account createdat")
+		}
+		switch conds.CreatedAt.Op {
+		case cruder.GTE:
+			q.Where(entaccount.CreatedAtGTE(at))
+		case cruder.LTE:
+			q.Where(entaccount.CreatedAtLTE(at))
 		default:
 			return nil, fmt.Errorf("invalid account field")
 		}
