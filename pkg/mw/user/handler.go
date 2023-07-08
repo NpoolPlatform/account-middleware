@@ -275,6 +275,12 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 				Val: conds.GetBlocked().GetValue(),
 			}
 		}
+		if conds.Address != nil {
+			h.Conds.Address = &cruder.Cond{
+				Op:  conds.GetAddress().GetOp(),
+				Val: conds.GetAddress().GetValue(),
+			}
+		}
 		return nil
 	}
 }
