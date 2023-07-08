@@ -219,6 +219,20 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 			}
 			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: id}
 		}
+		if conds.AppID != nil {
+			id, err := uuid.Parse(conds.GetAppID().GetValue())
+			if err != nil {
+				return err
+			}
+			h.Conds.AppID = &cruder.Cond{Op: conds.GetAppID().GetOp(), Val: id}
+		}
+		if conds.UserID != nil {
+			id, err := uuid.Parse(conds.GetUserID().GetValue())
+			if err != nil {
+				return err
+			}
+			h.Conds.UserID = &cruder.Cond{Op: conds.GetUserID().GetOp(), Val: id}
+		}
 		if conds.CoinTypeID != nil {
 			id, err := uuid.Parse(conds.GetCoinTypeID().GetValue())
 			if err != nil {
