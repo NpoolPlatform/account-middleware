@@ -224,10 +224,11 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 			h.Conds.CoinTypeID = &cruder.Cond{Op: conds.GetCoinTypeID().GetOp(), Val: id}
 		}
 		if conds.AccountID != nil {
-			h.Conds.AccountID = &cruder.Cond{
-				Op:  conds.GetAccountID().GetOp(),
-				Val: conds.GetAccountID().GetValue(),
+			id, err := uuid.Parse(conds.GetAccountID().GetValue())
+			if err != nil {
+				return err
 			}
+			h.Conds.AccountID = &cruder.Cond{Op: conds.GetAccountID().GetOp(), Val: id}
 		}
 		if conds.UsedFor != nil {
 			h.Conds.UsedFor = &cruder.Cond{
