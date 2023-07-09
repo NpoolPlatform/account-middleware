@@ -129,6 +129,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 						)
 				}).
 				Where(
+					entplatform.IDNEQ(*h.ID),
 					entplatform.UsedFor(h.UsedFor.String()),
 				).
 				IDs(_ctx)
