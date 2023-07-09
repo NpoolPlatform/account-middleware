@@ -167,7 +167,7 @@ func WithTransactionID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
+func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nolint
 	return func(ctx context.Context, h *Handler) error {
 		h.Conds = &goodbenefitcrud.Conds{}
 		if conds == nil {
