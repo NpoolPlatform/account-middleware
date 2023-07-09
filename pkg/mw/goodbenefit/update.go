@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
+
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
 	goodbenefitcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/goodbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db"
@@ -66,6 +68,46 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 		).Save(_ctx); err != nil {
 			return err
 		}
+
+		if h.Backup != nil && !*h.Backup {
+			ids, err := tx.
+				GoodBenefit.
+				Query().
+				Select().
+				Modify(func(s *sql.Selector) {
+					t := sql.Table(entaccount.Table)
+					s.LeftJoin(t).
+						On(
+							t.C(entaccount.FieldID),
+							s.C(entgoodbenefit.FieldAccountID),
+						).
+						OnP(
+							sql.EQ(t.C(entaccount.FieldCoinTypeID), account.CoinTypeID),
+						).
+						OnP(
+							sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
+						)
+				}).
+				Where(
+					entgoodbenefit.IDNEQ(*h.ID),
+				).
+				IDs(_ctx)
+			if err != nil {
+				return err
+			}
+
+			if _, err := tx.
+				GoodBenefit.
+				Update().
+				Where(
+					entgoodbenefit.IDIn(ids...),
+				).
+				SetBackup(true).
+				Save(_ctx); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
