@@ -4,8 +4,12 @@ import (
 	"context"
 	"fmt"
 
+	"entgo.io/ent/dialect/sql"
+
 	"github.com/NpoolPlatform/account-middleware/pkg/db"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
+	entaccount "github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
+	entplatform "github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
 	platformcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/platform"
@@ -79,7 +83,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 		privateKey = false
 	}
 
-	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
+	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		if _, err := accountcrud.CreateSet(
 			tx.Account.Create(),
 			&accountcrud.Req{
@@ -89,7 +93,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 				UsedFor:                h.UsedFor,
 				PlatformHoldPrivateKey: &privateKey,
 			},
-		).Save(ctx); err != nil {
+		).Save(_ctx); err != nil {
 			return err
 		}
 
@@ -101,9 +105,49 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 				AccountID: h.AccountID,
 				Backup:    h.Backup,
 			},
-		).Save(ctx); err != nil {
+		).Save(_ctx); err != nil {
 			return err
 		}
+
+		if h.Backup != nil && !*h.Backup {
+			ids, err := tx.
+				Platform.
+				Query().
+				Select().
+				Modify(func(s *sql.Selector) {
+					t := sql.Table(entaccount.Table)
+					s.LeftJoin(t).
+						On(
+							t.C(entaccount.FieldID),
+							s.C(entplatform.FieldAccountID),
+						).
+						OnP(
+							sql.EQ(t.C(entaccount.FieldCoinTypeID), *h.CoinTypeID),
+						).
+						OnP(
+							sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
+						)
+				}).
+				Where(
+					entplatform.UsedFor(h.UsedFor.String()),
+				).
+				IDs(_ctx)
+			if err != nil {
+				return err
+			}
+
+			if _, err := tx.
+				Platform.
+				Update().
+				Where(
+					entplatform.IDIn(ids...),
+				).
+				SetBackup(true).
+				Save(_ctx); err != nil {
+				return err
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
