@@ -24,7 +24,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
+func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { //nolint
 	if h.CoinTypeID == nil {
 		return nil, fmt.Errorf("invalid cointypeid")
 	}
