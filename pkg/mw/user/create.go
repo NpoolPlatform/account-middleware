@@ -9,9 +9,6 @@ import (
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
 	usercrud "github.com/NpoolPlatform/account-middleware/pkg/crud/user"
-	account1 "github.com/NpoolPlatform/account-middleware/pkg/mw/account"
-	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	accountmwpb "github.com/NpoolPlatform/message/npool/account/mw/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
@@ -62,24 +59,6 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		_ = redis2.Unlock(key)
 	}()
 
-	accountHandler, err := account1.NewHandler(
-		ctx,
-		account1.WithConds(&accountmwpb.Conds{
-			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: h.CoinTypeID.String()},
-			Address:    &basetypes.StringVal{Op: cruder.EQ, Value: *h.Address},
-		}),
-	)
-	if err != nil {
-		return nil, err
-	}
-	exist, err := accountHandler.ExistAccountConds(ctx)
-	if err != nil {
-		return nil, err
-	}
-	if exist {
-		return nil, fmt.Errorf("address exist")
-	}
-
 	id := uuid.New()
 	if h.ID == nil {
 		h.ID = &id
@@ -92,7 +71,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 
 	privateKey := true
 
-	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
+	err := db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		if _, err := accountcrud.CreateSet(
 			tx.Account.Create(),
 			&accountcrud.Req{
