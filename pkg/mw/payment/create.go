@@ -54,14 +54,14 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		return nil, fmt.Errorf("address exist")
 	}
 
-	id := uuid.New()
+	id1 := uuid.New()
 	if h.ID == nil {
-		h.ID = &id
+		h.ID = &id1
 	}
 
-	id = uuid.New()
+	id2 := uuid.New()
 	if h.AccountID == nil {
-		h.AccountID = &id
+		h.AccountID = &id2
 	}
 
 	usedFor := basetypes.AccountUsedFor_GoodPayment
