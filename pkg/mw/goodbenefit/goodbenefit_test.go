@@ -32,6 +32,7 @@ var ret = npool.Account{
 	AccountID:     uuid.NewString(),
 	Address:       uuid.NewString(),
 	Active:        true,
+	Backup:        true,
 	TransactionID: uuid.Nil.String(),
 	LockedByStr:   basetypes.AccountLockedBy_DefaultLockedBy.String(),
 }
@@ -44,6 +45,7 @@ func creatAccount(t *testing.T) {
 		WithCoinTypeID(&ret.CoinTypeID),
 		WithAccountID(&ret.AccountID),
 		WithAddress(&ret.Address),
+		WithBackup(&ret.Backup),
 	)
 	assert.Nil(t, err)
 	info, err := handler.CreateAccount(context.Background())

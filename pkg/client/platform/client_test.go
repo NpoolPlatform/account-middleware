@@ -40,7 +40,7 @@ var ret = npool.Account{
 	UsedFor:     basetypes.AccountUsedFor_UserBenefitHot,
 	UsedForStr:  basetypes.AccountUsedFor_UserBenefitHot.String(),
 	Address:     uuid.NewString(),
-	Backup:      false,
+	Backup:      true,
 	Active:      true,
 	Locked:      false,
 	LockedByStr: basetypes.AccountLockedBy_DefaultLockedBy.String(),
@@ -53,6 +53,7 @@ var req = &npool.AccountReq{
 	AccountID:  &ret.AccountID,
 	UsedFor:    &ret.UsedFor,
 	Address:    &ret.Address,
+	Backup:     &ret.Backup,
 }
 
 func createAccount(t *testing.T) {

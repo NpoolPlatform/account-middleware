@@ -39,7 +39,7 @@ var ret = npool.Account{
 	CoinTypeID:    uuid.NewString(),
 	AccountID:     uuid.NewString(),
 	Address:       uuid.NewString(),
-	Backup:        false,
+	Backup:        true,
 	Active:        true,
 	Locked:        false,
 	LockedByStr:   basetypes.AccountLockedBy_DefaultLockedBy.String(),
