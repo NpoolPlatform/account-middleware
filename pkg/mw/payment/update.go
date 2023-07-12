@@ -46,7 +46,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 			return err
 		}
 
-		if account.Locked && !*h.Locked {
+		if account.Locked && h.Locked != nil && !*h.Locked {
 			const coolDown = uint32(60 * 60)
 			availableAt := uint32(time.Now().Unix()) + coolDown
 			h.AvailableAt = &availableAt
