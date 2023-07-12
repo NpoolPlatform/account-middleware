@@ -4,62 +4,72 @@ package transfer
 import (
 	"context"
 
-	constant "github.com/NpoolPlatform/account-middleware/pkg/message/const"
-	commontracer "github.com/NpoolPlatform/account-middleware/pkg/tracer"
-
 	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
-	"go.opentelemetry.io/otel"
-	scodes "go.opentelemetry.io/otel/codes"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	transfer1 "github.com/NpoolPlatform/account-middleware/pkg/mw/transfer"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/transfer"
-
-	transfermgrcli "github.com/NpoolPlatform/account-manager/pkg/client/transfer"
-
-	"github.com/google/uuid"
 )
 
-func (s *Server) ExistTransferConds(ctx context.Context, in *npool.ExistTransferCondsRequest) (*npool.ExistTransferCondsResponse, error) {
-	var err error
-
-	_, span := otel.Tracer(constant.ServiceName).Start(ctx, "CreateTransfer")
-	defer span.End()
-
-	defer func() {
-		if err != nil {
-			span.SetStatus(scodes.Error, err.Error())
-			span.RecordError(err)
-		}
-	}()
-
-	if in.Conds == nil {
-		logger.Sugar().Errorw("ExistTransferConds", "Conds", in.GetConds())
-		return &npool.ExistTransferCondsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if _, err := uuid.Parse(in.GetConds().GetAppID().GetValue()); err != nil {
-		logger.Sugar().Errorw("ExistTransferConds", "AppID", in.GetConds().GetAppID().GetValue(), "error", err)
-		return &npool.ExistTransferCondsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if _, err := uuid.Parse(in.GetConds().GetUserID().GetValue()); err != nil {
-		logger.Sugar().Errorw("ExistTransferConds", "UserID", in.GetConds().GetUserID().GetValue(), "error", err)
-		return &npool.ExistTransferCondsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-	if _, err := uuid.Parse(in.GetConds().GetTargetUserID().GetValue()); err != nil {
-		logger.Sugar().Errorw("ExistTransferConds", "TargetUserID", in.GetConds().GetTargetUserID().GetValue(), "error", err)
-		return &npool.ExistTransferCondsResponse{}, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	span = commontracer.TraceInvoker(span, "transfer", "transfer", "ExistTransferConds")
-
-	exist, err := transfermgrcli.ExistTransferConds(ctx, in.GetConds())
+func (s *Server) GetTransfer(ctx context.Context, in *npool.GetTransferRequest) (*npool.GetTransferResponse, error) {
+	handler, err := transfer1.NewHandler(
+		ctx,
+		transfer1.WithID(&in.ID),
+	)
 	if err != nil {
-		logger.Sugar().Errorw("ExistTransferConds", "err", err)
-		return &npool.ExistTransferCondsResponse{}, status.Error(codes.Internal, err.Error())
+		logger.Sugar().Errorw(
+			"GetTransfer",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetTransferResponse{}, status.Error(codes.Aborted, err.Error())
 	}
 
-	return &npool.ExistTransferCondsResponse{
-		Info: exist,
+	info, err := handler.GetTransfer(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetTransfer",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetTransferResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	return &npool.GetTransferResponse{
+		Info: info,
+	}, nil
+}
+
+func (s *Server) GetTransfers(ctx context.Context, in *npool.GetTransfersRequest) (*npool.GetTransfersResponse, error) {
+	handler, err := transfer1.NewHandler(
+		ctx,
+		transfer1.WithConds(in.GetConds()),
+		transfer1.WithOffset(in.GetOffset()),
+		transfer1.WithLimit(in.GetLimit()),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetTransfers",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetTransfersResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	infos, total, err := handler.GetTransfers(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"GetTransfers",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.GetTransfersResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	return &npool.GetTransfersResponse{
+		Infos: infos,
+		Total: total,
 	}, nil
 }

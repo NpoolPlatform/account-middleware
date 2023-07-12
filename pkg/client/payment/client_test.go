@@ -8,11 +8,12 @@ import (
 	"testing"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/payment"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -33,37 +34,37 @@ func init() {
 	}
 }
 
-var acc = &npool.Account{
+var ret = &npool.Account{
 	ID:            uuid.NewString(),
 	CoinTypeID:    uuid.NewString(),
+	AccountID:     uuid.NewString(),
 	Address:       uuid.NewString(),
 	Active:        true,
 	Locked:        false,
-	LockedBy:      accountmgrpb.LockedBy_DefaultLockedBy,
-	LockedByStr:   accountmgrpb.LockedBy_DefaultLockedBy.String(),
+	LockedByStr:   basetypes.AccountLockedBy_DefaultLockedBy.String(),
 	Blocked:       false,
 	CollectingTID: uuid.UUID{}.String(),
 }
 
-var accReq = &npool.AccountReq{
-	ID:            &acc.ID,
-	CoinTypeID:    &acc.CoinTypeID,
-	Address:       &acc.Address,
-	Active:        &acc.Active,
-	Locked:        &acc.Locked,
-	LockedBy:      &acc.LockedBy,
-	Blocked:       &acc.Blocked,
-	CollectingTID: &acc.CollectingTID,
+var retReq = &npool.AccountReq{
+	ID:            &ret.ID,
+	CoinTypeID:    &ret.CoinTypeID,
+	AccountID:     &ret.AccountID,
+	Address:       &ret.Address,
+	Active:        &ret.Active,
+	Locked:        &ret.Locked,
+	Blocked:       &ret.Blocked,
+	CollectingTID: &ret.CollectingTID,
 }
 
 func createAccount(t *testing.T) {
-	info, err := CreateAccount(context.Background(), accReq)
+	info, err := CreateAccount(context.Background(), retReq)
 	if assert.Nil(t, err) {
-		acc.CreatedAt = info.CreatedAt
-		acc.UpdatedAt = info.UpdatedAt
-		acc.AccountID = info.AccountID
-		acc.AvailableAt = info.AvailableAt
-		assert.Equal(t, acc, info)
+		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
+		ret.AccountID = info.AccountID
+		ret.AvailableAt = info.AvailableAt
+		assert.Equal(t, ret, info)
 	}
 }
 
@@ -73,21 +74,50 @@ func updateAccount(t *testing.T) {
 	blocked := true
 	collectingTID := uuid.NewString()
 
-	acc.Active = active
-	acc.Locked = locked
-	acc.Blocked = blocked
-	acc.CollectingTID = collectingTID
+	ret.Active = active
+	ret.Locked = locked
+	ret.Blocked = blocked
+	ret.CollectingTID = collectingTID
 
-	accReq.Active = &active
-	accReq.Locked = &locked
-	accReq.Blocked = &blocked
-	accReq.CollectingTID = &collectingTID
+	retReq.Active = &active
+	retReq.Locked = &locked
+	retReq.Blocked = &blocked
+	retReq.CollectingTID = &collectingTID
 
-	info, err := UpdateAccount(context.Background(), accReq)
+	info, err := UpdateAccount(context.Background(), retReq)
 	if assert.Nil(t, err) {
-		acc.UpdatedAt = info.UpdatedAt
-		acc.AvailableAt = info.AvailableAt
-		assert.Equal(t, acc, info)
+		ret.UpdatedAt = info.UpdatedAt
+		ret.AvailableAt = info.AvailableAt
+		assert.Equal(t, ret, info)
+	}
+}
+
+func getAccount(t *testing.T) {
+	info, err := GetAccount(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, ret)
+	}
+}
+
+func getAccounts(t *testing.T) {
+	infos, total, err := GetAccounts(
+		context.Background(),
+		&npool.Conds{
+			ID:         &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
+			AccountID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.AccountID},
+			Address:    &basetypes.StringVal{Op: cruder.EQ, Value: ret.Address},
+			Active:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Active},
+			Locked:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Locked},
+			Blocked:    &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Blocked},
+		},
+		0,
+		int32(2),
+	)
+	if assert.Nil(t, err) {
+		if assert.Equal(t, total, uint32(1)) {
+			assert.Equal(t, infos[0], ret)
+		}
 	}
 }
 
@@ -104,4 +134,6 @@ func TestClient(t *testing.T) {
 
 	t.Run("createAccount", createAccount)
 	t.Run("updateAccount", updateAccount)
+	t.Run("getAccount", getAccount)
+	t.Run("getAccounts", getAccounts)
 }

@@ -8,11 +8,11 @@ import (
 	"testing"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
-
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/user"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -33,38 +33,41 @@ func init() {
 	}
 }
 
-var acc = &npool.Account{
+var ret = &npool.Account{
 	ID:         uuid.NewString(),
 	AppID:      uuid.NewString(),
 	UserID:     uuid.NewString(),
+	AccountID:  uuid.NewString(),
 	CoinTypeID: uuid.NewString(),
 	Address:    uuid.NewString(),
 	Active:     true,
-	UsedFor:    accountmgrpb.AccountUsedFor_UserWithdraw,
-	UsedForStr: accountmgrpb.AccountUsedFor_UserWithdraw.String(),
+	UsedFor:    basetypes.AccountUsedFor_UserWithdraw,
+	UsedForStr: basetypes.AccountUsedFor_UserWithdraw.String(),
 	Labels:     []string{uuid.NewString(), uuid.NewString()},
+	Memo:       uuid.NewString(),
 }
 
-var accReq = &npool.AccountReq{
-	ID:         &acc.ID,
-	AppID:      &acc.AppID,
-	UserID:     &acc.UserID,
-	CoinTypeID: &acc.CoinTypeID,
-	Address:    &acc.Address,
-	UsedFor:    &acc.UsedFor,
-	Labels:     acc.Labels,
+var retReq = &npool.AccountReq{
+	ID:         &ret.ID,
+	AppID:      &ret.AppID,
+	UserID:     &ret.UserID,
+	AccountID:  &ret.AccountID,
+	CoinTypeID: &ret.CoinTypeID,
+	Address:    &ret.Address,
+	UsedFor:    &ret.UsedFor,
+	Labels:     ret.Labels,
+	Memo:       &ret.Memo,
 }
 
 func createAccount(t *testing.T) {
-	info, err := CreateAccount(context.Background(), accReq)
+	info, err := CreateAccount(context.Background(), retReq)
 	if assert.Nil(t, err) {
-		acc.ID = info.ID
-		acc.CreatedAt = info.CreatedAt
-		acc.LabelsStr = info.LabelsStr
-		acc.AccountID = info.AccountID
-		acc.UpdatedAt = info.UpdatedAt
-		acc.DeletedAt = info.DeletedAt
-		assert.Equal(t, acc, info)
+		ret.ID = info.ID
+		ret.CreatedAt = info.CreatedAt
+		ret.LabelsStr = info.LabelsStr
+		ret.UpdatedAt = info.UpdatedAt
+		ret.DeletedAt = info.DeletedAt
+		assert.Equal(t, ret, info)
 	}
 }
 
@@ -72,35 +75,66 @@ func updateAccount(t *testing.T) {
 	active := false
 	labels := []string{uuid.NewString(), uuid.NewString()}
 	blocked := true
+	memo := uuid.NewString()
 
-	acc.Active = active
-	acc.Labels = labels
-	acc.Blocked = blocked
+	ret.Active = active
+	ret.Labels = labels
+	ret.Blocked = blocked
+	ret.Memo = memo
 
-	accReq.Active = &active
-	accReq.Labels = labels
-	accReq.Blocked = &blocked
+	retReq.Active = &active
+	retReq.Labels = labels
+	retReq.Blocked = &blocked
+	retReq.Memo = &memo
 
-	info, err := UpdateAccount(context.Background(), accReq)
+	info, err := UpdateAccount(context.Background(), retReq)
 	if assert.Nil(t, err) {
-		acc.LabelsStr = info.LabelsStr
-		acc.CreatedAt = info.CreatedAt
-		acc.UpdatedAt = info.UpdatedAt
-		acc.DeletedAt = info.DeletedAt
-		assert.Equal(t, acc, info)
+		ret.LabelsStr = info.LabelsStr
+		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
+		ret.DeletedAt = info.DeletedAt
+		assert.Equal(t, ret, info)
+	}
+}
+
+func getAccount(t *testing.T) {
+	info, err := GetAccount(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, ret)
+	}
+}
+
+func getAccounts(t *testing.T) {
+	infos, total, err := GetAccounts(
+		context.Background(),
+		&npool.Conds{
+			ID:         &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			AppID:      &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
+			UserID:     &basetypes.StringVal{Op: cruder.EQ, Value: ret.UserID},
+			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
+			AccountID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.AccountID},
+			Address:    &basetypes.StringVal{Op: cruder.EQ, Value: ret.Address},
+			Active:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Active},
+			Blocked:    &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Blocked},
+		},
+		0,
+		int32(2),
+	)
+	if assert.Nil(t, err) {
+		if assert.Equal(t, total, uint32(1)) {
+			assert.Equal(t, infos[0], ret)
+		}
 	}
 }
 
 func deleteAccount(t *testing.T) {
-	info, err := DeleteAccount(context.Background(), acc.ID)
-	if assert.Nil(t, err) {
-		acc.CreatedAt = info.CreatedAt
-		acc.UpdatedAt = info.UpdatedAt
-		acc.DeletedAt = info.DeletedAt
-		assert.Equal(t, acc, info)
+	req := &npool.AccountReq{
+		ID: &ret.ID,
 	}
-	_, err = GetAccount(context.Background(), info.ID)
-	assert.NotNil(t, err)
+	info, err := DeleteAccount(context.Background(), req)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, ret)
+	}
 }
 
 func TestClient(t *testing.T) {
@@ -116,5 +150,7 @@ func TestClient(t *testing.T) {
 
 	t.Run("createAccount", createAccount)
 	t.Run("updateAccount", updateAccount)
+	t.Run("getAccount", getAccount)
+	t.Run("getAccounts", getAccounts)
 	t.Run("deleteAccount", deleteAccount)
 }

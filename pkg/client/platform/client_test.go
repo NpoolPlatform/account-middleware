@@ -8,11 +8,11 @@ import (
 	"testing"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
-
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
@@ -33,58 +33,95 @@ func init() {
 	}
 }
 
-var acc = &npool.Account{
+var ret = npool.Account{
 	ID:          uuid.NewString(),
 	CoinTypeID:  uuid.NewString(),
-	UsedFor:     accountmgrpb.AccountUsedFor_UserBenefitHot,
-	UsedForStr:  accountmgrpb.AccountUsedFor_UserBenefitHot.String(),
+	AccountID:   uuid.NewString(),
+	UsedFor:     basetypes.AccountUsedFor_UserBenefitHot,
+	UsedForStr:  basetypes.AccountUsedFor_UserBenefitHot.String(),
 	Address:     uuid.NewString(),
 	Backup:      false,
 	Active:      true,
 	Locked:      false,
-	LockedBy:    accountmgrpb.LockedBy_DefaultLockedBy,
-	LockedByStr: accountmgrpb.LockedBy_DefaultLockedBy.String(),
+	LockedByStr: basetypes.AccountLockedBy_DefaultLockedBy.String(),
 	Blocked:     false,
 }
 
-var accReq = &npool.AccountReq{
-	ID:         &acc.ID,
-	CoinTypeID: &acc.CoinTypeID,
-	UsedFor:    &acc.UsedFor,
-	Address:    &acc.Address,
-	LockedBy:   &acc.LockedBy,
+var req = &npool.AccountReq{
+	ID:         &ret.ID,
+	CoinTypeID: &ret.CoinTypeID,
+	AccountID:  &ret.AccountID,
+	UsedFor:    &ret.UsedFor,
+	Address:    &ret.Address,
 }
 
 func createAccount(t *testing.T) {
-	info, err := CreateAccount(context.Background(), accReq)
+	info, err := CreateAccount(context.Background(), req)
 	if assert.Nil(t, err) {
-		acc.CreatedAt = info.CreatedAt
-		acc.AccountID = info.AccountID
-		assert.Equal(t, acc, info)
+		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
+		assert.Equal(t, info, &ret)
 	}
 }
 
 func updateAccount(t *testing.T) {
 	backup := true
 	locked := true
-	lockedBy := accountmgrpb.LockedBy_Collecting
+	lockedBy := basetypes.AccountLockedBy_Collecting
 	blocked := true
 
-	acc.Backup = backup
-	acc.Locked = locked
-	acc.LockedBy = lockedBy
-	acc.LockedByStr = lockedBy.String()
-	acc.Blocked = blocked
+	ret.Backup = backup
+	ret.Locked = locked
+	ret.LockedBy = lockedBy
+	ret.LockedByStr = lockedBy.String()
+	ret.Blocked = blocked
 
-	accReq.Backup = &backup
-	accReq.Locked = &locked
-	accReq.LockedBy = &lockedBy
-	accReq.Blocked = &blocked
+	req.Backup = &backup
+	req.Locked = &locked
+	req.LockedBy = &lockedBy
+	req.Blocked = &blocked
 
-	info, err := UpdateAccount(context.Background(), accReq)
+	info, err := UpdateAccount(context.Background(), req)
 	if assert.Nil(t, err) {
-		acc.CreatedAt = info.CreatedAt
-		assert.Equal(t, acc, info)
+		ret.UpdatedAt = info.UpdatedAt
+		assert.Equal(t, info, &ret)
+	}
+}
+
+func getAccount(t *testing.T) {
+	info, err := GetAccount(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, &ret)
+	}
+}
+
+func getAccounts(t *testing.T) {
+	infos, total, err := GetAccounts(
+		context.Background(),
+		&npool.Conds{
+			ID:         &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
+			AccountID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.AccountID},
+			UsedFor:    &basetypes.Uint32Val{Op: cruder.EQ, Value: uint32(ret.UsedFor)},
+			Address:    &basetypes.StringVal{Op: cruder.EQ, Value: ret.Address},
+			Active:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Active},
+			Locked:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Locked},
+			Blocked:    &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Blocked},
+		},
+		0,
+		int32(2),
+	)
+	if assert.Nil(t, err) {
+		if assert.Equal(t, total, uint32(1)) {
+			assert.Equal(t, infos[0], &ret)
+		}
+	}
+}
+
+func deleteAccount(t *testing.T) {
+	info, err := DeleteAccount(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, &ret)
 	}
 }
 
@@ -101,4 +138,7 @@ func TestClient(t *testing.T) {
 
 	t.Run("createAccount", createAccount)
 	t.Run("updateAccount", updateAccount)
+	t.Run("getAccount", getAccount)
+	t.Run("getAccounts", getAccounts)
+	t.Run("deleteAccount", deleteAccount)
 }

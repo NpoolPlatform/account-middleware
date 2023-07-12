@@ -9,20 +9,21 @@ import (
 	"time"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
-
 	"github.com/NpoolPlatform/go-service-framework/pkg/config"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 
-	accountmgrpb "github.com/NpoolPlatform/message/npool/account/mgr/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/google/uuid"
+	"github.com/shopspring/decimal"
 )
 
 func init() {
@@ -34,63 +35,120 @@ func init() {
 	}
 }
 
-var acc = &npool.Account{
+var ret = npool.Account{
 	ID:            uuid.NewString(),
 	AppID:         uuid.NewString(),
 	UserID:        uuid.NewString(),
 	CoinTypeID:    uuid.NewString(),
+	AccountID:     uuid.NewString(),
 	Address:       uuid.NewString(),
 	Active:        true,
 	Locked:        false,
-	LockedByStr:   accountmgrpb.LockedBy_DefaultLockedBy.String(),
-	LockedBy:      accountmgrpb.LockedBy_DefaultLockedBy,
+	LockedByStr:   basetypes.AccountLockedBy_DefaultLockedBy.String(),
 	Blocked:       false,
 	CollectingTID: uuid.UUID{}.String(),
-	Incoming:      "0.000000000000000000",
-	Outcoming:     "0.000000000000000000",
+	Incoming:      decimal.NewFromInt(0).String(),
+	Outcoming:     decimal.NewFromInt(0).String(),
 }
 
-var accReq = npool.AccountReq{
-	ID:         &acc.ID,
-	AppID:      &acc.AppID,
-	UserID:     &acc.UserID,
-	CoinTypeID: &acc.CoinTypeID,
-	Address:    &acc.Address,
-	Active:     &acc.Active,
-	Locked:     &acc.Locked,
-	LockedBy:   &acc.LockedBy,
-	Blocked:    &acc.Blocked,
+var req = npool.AccountReq{
+	ID:         &ret.ID,
+	AppID:      &ret.AppID,
+	UserID:     &ret.UserID,
+	CoinTypeID: &ret.CoinTypeID,
+	AccountID:  &ret.AccountID,
+	Address:    &ret.Address,
+	Active:     &ret.Active,
+	Locked:     &ret.Locked,
+	Blocked:    &ret.Blocked,
 }
 
 func createAccount(t *testing.T) {
-	info, err := CreateAccount(context.Background(), &accReq)
+	info, err := CreateAccount(context.Background(), &req)
 	if assert.Nil(t, err) {
-		acc.CreatedAt = info.CreatedAt
-		acc.ScannableAt = info.ScannableAt
-		acc.AccountID = info.AccountID
-		assert.Equal(t, info, acc)
+		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
+		ret.ScannableAt = info.ScannableAt
+		assert.Equal(t, info, &ret)
 	}
 }
 
 func updateAccount(t *testing.T) {
 	collectingTID := uuid.NewString()
-	incoming := "1.200000000000000000"
-	outcoming := "1.100000000000000000"
-	scannableAt := uint32(time.Now().Unix() + 100000)
+	incoming := "1.2"
+	outcoming := "1.1"
 
-	accReq.CollectingTID = &collectingTID
-	accReq.Incoming = &incoming
-	accReq.Outcoming = &outcoming
-	accReq.ScannableAt = &scannableAt
+	ret.CollectingTID = collectingTID
+	ret.Incoming = incoming
+	ret.Outcoming = outcoming
+	ret.Locked = true
+	ret.LockedBy = basetypes.AccountLockedBy_Payment
+	ret.LockedByStr = basetypes.AccountLockedBy_Payment.String()
 
-	acc.CollectingTID = collectingTID
-	acc.Incoming = incoming
-	acc.Outcoming = outcoming
-	acc.ScannableAt = scannableAt
+	req.CollectingTID = &collectingTID
+	req.Incoming = &incoming
+	req.Outcoming = &outcoming
+	req.LockedBy = &ret.LockedBy
 
-	info, err := UpdateAccount(context.Background(), &accReq)
+	info, err := UpdateAccount(context.Background(), &req)
 	if assert.Nil(t, err) {
-		assert.Equal(t, info, acc)
+		assert.Equal(t, info, &ret)
+	}
+
+	ret.Locked = false
+	req.Locked = &ret.Locked
+	req.Incoming = nil
+	req.Outcoming = nil
+
+	info, err = UpdateAccount(context.Background(), &req)
+	if assert.Nil(t, err) {
+		assert.NotEqual(t, info.ScannableAt, ret.ScannableAt)
+		ret.ScannableAt = info.ScannableAt
+		assert.Equal(t, info, &ret)
+	}
+}
+
+func getAccount(t *testing.T) {
+	info, err := GetAccount(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, &ret)
+	}
+}
+
+func getAccounts(t *testing.T) {
+	infos, total, err := GetAccounts(
+		context.Background(),
+		&npool.Conds{
+			ID:          &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			AppID:       &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
+			UserID:      &basetypes.StringVal{Op: cruder.EQ, Value: ret.UserID},
+			CoinTypeID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
+			AccountID:   &basetypes.StringVal{Op: cruder.EQ, Value: ret.AccountID},
+			Address:     &basetypes.StringVal{Op: cruder.EQ, Value: ret.Address},
+			Active:      &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Active},
+			Locked:      &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Locked},
+			Blocked:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Blocked},
+			ScannableAt: &basetypes.Uint32Val{Op: cruder.GT, Value: uint32(time.Now().Unix())},
+		},
+		0,
+		int32(2),
+	)
+	if assert.Nil(t, err) {
+		if assert.Equal(t, total, uint32(1)) {
+			assert.Equal(t, infos[0], &ret)
+		}
+	}
+}
+
+func deleteAccount(t *testing.T) {
+	info, err := DeleteAccount(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, &ret)
+	}
+
+	info, err = DeleteAccount(context.Background(), ret.ID)
+	if assert.Nil(t, err) {
+		assert.Nil(t, info)
 	}
 }
 
@@ -107,4 +165,7 @@ func TestClient(t *testing.T) {
 
 	t.Run("createAccount", createAccount)
 	t.Run("updateAccount", updateAccount)
+	t.Run("getAccount", getAccount)
+	t.Run("getAccounts", getAccounts)
+	t.Run("deleteAccount", deleteAccount)
 }
