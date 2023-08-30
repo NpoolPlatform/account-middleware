@@ -21,6 +21,7 @@ func (h *Handler) SubBalance(ctx context.Context) (*npool.Account, error) {
 			Query().
 			Where(
 				entdeposit.ID(*h.ID),
+				entdeposit.DeletedAt(0),
 			).
 			ForUpdate().
 			Only(_ctx)
@@ -33,11 +34,11 @@ func (h *Handler) SubBalance(ctx context.Context) (*npool.Account, error) {
 
 		incoming := deposit.Incoming
 		if h.Incoming != nil {
-			incoming = incoming.Add(*h.Incoming)
+			incoming = incoming.Sub(*h.Incoming)
 		}
 		outcoming := deposit.Outcoming
 		if h.Outcoming != nil {
-			outcoming = outcoming.Add(*h.Outcoming)
+			outcoming = outcoming.Sub(*h.Outcoming)
 		}
 
 		if incoming.Cmp(outcoming) < 0 {

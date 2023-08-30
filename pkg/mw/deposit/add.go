@@ -21,6 +21,7 @@ func (h *Handler) AddBalance(ctx context.Context) (*npool.Account, error) {
 			Query().
 			Where(
 				entdeposit.ID(*h.ID),
+				entdeposit.DeletedAt(0),
 			).
 			ForUpdate().
 			Only(_ctx)
