@@ -10,6 +10,8 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 	entdeposit "github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/deposit"
+
+	"github.com/shopspring/decimal"
 )
 
 func (h *Handler) AddBalance(ctx context.Context) (*npool.Account, error) {
@@ -44,6 +46,12 @@ func (h *Handler) AddBalance(ctx context.Context) (*npool.Account, error) {
 
 		if incoming.Cmp(outcoming) < 0 {
 			return fmt.Errorf("incoming (%v) < outcoming (%v)", incoming, outcoming)
+		}
+		if incoming.Cmp(decimal.NewFromInt(0)) < 0 {
+			return fmt.Errorf("invalid incoming")
+		}
+		if outcoming.Cmp(decimal.NewFromInt(0)) < 0 {
+			return fmt.Errorf("invalid outcoming")
 		}
 
 		if _, err := depositcrud.UpdateSet(
