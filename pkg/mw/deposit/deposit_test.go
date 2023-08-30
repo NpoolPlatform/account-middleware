@@ -224,7 +224,7 @@ func TestMainOrder(t *testing.T) {
 	t.Run("updateAccount", updateAccount)
 	t.Run("addAccount", addAccount)
 	t.Run("subAccount", subAccount)
-	// t.Run("getAccount", getAccount)
-	// t.Run("getAccounts", getAccounts)
-	// t.Run("deleteAccount", deleteAccount)
+	t.Run("getAccount", getAccount)
+	t.Run("getAccounts", getAccounts)
+	t.Run("deleteAccount", deleteAccount)
 }
