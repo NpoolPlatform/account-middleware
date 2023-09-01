@@ -53,6 +53,19 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 			_scannableAt = &scannableAt
 		}
 
+		incoming := deposit.Incoming
+		if h.Incoming != nil {
+			incoming = incoming.Add(*h.Incoming)
+		}
+		outcoming := deposit.Outcoming
+		if h.Outcoming != nil {
+			outcoming = outcoming.Add(*h.Outcoming)
+		}
+
+		if incoming.Cmp(outcoming) < 0 {
+			return fmt.Errorf("incoming (%v) < outcoming (%v)", incoming, outcoming)
+		}
+
 		if _, err := accountcrud.UpdateSet(
 			account.Update(),
 			&accountcrud.Req{
@@ -69,6 +82,8 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 			deposit.Update(),
 			&depositcrud.Req{
 				CollectingTID: h.CollectingTID,
+				Incoming:      &incoming,
+				Outcoming:     &outcoming,
 				ScannableAt:   _scannableAt,
 			},
 		).Save(_ctx); err != nil {
