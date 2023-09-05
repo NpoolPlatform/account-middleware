@@ -89,6 +89,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 						)
 				}).
 				Where(
+					entgoodbenefit.GoodID(goodbenefit.GoodID),
 					entgoodbenefit.IDNEQ(*h.ID),
 				).
 				IDs(_ctx)
