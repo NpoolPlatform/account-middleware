@@ -91,6 +91,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 				Where(
 					entgoodbenefit.GoodID(goodbenefit.GoodID),
 					entgoodbenefit.IDNEQ(*h.ID),
+					entgoodbenefit.Backup(false),
 				).
 				IDs(_ctx)
 			if err != nil {
