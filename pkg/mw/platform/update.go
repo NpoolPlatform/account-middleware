@@ -81,6 +81,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 				Where(
 					entplatform.IDNEQ(*h.ID),
 					entplatform.UsedFor(platform.UsedFor),
+					entplatform.Backup(false),
 				).
 				IDs(_ctx)
 			if err != nil {

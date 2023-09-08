@@ -4,10 +4,11 @@ import (
 	"fmt"
 
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 )
 
 func key(id string) string {
-	return fmt.Sprintf("account:lock:%v", id)
+	return fmt.Sprintf("%v:%v", basetypes.Prefix_PrefixAccountLock, id)
 }
 
 func Lock(id string) error {

@@ -75,19 +75,12 @@ func createAccount(t *testing.T) {
 
 func updateAccount(t *testing.T) {
 	collectingTID := uuid.NewString()
-	incoming := "1.2"
-	outcoming := "1.1"
-
 	ret.CollectingTID = collectingTID
-	ret.Incoming = incoming
-	ret.Outcoming = outcoming
 	ret.Locked = true
 	ret.LockedBy = basetypes.AccountLockedBy_Payment
 	ret.LockedByStr = basetypes.AccountLockedBy_Payment.String()
 
 	req.CollectingTID = &collectingTID
-	req.Incoming = &incoming
-	req.Outcoming = &outcoming
 	req.LockedBy = &ret.LockedBy
 
 	info, err := UpdateAccount(context.Background(), &req)
@@ -97,13 +90,35 @@ func updateAccount(t *testing.T) {
 
 	ret.Locked = false
 	req.Locked = &ret.Locked
-	req.Incoming = nil
-	req.Outcoming = nil
-
 	info, err = UpdateAccount(context.Background(), &req)
 	if assert.Nil(t, err) {
 		assert.NotEqual(t, info.ScannableAt, ret.ScannableAt)
 		ret.ScannableAt = info.ScannableAt
+		assert.Equal(t, info, &ret)
+	}
+}
+
+func addAccount(t *testing.T) {
+	incoming := "1.2"
+	outcoming := "1.1"
+
+	ret.Incoming = incoming
+	ret.Outcoming = outcoming
+	req.Incoming = &incoming
+	req.Outcoming = &outcoming
+
+	info, err := AddBalance(context.Background(), &req)
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, &ret)
+	}
+}
+
+func subAccount(t *testing.T) {
+	ret.Incoming = "0"
+	ret.Outcoming = "0"
+
+	info, err := SubBalance(context.Background(), &req)
+	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -168,6 +183,8 @@ func TestClient(t *testing.T) {
 
 	t.Run("createAccount", createAccount)
 	t.Run("updateAccount", updateAccount)
+	t.Run("addAccount", addAccount)
+	t.Run("subAccount", subAccount)
 	t.Run("getAccount", getAccount)
 	t.Run("getAccounts", getAccounts)
 	t.Run("deleteAccount", deleteAccount)

@@ -120,3 +120,35 @@ func DeleteAccount(ctx context.Context, id string) (*npool.Account, error) {
 	}
 	return info.(*npool.Account), nil
 }
+
+func AddBalance(ctx context.Context, in *npool.AccountReq) (*npool.Account, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.AddBalance(ctx, &npool.AddBalanceRequest{
+			Info: in,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Account), nil
+}
+
+func SubBalance(ctx context.Context, in *npool.AccountReq) (*npool.Account, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.SubBalance(ctx, &npool.SubBalanceRequest{
+			Info: in,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Account), nil
+}

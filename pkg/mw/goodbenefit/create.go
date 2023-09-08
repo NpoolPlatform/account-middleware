@@ -85,7 +85,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 			return err
 		}
 
-		if _, err := goodbenefitcrud.CreateSet(
+		goodbenefit, err := goodbenefitcrud.CreateSet(
 			tx.GoodBenefit.Create(),
 			&goodbenefitcrud.Req{
 				ID:        h.ID,
@@ -93,7 +93,8 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 				AccountID: h.AccountID,
 				Backup:    h.Backup,
 			},
-		).Save(_ctx); err != nil {
+		).Save(_ctx)
+		if err != nil {
 			return err
 		}
 
@@ -120,6 +121,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 					)
 			}).
 			Where(
+				entgoodbenefit.GoodID(goodbenefit.GoodID),
 				entgoodbenefit.IDNEQ(*h.ID),
 				entgoodbenefit.Backup(false),
 			).

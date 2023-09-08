@@ -67,8 +67,6 @@ func updateAccount(t *testing.T) {
 	ret.LockedBy = basetypes.AccountLockedBy_Payment
 	ret.LockedByStr = basetypes.AccountLockedBy_Payment.String()
 	ret.CollectingTID = uuid.NewString()
-	ret.Incoming = "0.12"
-	ret.Outcoming = "0.1"
 
 	handler, err := NewHandler(
 		context.Background(),
@@ -102,6 +100,23 @@ func updateAccount(t *testing.T) {
 		ret.ScannableAt = info.ScannableAt
 		assert.Equal(t, info, &ret)
 	}
+}
+
+func addAccount(t *testing.T) {
+	ret.Incoming = "0.12"
+	ret.Outcoming = "0.1"
+	handler, err := NewHandler(
+		context.Background(),
+		WithID(&ret.ID),
+		WithIncoming(&ret.Incoming),
+		WithOutcoming(&ret.Outcoming),
+	)
+	assert.Nil(t, err)
+
+	info, err := handler.AddBalance(context.Background())
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, &ret)
+	}
 
 	handler, err = NewHandler(
 		context.Background(),
@@ -111,7 +126,7 @@ func updateAccount(t *testing.T) {
 	)
 	assert.Nil(t, err)
 
-	info, err = handler.UpdateAccount(context.Background())
+	info, err = handler.AddBalance(context.Background())
 	if assert.Nil(t, err) {
 		assert.NotEqual(t, info, &ret)
 		ret.Incoming = "0.24"
@@ -126,8 +141,25 @@ func updateAccount(t *testing.T) {
 	)
 	assert.Nil(t, err)
 
-	_, err = handler.UpdateAccount(context.Background())
+	_, err = handler.AddBalance(context.Background())
 	assert.NotNil(t, err)
+}
+
+func subAccount(t *testing.T) {
+	ret.Incoming = "0.12"
+	ret.Outcoming = "0.1"
+	handler, err := NewHandler(
+		context.Background(),
+		WithID(&ret.ID),
+		WithIncoming(&ret.Incoming),
+		WithOutcoming(&ret.Outcoming),
+	)
+	assert.Nil(t, err)
+
+	info, err := handler.SubBalance(context.Background())
+	if assert.Nil(t, err) {
+		assert.Equal(t, info, &ret)
+	}
 }
 
 func getAccount(t *testing.T) {
@@ -190,6 +222,8 @@ func TestMainOrder(t *testing.T) {
 	}
 	t.Run("createAccount", creatAccount)
 	t.Run("updateAccount", updateAccount)
+	t.Run("addAccount", addAccount)
+	t.Run("subAccount", subAccount)
 	t.Run("getAccount", getAccount)
 	t.Run("getAccounts", getAccounts)
 	t.Run("deleteAccount", deleteAccount)
