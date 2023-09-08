@@ -59,7 +59,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 			return err
 		}
 
-		if h.Backup == nil || !*h.backup {
+		if h.Backup == nil || !*h.Backup {
 			return nil
 		}
 
