@@ -119,9 +119,6 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 			Select().
 			Modify(func(s *sql.Selector) {
 				t := sql.Table(entaccount.Table)
-				s.Where(
-					sql.EQ(t.C(entaccount.FieldCoinTypeID), *h.CoinTypeID),
-				)
 				s.LeftJoin(t).
 					On(
 						t.C(entaccount.FieldID),
@@ -133,6 +130,9 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 					OnP(
 						sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
 					)
+				s.Where(
+					sql.EQ(t.C(entaccount.FieldCoinTypeID), *h.CoinTypeID),
+				)
 			}).
 			Where(
 				entplatform.IDNEQ(*h.ID),

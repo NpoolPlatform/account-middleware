@@ -69,45 +69,50 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 			return err
 		}
 
-		if h.Backup != nil && !*h.Backup {
-			ids, err := tx.
-				GoodBenefit.
-				Query().
-				Select().
-				Modify(func(s *sql.Selector) {
-					t := sql.Table(entaccount.Table)
-					s.LeftJoin(t).
-						On(
-							t.C(entaccount.FieldID),
-							s.C(entgoodbenefit.FieldAccountID),
-						).
-						OnP(
-							sql.EQ(t.C(entaccount.FieldCoinTypeID), account.CoinTypeID),
-						).
-						OnP(
-							sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
-						)
-				}).
-				Where(
-					entgoodbenefit.GoodID(goodbenefit.GoodID),
-					entgoodbenefit.IDNEQ(*h.ID),
-					entgoodbenefit.Backup(false),
-				).
-				IDs(_ctx)
-			if err != nil {
-				return err
-			}
+		if h.Backup == nil || !*h.Backup {
+			return nil
+		}
 
-			if _, err := tx.
-				GoodBenefit.
-				Update().
-				Where(
-					entgoodbenefit.IDIn(ids...),
-				).
-				SetBackup(true).
-				Save(_ctx); err != nil {
-				return err
-			}
+		ids, err := tx.
+			GoodBenefit.
+			Query().
+			Select().
+			Modify(func(s *sql.Selector) {
+				t := sql.Table(entaccount.Table)
+				s.LeftJoin(t).
+					On(
+						t.C(entaccount.FieldID),
+						s.C(entgoodbenefit.FieldAccountID),
+					).
+					OnP(
+						sql.EQ(t.C(entaccount.FieldCoinTypeID), account.CoinTypeID),
+					).
+					OnP(
+						sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
+					)
+				s.Where(
+					sql.EQ(t.C(entaccount.FieldCoinTypeID), *h.CoinTypeID),
+				)
+			}).
+			Where(
+				entgoodbenefit.GoodID(goodbenefit.GoodID),
+				entgoodbenefit.IDNEQ(*h.ID),
+				entgoodbenefit.Backup(false),
+			).
+			IDs(_ctx)
+		if err != nil {
+			return err
+		}
+
+		if _, err := tx.
+			GoodBenefit.
+			Update().
+			Where(
+				entgoodbenefit.IDIn(ids...),
+			).
+			SetBackup(true).
+			Save(_ctx); err != nil {
+			return err
 		}
 
 		return nil

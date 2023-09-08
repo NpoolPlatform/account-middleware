@@ -119,6 +119,9 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 					OnP(
 						sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
 					)
+				s.Where(
+					sql.EQ(t.C(entaccount.FieldCoinTypeID), *h.CoinTypeID),
+				)
 			}).
 			Where(
 				entgoodbenefit.GoodID(goodbenefit.GoodID),
