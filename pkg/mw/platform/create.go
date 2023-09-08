@@ -109,7 +109,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 			return err
 		}
 
-		if h.Backup != nil && *h.Backup {
+		if h.Backup == nil || *h.Backup {
 			return nil
 		}
 
@@ -119,6 +119,9 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 			Select().
 			Modify(func(s *sql.Selector) {
 				t := sql.Table(entaccount.Table)
+				s.Where(
+					sql.EQ(t.C(entaccount.FieldCoinTypeID), *h.CoinTypeID),
+				)
 				s.LeftJoin(t).
 					On(
 						t.C(entaccount.FieldID),

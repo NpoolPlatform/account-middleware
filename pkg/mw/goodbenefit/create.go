@@ -98,7 +98,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 			return err
 		}
 
-		if h.Backup != nil && *h.Backup {
+		if h.Backup == nil && !*h.Backup {
 			return nil
 		}
 
