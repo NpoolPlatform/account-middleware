@@ -16,7 +16,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
 )
 
-func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
+func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { //nolint
 	if h.ID == nil {
 		return nil, fmt.Errorf("invalid id")
 	}
