@@ -81,7 +81,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 						sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
 					)
 				s.Where(
-					sql.EQ(t.C(entaccount.FieldCoinTypeID), *h.CoinTypeID),
+					sql.EQ(t.C(entaccount.FieldCoinTypeID), account.CoinTypeID),
 				)
 			}).
 			Where(
