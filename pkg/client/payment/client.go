@@ -5,12 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	servicename "github.com/NpoolPlatform/account-middleware/pkg/servicename"
 	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
-
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/payment"
-
-	servicename "github.com/NpoolPlatform/account-middleware/pkg/servicename"
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 )
 
 var timeout = 10 * time.Second
@@ -117,6 +116,39 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.UpdateAccount(ctx, &npool.UpdateAccountRequest{
 			Info: in,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Account), nil
+}
+
+func LockAccount(ctx context.Context, id string, lockedBy basetypes.AccountLockedBy) (*npool.Account, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.LockAccount(ctx, &npool.LockAccountRequest{
+			ID:       id,
+			LockedBy: lockedBy,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Info, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return info.(*npool.Account), nil
+}
+
+func UnlockAccount(ctx context.Context, id string) (*npool.Account, error) {
+	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.UnlockAccount(ctx, &npool.UnlockAccountRequest{
+			ID: id,
 		})
 		if err != nil {
 			return nil, err
