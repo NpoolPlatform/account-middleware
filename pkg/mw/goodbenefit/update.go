@@ -114,7 +114,6 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 			Save(_ctx); err != nil {
 			return err
 		}
-
 		return nil
 	})
 	if err != nil {

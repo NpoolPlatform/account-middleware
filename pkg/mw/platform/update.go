@@ -59,6 +59,15 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 			return err
 		}
 
+		if _, err := platformcrud.UpdateSet(
+			platform.Update(),
+			&platformcrud.Req{
+				Backup: h.Backup,
+			},
+		).Save(_ctx); err != nil {
+			return err
+		}
+
 		if h.Backup != nil && *h.Backup {
 			return nil
 		}
@@ -102,15 +111,6 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 			).
 			SetBackup(true).
 			Save(_ctx); err != nil {
-			return err
-		}
-
-		if _, err := platformcrud.UpdateSet(
-			platform.Update(),
-			&platformcrud.Req{
-				Backup: h.Backup,
-			},
-		).Save(_ctx); err != nil {
 			return err
 		}
 		return nil
