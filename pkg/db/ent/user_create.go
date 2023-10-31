@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -61,6 +60,20 @@ func (uc *UserCreate) SetDeletedAt(u uint32) *UserCreate {
 func (uc *UserCreate) SetNillableDeletedAt(u *uint32) *UserCreate {
 	if u != nil {
 		uc.SetDeletedAt(*u)
+	}
+	return uc
+}
+
+// SetEntID sets the "ent_id" field.
+func (uc *UserCreate) SetEntID(u uuid.UUID) *UserCreate {
+	uc.mutation.SetEntID(u)
+	return uc
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (uc *UserCreate) SetNillableEntID(u *uuid.UUID) *UserCreate {
+	if u != nil {
+		uc.SetEntID(*u)
 	}
 	return uc
 }
@@ -156,16 +169,8 @@ func (uc *UserCreate) SetNillableMemo(s *string) *UserCreate {
 }
 
 // SetID sets the "id" field.
-func (uc *UserCreate) SetID(u uuid.UUID) *UserCreate {
+func (uc *UserCreate) SetID(u uint32) *UserCreate {
 	uc.mutation.SetID(u)
-	return uc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (uc *UserCreate) SetNillableID(u *uuid.UUID) *UserCreate {
-	if u != nil {
-		uc.SetID(*u)
-	}
 	return uc
 }
 
@@ -269,6 +274,13 @@ func (uc *UserCreate) defaults() error {
 		v := user.DefaultDeletedAt()
 		uc.mutation.SetDeletedAt(v)
 	}
+	if _, ok := uc.mutation.EntID(); !ok {
+		if user.DefaultEntID == nil {
+			return fmt.Errorf("ent: uninitialized user.DefaultEntID (forgotten import ent/runtime?)")
+		}
+		v := user.DefaultEntID()
+		uc.mutation.SetEntID(v)
+	}
 	if _, ok := uc.mutation.AppID(); !ok {
 		if user.DefaultAppID == nil {
 			return fmt.Errorf("ent: uninitialized user.DefaultAppID (forgotten import ent/runtime?)")
@@ -309,13 +321,6 @@ func (uc *UserCreate) defaults() error {
 		v := user.DefaultMemo
 		uc.mutation.SetMemo(v)
 	}
-	if _, ok := uc.mutation.ID(); !ok {
-		if user.DefaultID == nil {
-			return fmt.Errorf("ent: uninitialized user.DefaultID (forgotten import ent/runtime?)")
-		}
-		v := user.DefaultID()
-		uc.mutation.SetID(v)
-	}
 	return nil
 }
 
@@ -330,6 +335,9 @@ func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.DeletedAt(); !ok {
 		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "User.deleted_at"`)}
 	}
+	if _, ok := uc.mutation.EntID(); !ok {
+		return &ValidationError{Name: "ent_id", err: errors.New(`ent: missing required field "User.ent_id"`)}
+	}
 	return nil
 }
 
@@ -341,12 +349,9 @@ func (uc *UserCreate) sqlSave(ctx context.Context) (*User, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
 	}
 	return _node, nil
 }
@@ -357,7 +362,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: user.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: user.FieldID,
 			},
 		}
@@ -365,7 +370,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = uc.conflict
 	if id, ok := uc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
 	}
 	if value, ok := uc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -390,6 +395,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if value, ok := uc.mutation.EntID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: user.FieldEntID,
+		})
+		_node.EntID = value
 	}
 	if value, ok := uc.mutation.AppID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -552,6 +565,18 @@ func (u *UserUpsert) UpdateDeletedAt() *UserUpsert {
 // AddDeletedAt adds v to the "deleted_at" field.
 func (u *UserUpsert) AddDeletedAt(v uint32) *UserUpsert {
 	u.Add(user.FieldDeletedAt, v)
+	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *UserUpsert) SetEntID(v uuid.UUID) *UserUpsert {
+	u.Set(user.FieldEntID, v)
+	return u
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *UserUpsert) UpdateEntID() *UserUpsert {
+	u.SetExcluded(user.FieldEntID)
 	return u
 }
 
@@ -794,6 +819,20 @@ func (u *UserUpsertOne) UpdateDeletedAt() *UserUpsertOne {
 	})
 }
 
+// SetEntID sets the "ent_id" field.
+func (u *UserUpsertOne) SetEntID(v uuid.UUID) *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *UserUpsertOne) UpdateEntID() *UserUpsertOne {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateEntID()
+	})
+}
+
 // SetAppID sets the "app_id" field.
 func (u *UserUpsertOne) SetAppID(v uuid.UUID) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
@@ -957,12 +996,7 @@ func (u *UserUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *UserUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: UserUpsertOne.ID is not supported by MySQL driver. Use UserUpsertOne.Exec instead")
-	}
+func (u *UserUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -971,7 +1005,7 @@ func (u *UserUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *UserUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *UserUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1022,6 +1056,10 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint32(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1217,6 +1255,20 @@ func (u *UserUpsertBulk) AddDeletedAt(v uint32) *UserUpsertBulk {
 func (u *UserUpsertBulk) UpdateDeletedAt() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *UserUpsertBulk) SetEntID(v uuid.UUID) *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *UserUpsertBulk) UpdateEntID() *UserUpsertBulk {
+	return u.Update(func(s *UserUpsert) {
+		s.UpdateEntID()
 	})
 }
 

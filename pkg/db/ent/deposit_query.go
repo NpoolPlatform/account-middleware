@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // DepositQuery is the builder for querying Deposit entities.
@@ -87,8 +86,8 @@ func (dq *DepositQuery) FirstX(ctx context.Context) *Deposit {
 
 // FirstID returns the first Deposit ID from the query.
 // Returns a *NotFoundError when no Deposit ID was found.
-func (dq *DepositQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (dq *DepositQuery) FirstID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = dq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -100,7 +99,7 @@ func (dq *DepositQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (dq *DepositQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (dq *DepositQuery) FirstIDX(ctx context.Context) uint32 {
 	id, err := dq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -138,8 +137,8 @@ func (dq *DepositQuery) OnlyX(ctx context.Context) *Deposit {
 // OnlyID is like Only, but returns the only Deposit ID in the query.
 // Returns a *NotSingularError when more than one Deposit ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (dq *DepositQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (dq *DepositQuery) OnlyID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = dq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -155,7 +154,7 @@ func (dq *DepositQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (dq *DepositQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (dq *DepositQuery) OnlyIDX(ctx context.Context) uint32 {
 	id, err := dq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,8 +180,8 @@ func (dq *DepositQuery) AllX(ctx context.Context) []*Deposit {
 }
 
 // IDs executes the query and returns a list of Deposit IDs.
-func (dq *DepositQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (dq *DepositQuery) IDs(ctx context.Context) ([]uint32, error) {
+	var ids []uint32
 	if err := dq.Select(deposit.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +189,7 @@ func (dq *DepositQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (dq *DepositQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (dq *DepositQuery) IDsX(ctx context.Context) []uint32 {
 	ids, err := dq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +376,7 @@ func (dq *DepositQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   deposit.Table,
 			Columns: deposit.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: deposit.FieldID,
 			},
 		},

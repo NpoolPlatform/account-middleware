@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -62,6 +61,20 @@ func (dc *DepositCreate) SetDeletedAt(u uint32) *DepositCreate {
 func (dc *DepositCreate) SetNillableDeletedAt(u *uint32) *DepositCreate {
 	if u != nil {
 		dc.SetDeletedAt(*u)
+	}
+	return dc
+}
+
+// SetEntID sets the "ent_id" field.
+func (dc *DepositCreate) SetEntID(u uuid.UUID) *DepositCreate {
+	dc.mutation.SetEntID(u)
+	return dc
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (dc *DepositCreate) SetNillableEntID(u *uuid.UUID) *DepositCreate {
+	if u != nil {
+		dc.SetEntID(*u)
 	}
 	return dc
 }
@@ -165,16 +178,8 @@ func (dc *DepositCreate) SetNillableScannableAt(u *uint32) *DepositCreate {
 }
 
 // SetID sets the "id" field.
-func (dc *DepositCreate) SetID(u uuid.UUID) *DepositCreate {
+func (dc *DepositCreate) SetID(u uint32) *DepositCreate {
 	dc.mutation.SetID(u)
-	return dc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (dc *DepositCreate) SetNillableID(u *uuid.UUID) *DepositCreate {
-	if u != nil {
-		dc.SetID(*u)
-	}
 	return dc
 }
 
@@ -278,6 +283,13 @@ func (dc *DepositCreate) defaults() error {
 		v := deposit.DefaultDeletedAt()
 		dc.mutation.SetDeletedAt(v)
 	}
+	if _, ok := dc.mutation.EntID(); !ok {
+		if deposit.DefaultEntID == nil {
+			return fmt.Errorf("ent: uninitialized deposit.DefaultEntID (forgotten import ent/runtime?)")
+		}
+		v := deposit.DefaultEntID()
+		dc.mutation.SetEntID(v)
+	}
 	if _, ok := dc.mutation.AppID(); !ok {
 		if deposit.DefaultAppID == nil {
 			return fmt.Errorf("ent: uninitialized deposit.DefaultAppID (forgotten import ent/runtime?)")
@@ -321,13 +333,6 @@ func (dc *DepositCreate) defaults() error {
 		v := deposit.DefaultScannableAt()
 		dc.mutation.SetScannableAt(v)
 	}
-	if _, ok := dc.mutation.ID(); !ok {
-		if deposit.DefaultID == nil {
-			return fmt.Errorf("ent: uninitialized deposit.DefaultID (forgotten import ent/runtime?)")
-		}
-		v := deposit.DefaultID()
-		dc.mutation.SetID(v)
-	}
 	return nil
 }
 
@@ -342,6 +347,9 @@ func (dc *DepositCreate) check() error {
 	if _, ok := dc.mutation.DeletedAt(); !ok {
 		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Deposit.deleted_at"`)}
 	}
+	if _, ok := dc.mutation.EntID(); !ok {
+		return &ValidationError{Name: "ent_id", err: errors.New(`ent: missing required field "Deposit.ent_id"`)}
+	}
 	return nil
 }
 
@@ -353,12 +361,9 @@ func (dc *DepositCreate) sqlSave(ctx context.Context) (*Deposit, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
 	}
 	return _node, nil
 }
@@ -369,7 +374,7 @@ func (dc *DepositCreate) createSpec() (*Deposit, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: deposit.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: deposit.FieldID,
 			},
 		}
@@ -377,7 +382,7 @@ func (dc *DepositCreate) createSpec() (*Deposit, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = dc.conflict
 	if id, ok := dc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
 	}
 	if value, ok := dc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -402,6 +407,14 @@ func (dc *DepositCreate) createSpec() (*Deposit, *sqlgraph.CreateSpec) {
 			Column: deposit.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if value, ok := dc.mutation.EntID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: deposit.FieldEntID,
+		})
+		_node.EntID = value
 	}
 	if value, ok := dc.mutation.AppID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -564,6 +577,18 @@ func (u *DepositUpsert) UpdateDeletedAt() *DepositUpsert {
 // AddDeletedAt adds v to the "deleted_at" field.
 func (u *DepositUpsert) AddDeletedAt(v uint32) *DepositUpsert {
 	u.Add(deposit.FieldDeletedAt, v)
+	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *DepositUpsert) SetEntID(v uuid.UUID) *DepositUpsert {
+	u.Set(deposit.FieldEntID, v)
+	return u
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *DepositUpsert) UpdateEntID() *DepositUpsert {
+	u.SetExcluded(deposit.FieldEntID)
 	return u
 }
 
@@ -812,6 +837,20 @@ func (u *DepositUpsertOne) UpdateDeletedAt() *DepositUpsertOne {
 	})
 }
 
+// SetEntID sets the "ent_id" field.
+func (u *DepositUpsertOne) SetEntID(v uuid.UUID) *DepositUpsertOne {
+	return u.Update(func(s *DepositUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *DepositUpsertOne) UpdateEntID() *DepositUpsertOne {
+	return u.Update(func(s *DepositUpsert) {
+		s.UpdateEntID()
+	})
+}
+
 // SetAppID sets the "app_id" field.
 func (u *DepositUpsertOne) SetAppID(v uuid.UUID) *DepositUpsertOne {
 	return u.Update(func(s *DepositUpsert) {
@@ -982,12 +1021,7 @@ func (u *DepositUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *DepositUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: DepositUpsertOne.ID is not supported by MySQL driver. Use DepositUpsertOne.Exec instead")
-	}
+func (u *DepositUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -996,7 +1030,7 @@ func (u *DepositUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *DepositUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *DepositUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1047,6 +1081,10 @@ func (dcb *DepositCreateBulk) Save(ctx context.Context) ([]*Deposit, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint32(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1242,6 +1280,20 @@ func (u *DepositUpsertBulk) AddDeletedAt(v uint32) *DepositUpsertBulk {
 func (u *DepositUpsertBulk) UpdateDeletedAt() *DepositUpsertBulk {
 	return u.Update(func(s *DepositUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *DepositUpsertBulk) SetEntID(v uuid.UUID) *DepositUpsertBulk {
+	return u.Update(func(s *DepositUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *DepositUpsertBulk) UpdateEntID() *DepositUpsertBulk {
+	return u.Update(func(s *DepositUpsert) {
+		s.UpdateEntID()
 	})
 }
 

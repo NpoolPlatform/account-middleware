@@ -10,10 +10,11 @@ import (
 var (
 	// AccountsColumns holds the columns for the "accounts" table.
 	AccountsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "coin_type_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "address", Type: field.TypeString, Nullable: true, Default: ""},
 		{Name: "used_for", Type: field.TypeString, Nullable: true, Default: "DefaultAccountUsedFor"},
@@ -28,13 +29,21 @@ var (
 		Name:       "accounts",
 		Columns:    AccountsColumns,
 		PrimaryKey: []*schema.Column{AccountsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "account_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{AccountsColumns[4]},
+			},
+		},
 	}
 	// DepositsColumns holds the columns for the "deposits" table.
 	DepositsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "app_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
@@ -48,13 +57,21 @@ var (
 		Name:       "deposits",
 		Columns:    DepositsColumns,
 		PrimaryKey: []*schema.Column{DepositsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "deposit_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{DepositsColumns[4]},
+			},
+		},
 	}
 	// GoodBenefitsColumns holds the columns for the "good_benefits" table.
 	GoodBenefitsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "good_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "backup", Type: field.TypeBool, Nullable: true, Default: false},
@@ -65,13 +82,21 @@ var (
 		Name:       "good_benefits",
 		Columns:    GoodBenefitsColumns,
 		PrimaryKey: []*schema.Column{GoodBenefitsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "goodbenefit_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{GoodBenefitsColumns[4]},
+			},
+		},
 	}
 	// PaymentsColumns holds the columns for the "payments" table.
 	PaymentsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "collecting_tid", Type: field.TypeUUID, Nullable: true},
 		{Name: "available_at", Type: field.TypeUint32, Nullable: true},
@@ -81,13 +106,21 @@ var (
 		Name:       "payments",
 		Columns:    PaymentsColumns,
 		PrimaryKey: []*schema.Column{PaymentsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "payment_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{PaymentsColumns[4]},
+			},
+		},
 	}
 	// PlatformsColumns holds the columns for the "platforms" table.
 	PlatformsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "used_for", Type: field.TypeString, Nullable: true, Default: "DefaultAccountUsedFor"},
 		{Name: "backup", Type: field.TypeBool, Nullable: true, Default: false},
@@ -97,13 +130,21 @@ var (
 		Name:       "platforms",
 		Columns:    PlatformsColumns,
 		PrimaryKey: []*schema.Column{PlatformsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "platform_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{PlatformsColumns[4]},
+			},
+		},
 	}
 	// TransfersColumns holds the columns for the "transfers" table.
 	TransfersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "app_id", Type: field.TypeUUID},
 		{Name: "user_id", Type: field.TypeUUID},
 		{Name: "target_user_id", Type: field.TypeUUID},
@@ -113,13 +154,21 @@ var (
 		Name:       "transfers",
 		Columns:    TransfersColumns,
 		PrimaryKey: []*schema.Column{TransfersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "transfer_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{TransfersColumns[4]},
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "id", Type: field.TypeUint32, Increment: true},
 		{Name: "created_at", Type: field.TypeUint32},
 		{Name: "updated_at", Type: field.TypeUint32},
 		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "app_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "user_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "coin_type_id", Type: field.TypeUUID, Nullable: true},
@@ -133,6 +182,13 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "user_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{UsersColumns[4]},
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{

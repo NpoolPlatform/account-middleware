@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -61,6 +60,20 @@ func (ac *AccountCreate) SetDeletedAt(u uint32) *AccountCreate {
 func (ac *AccountCreate) SetNillableDeletedAt(u *uint32) *AccountCreate {
 	if u != nil {
 		ac.SetDeletedAt(*u)
+	}
+	return ac
+}
+
+// SetEntID sets the "ent_id" field.
+func (ac *AccountCreate) SetEntID(u uuid.UUID) *AccountCreate {
+	ac.mutation.SetEntID(u)
+	return ac
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (ac *AccountCreate) SetNillableEntID(u *uuid.UUID) *AccountCreate {
+	if u != nil {
+		ac.SetEntID(*u)
 	}
 	return ac
 }
@@ -178,16 +191,8 @@ func (ac *AccountCreate) SetNillableBlocked(b *bool) *AccountCreate {
 }
 
 // SetID sets the "id" field.
-func (ac *AccountCreate) SetID(u uuid.UUID) *AccountCreate {
+func (ac *AccountCreate) SetID(u uint32) *AccountCreate {
 	ac.mutation.SetID(u)
-	return ac
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (ac *AccountCreate) SetNillableID(u *uuid.UUID) *AccountCreate {
-	if u != nil {
-		ac.SetID(*u)
-	}
 	return ac
 }
 
@@ -291,6 +296,13 @@ func (ac *AccountCreate) defaults() error {
 		v := account.DefaultDeletedAt()
 		ac.mutation.SetDeletedAt(v)
 	}
+	if _, ok := ac.mutation.EntID(); !ok {
+		if account.DefaultEntID == nil {
+			return fmt.Errorf("ent: uninitialized account.DefaultEntID (forgotten import ent/runtime?)")
+		}
+		v := account.DefaultEntID()
+		ac.mutation.SetEntID(v)
+	}
 	if _, ok := ac.mutation.CoinTypeID(); !ok {
 		if account.DefaultCoinTypeID == nil {
 			return fmt.Errorf("ent: uninitialized account.DefaultCoinTypeID (forgotten import ent/runtime?)")
@@ -326,13 +338,6 @@ func (ac *AccountCreate) defaults() error {
 		v := account.DefaultBlocked
 		ac.mutation.SetBlocked(v)
 	}
-	if _, ok := ac.mutation.ID(); !ok {
-		if account.DefaultID == nil {
-			return fmt.Errorf("ent: uninitialized account.DefaultID (forgotten import ent/runtime?)")
-		}
-		v := account.DefaultID()
-		ac.mutation.SetID(v)
-	}
 	return nil
 }
 
@@ -347,6 +352,9 @@ func (ac *AccountCreate) check() error {
 	if _, ok := ac.mutation.DeletedAt(); !ok {
 		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Account.deleted_at"`)}
 	}
+	if _, ok := ac.mutation.EntID(); !ok {
+		return &ValidationError{Name: "ent_id", err: errors.New(`ent: missing required field "Account.ent_id"`)}
+	}
 	return nil
 }
 
@@ -358,12 +366,9 @@ func (ac *AccountCreate) sqlSave(ctx context.Context) (*Account, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
 	}
 	return _node, nil
 }
@@ -374,7 +379,7 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: account.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: account.FieldID,
 			},
 		}
@@ -382,7 +387,7 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = ac.conflict
 	if id, ok := ac.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
 	}
 	if value, ok := ac.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -407,6 +412,14 @@ func (ac *AccountCreate) createSpec() (*Account, *sqlgraph.CreateSpec) {
 			Column: account.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if value, ok := ac.mutation.EntID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: account.FieldEntID,
+		})
+		_node.EntID = value
 	}
 	if value, ok := ac.mutation.CoinTypeID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -577,6 +590,18 @@ func (u *AccountUpsert) UpdateDeletedAt() *AccountUpsert {
 // AddDeletedAt adds v to the "deleted_at" field.
 func (u *AccountUpsert) AddDeletedAt(v uint32) *AccountUpsert {
 	u.Add(account.FieldDeletedAt, v)
+	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *AccountUpsert) SetEntID(v uuid.UUID) *AccountUpsert {
+	u.Set(account.FieldEntID, v)
+	return u
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *AccountUpsert) UpdateEntID() *AccountUpsert {
+	u.SetExcluded(account.FieldEntID)
 	return u
 }
 
@@ -837,6 +862,20 @@ func (u *AccountUpsertOne) UpdateDeletedAt() *AccountUpsertOne {
 	})
 }
 
+// SetEntID sets the "ent_id" field.
+func (u *AccountUpsertOne) SetEntID(v uuid.UUID) *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *AccountUpsertOne) UpdateEntID() *AccountUpsertOne {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateEntID()
+	})
+}
+
 // SetCoinTypeID sets the "coin_type_id" field.
 func (u *AccountUpsertOne) SetCoinTypeID(v uuid.UUID) *AccountUpsertOne {
 	return u.Update(func(s *AccountUpsert) {
@@ -1021,12 +1060,7 @@ func (u *AccountUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *AccountUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: AccountUpsertOne.ID is not supported by MySQL driver. Use AccountUpsertOne.Exec instead")
-	}
+func (u *AccountUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -1035,7 +1069,7 @@ func (u *AccountUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *AccountUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *AccountUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -1086,6 +1120,10 @@ func (acb *AccountCreateBulk) Save(ctx context.Context) ([]*Account, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint32(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -1281,6 +1319,20 @@ func (u *AccountUpsertBulk) AddDeletedAt(v uint32) *AccountUpsertBulk {
 func (u *AccountUpsertBulk) UpdateDeletedAt() *AccountUpsertBulk {
 	return u.Update(func(s *AccountUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *AccountUpsertBulk) SetEntID(v uuid.UUID) *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *AccountUpsertBulk) UpdateEntID() *AccountUpsertBulk {
+	return u.Update(func(s *AccountUpsert) {
+		s.UpdateEntID()
 	})
 }
 

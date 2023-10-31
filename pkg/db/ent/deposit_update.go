@@ -85,6 +85,20 @@ func (du *DepositUpdate) AddDeletedAt(u int32) *DepositUpdate {
 	return du
 }
 
+// SetEntID sets the "ent_id" field.
+func (du *DepositUpdate) SetEntID(u uuid.UUID) *DepositUpdate {
+	du.mutation.SetEntID(u)
+	return du
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (du *DepositUpdate) SetNillableEntID(u *uuid.UUID) *DepositUpdate {
+	if u != nil {
+		du.SetEntID(*u)
+	}
+	return du
+}
+
 // SetAppID sets the "app_id" field.
 func (du *DepositUpdate) SetAppID(u uuid.UUID) *DepositUpdate {
 	du.mutation.SetAppID(u)
@@ -318,7 +332,7 @@ func (du *DepositUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   deposit.Table,
 			Columns: deposit.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: deposit.FieldID,
 			},
 		},
@@ -370,6 +384,13 @@ func (du *DepositUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: deposit.FieldDeletedAt,
+		})
+	}
+	if value, ok := du.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: deposit.FieldEntID,
 		})
 	}
 	if value, ok := du.mutation.AppID(); ok {
@@ -543,6 +564,20 @@ func (duo *DepositUpdateOne) SetNillableDeletedAt(u *uint32) *DepositUpdateOne {
 // AddDeletedAt adds u to the "deleted_at" field.
 func (duo *DepositUpdateOne) AddDeletedAt(u int32) *DepositUpdateOne {
 	duo.mutation.AddDeletedAt(u)
+	return duo
+}
+
+// SetEntID sets the "ent_id" field.
+func (duo *DepositUpdateOne) SetEntID(u uuid.UUID) *DepositUpdateOne {
+	duo.mutation.SetEntID(u)
+	return duo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (duo *DepositUpdateOne) SetNillableEntID(u *uuid.UUID) *DepositUpdateOne {
+	if u != nil {
+		duo.SetEntID(*u)
+	}
 	return duo
 }
 
@@ -792,7 +827,7 @@ func (duo *DepositUpdateOne) sqlSave(ctx context.Context) (_node *Deposit, err e
 			Table:   deposit.Table,
 			Columns: deposit.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: deposit.FieldID,
 			},
 		},
@@ -861,6 +896,13 @@ func (duo *DepositUpdateOne) sqlSave(ctx context.Context) (_node *Deposit, err e
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: deposit.FieldDeletedAt,
+		})
+	}
+	if value, ok := duo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: deposit.FieldEntID,
 		})
 	}
 	if value, ok := duo.mutation.AppID(); ok {
