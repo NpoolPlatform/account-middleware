@@ -15,7 +15,7 @@ import (
 func (s *Server) ExistAccount(ctx context.Context, in *npool.ExistAccountRequest) (*npool.ExistAccountResponse, error) {
 	handler, err := goodbenefit1.NewHandler(
 		ctx,
-		goodbenefit1.WithID(&in.ID),
+		goodbenefit1.WithEntID(&in.EntID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

@@ -22,13 +22,13 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 	}
 	handler, err := goodbenefit1.NewHandler(
 		ctx,
-		goodbenefit1.WithID(req.ID),
-		goodbenefit1.WithBackup(req.Backup),
-		goodbenefit1.WithActive(req.Active),
-		goodbenefit1.WithLocked(req.Locked),
-		goodbenefit1.WithLockedBy(req.LockedBy),
-		goodbenefit1.WithBlocked(req.Blocked),
-		goodbenefit1.WithTransactionID(req.TransactionID),
+		goodbenefit1.WithID(req.ID, true),
+		goodbenefit1.WithBackup(req.Backup, false),
+		goodbenefit1.WithActive(req.Active, false),
+		goodbenefit1.WithLocked(req.Locked, false),
+		goodbenefit1.WithLockedBy(req.LockedBy, false),
+		goodbenefit1.WithBlocked(req.Blocked, false),
+		goodbenefit1.WithTransactionID(req.TransactionID, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

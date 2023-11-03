@@ -22,16 +22,16 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	}
 	handler, err := goodbenefit1.NewHandler(
 		ctx,
-		goodbenefit1.WithID(req.ID),
-		goodbenefit1.WithGoodID(req.GoodID),
-		goodbenefit1.WithCoinTypeID(req.CoinTypeID),
-		goodbenefit1.WithBackup(req.Backup),
-		goodbenefit1.WithAccountID(req.AccountID),
-		goodbenefit1.WithAddress(req.Address),
-		goodbenefit1.WithActive(req.Active),
-		goodbenefit1.WithLocked(req.Locked),
-		goodbenefit1.WithLockedBy(req.LockedBy),
-		goodbenefit1.WithBlocked(req.Blocked),
+		goodbenefit1.WithEntID(req.EntID, false),
+		goodbenefit1.WithGoodID(req.GoodID, true),
+		goodbenefit1.WithCoinTypeID(req.CoinTypeID, true),
+		goodbenefit1.WithBackup(req.Backup, false),
+		goodbenefit1.WithAccountID(req.AccountID, false),
+		goodbenefit1.WithAddress(req.Address, true),
+		goodbenefit1.WithActive(req.Active, false),
+		goodbenefit1.WithLocked(req.Locked, false),
+		goodbenefit1.WithLockedBy(req.LockedBy, false),
+		goodbenefit1.WithBlocked(req.Blocked, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

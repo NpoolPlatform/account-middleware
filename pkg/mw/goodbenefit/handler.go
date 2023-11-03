@@ -14,7 +14,8 @@ import (
 )
 
 type Handler struct {
-	ID            *uuid.UUID
+	ID            *uint32
+	EntID         *uuid.UUID
 	GoodID        *uuid.UUID
 	CoinTypeID    *uuid.UUID
 	AccountID     *uuid.UUID
@@ -40,23 +41,42 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(u *uint32, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if u == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
+			return nil
+		}
+		h.ID = u
+		return nil
+	}
+}
+
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
 		}
-		h.ID = &_id
+		h.EntID = &_id
 		return nil
 	}
 }
 
-func WithGoodID(id *string) func(context.Context, *Handler) error {
+func WithGoodID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid goodid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -68,9 +88,12 @@ func WithGoodID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithCoinTypeID(id *string) func(context.Context, *Handler) error {
+func WithCoinTypeID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid cointypeid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -82,9 +105,12 @@ func WithCoinTypeID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAccountID(id *string) func(context.Context, *Handler) error {
+func WithAccountID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid accountid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -96,9 +122,12 @@ func WithAccountID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAddress(addr *string) func(context.Context, *Handler) error {
+func WithAddress(addr *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if addr == nil {
+			if must {
+				return fmt.Errorf("invalid address")
+			}
 			return nil
 		}
 		if *addr == "" {
@@ -109,30 +138,33 @@ func WithAddress(addr *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithBackup(backup *bool) func(context.Context, *Handler) error {
+func WithBackup(backup *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Backup = backup
 		return nil
 	}
 }
 
-func WithActive(active *bool) func(context.Context, *Handler) error {
+func WithActive(active *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Active = active
 		return nil
 	}
 }
 
-func WithLocked(locked *bool) func(context.Context, *Handler) error {
+func WithLocked(locked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Locked = locked
 		return nil
 	}
 }
 
-func WithLockedBy(lockedBy *basetypes.AccountLockedBy) func(context.Context, *Handler) error {
+func WithLockedBy(lockedBy *basetypes.AccountLockedBy, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if lockedBy == nil {
+			if must {
+				return fmt.Errorf("invalid lockedby")
+			}
 			return nil
 		}
 		switch *lockedBy {
@@ -146,16 +178,19 @@ func WithLockedBy(lockedBy *basetypes.AccountLockedBy) func(context.Context, *Ha
 	}
 }
 
-func WithBlocked(blocked *bool) func(context.Context, *Handler) error {
+func WithBlocked(blocked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Blocked = blocked
 		return nil
 	}
 }
 
-func WithTransactionID(id *string) func(context.Context, *Handler) error {
+func WithTransactionID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid transactionid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -174,11 +209,14 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 			return nil
 		}
 		if conds.ID != nil {
-			id, err := uuid.Parse(conds.GetID().GetValue())
+			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: conds.GetID().GetValue()}
+		}
+		if conds.EntID != nil {
+			id, err := uuid.Parse(conds.GetEntID().GetValue())
 			if err != nil {
 				return err
 			}
-			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: id}
+			h.Conds.EntID = &cruder.Cond{Op: conds.GetEntID().GetOp(), Val: id}
 		}
 		if conds.GoodID != nil {
 			id, err := uuid.Parse(conds.GetGoodID().GetValue())

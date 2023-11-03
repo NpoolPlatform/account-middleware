@@ -22,7 +22,7 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 	}
 	handler, err := goodbenefit1.NewHandler(
 		ctx,
-		goodbenefit1.WithID(req.ID),
+		goodbenefit1.WithID(req.ID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

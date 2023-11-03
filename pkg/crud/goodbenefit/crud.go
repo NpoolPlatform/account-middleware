@@ -13,7 +13,7 @@ import (
 )
 
 type Req struct {
-	ID            *uuid.UUID
+	EntID         *uuid.UUID
 	GoodID        *uuid.UUID
 	AccountID     *uuid.UUID
 	TransactionID *uuid.UUID
@@ -22,8 +22,8 @@ type Req struct {
 }
 
 func CreateSet(c *ent.GoodBenefitCreate, req *Req) *ent.GoodBenefitCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.GoodID != nil {
 		c.SetGoodID(*req.GoodID)
@@ -61,8 +61,20 @@ type Conds struct {
 }
 
 func SetQueryConds(q *ent.GoodBenefitQuery, conds *Conds) (*ent.GoodBenefitQuery, error) {
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid goodbenefit entid")
+		}
+		switch conds.EntID.Op {
+		case cruder.EQ:
+			q.Where(entgoodbenefit.EntID(id))
+		default:
+			return nil, fmt.Errorf("invalid goodbenefit field")
+		}
+	}
 	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+		id, ok := conds.ID.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid goodbenefit id")
 		}
