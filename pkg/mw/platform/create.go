@@ -25,16 +25,6 @@ import (
 )
 
 func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { //nolint
-	if h.CoinTypeID == nil {
-		return nil, fmt.Errorf("invalid cointypeid")
-	}
-	if h.Address == nil {
-		return nil, fmt.Errorf("invalid address")
-	}
-	if h.UsedFor == nil {
-		return nil, fmt.Errorf("invalid usedfor")
-	}
-
 	key := fmt.Sprintf("%v:%v:%v", basetypes.Prefix_PrefixCreatePlatformAccount, *h.CoinTypeID, *h.Address)
 	if err := redis2.TryLock(key, 0); err != nil {
 		return nil, err
@@ -62,8 +52,8 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 	}
 
 	id1 := uuid.New()
-	if h.ID == nil {
-		h.ID = &id1
+	if h.EntID == nil {
+		h.EntID = &id1
 	}
 
 	id2 := uuid.New()
@@ -87,7 +77,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 		if _, err := accountcrud.CreateSet(
 			tx.Account.Create(),
 			&accountcrud.Req{
-				ID:                     h.AccountID,
+				EntID:                  h.AccountID,
 				CoinTypeID:             h.CoinTypeID,
 				Address:                h.Address,
 				UsedFor:                h.UsedFor,
@@ -100,7 +90,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 		if _, err := platformcrud.CreateSet(
 			tx.Platform.Create(),
 			&platformcrud.Req{
-				ID:        h.ID,
+				EntID:     h.EntID,
 				UsedFor:   h.UsedFor,
 				AccountID: h.AccountID,
 				Backup:    h.Backup,
@@ -121,7 +111,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 				t := sql.Table(entaccount.Table)
 				s.LeftJoin(t).
 					On(
-						t.C(entaccount.FieldID),
+						t.C(entaccount.FieldEntID),
 						s.C(entplatform.FieldAccountID),
 					).
 					OnP(
@@ -135,7 +125,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 				)
 			}).
 			Where(
-				entplatform.IDNEQ(*h.ID),
+				entplatform.EntIDNEQ(*h.EntID),
 				entplatform.UsedFor(h.UsedFor.String()),
 				entplatform.Backup(false),
 			).

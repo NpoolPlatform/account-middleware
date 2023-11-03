@@ -26,7 +26,7 @@ func (h *existHandler) queryAccount(cli *ent.Client) {
 	h.stm = cli.Platform.
 		Query().
 		Where(
-			entplatform.ID(*h.ID),
+			entplatform.EntID(*h.EntID),
 			entplatform.DeletedAt(0),
 		)
 }
@@ -45,7 +45,7 @@ func (h *existHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 	s.LeftJoin(t).
 		On(
 			s.C(entplatform.FieldAccountID),
-			t.C(entaccount.FieldID),
+			t.C(entaccount.FieldEntID),
 		)
 
 	if h.Conds != nil && h.Conds.CoinTypeID != nil {
@@ -114,8 +114,8 @@ func (h *existHandler) queryJoin() error {
 }
 
 func (h *Handler) ExistAccount(ctx context.Context) (bool, error) {
-	if h.ID == nil {
-		return false, fmt.Errorf("invalid id")
+	if h.EntID == nil {
+		return false, fmt.Errorf("invalid entid")
 	}
 
 	handler := &existHandler{

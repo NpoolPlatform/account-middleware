@@ -27,18 +27,22 @@ type queryHandler struct {
 }
 
 func (h *queryHandler) selectAccount(stm *ent.PlatformQuery) *ent.PlatformSelect {
-	return stm.Select(entplatform.FieldID)
+	return stm.Select(entplatform.FieldEntID)
 }
 
-func (h *queryHandler) queryAccount(cli *ent.Client) {
-	h.stmSelect = h.selectAccount(
-		cli.Platform.
-			Query().
-			Where(
-				entplatform.ID(*h.ID),
-				entplatform.DeletedAt(0),
-			),
-	)
+func (h *queryHandler) queryAccount(cli *ent.Client) error {
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
+	}
+	stm := cli.Platform.Query().Where(entplatform.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entplatform.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entplatform.EntID(*h.EntID))
+	}
+	h.stmSelect = h.selectAccount(stm)
+	return nil
 }
 
 func (h *queryHandler) queryAccounts(cli *ent.Client) (*ent.PlatformSelect, error) {
@@ -53,6 +57,7 @@ func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
 	t := sql.Table(entplatform.Table)
 	s.AppendSelect(
 		t.C(entplatform.FieldID),
+		t.C(entplatform.FieldEntID),
 		t.C(entplatform.FieldAccountID),
 		t.C(entplatform.FieldBackup),
 		t.C(entplatform.FieldUsedFor),
@@ -66,7 +71,7 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 	s.LeftJoin(t).
 		On(
 			s.C(entplatform.FieldAccountID),
-			t.C(entaccount.FieldID),
+			t.C(entaccount.FieldEntID),
 		).
 		OnP(
 			sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
@@ -180,16 +185,14 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
 	handler := &queryHandler{
 		Handler: h,
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		handler.queryAccount(cli)
+		if err := handler.queryAccount(cli); err != nil {
+			return err
+		}
 		if err := handler.queryJoin(); err != nil {
 			return err
 		}

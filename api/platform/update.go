@@ -22,12 +22,12 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 	}
 	handler, err := platform1.NewHandler(
 		ctx,
-		platform1.WithID(req.ID),
-		platform1.WithBackup(req.Backup),
-		platform1.WithActive(req.Active),
-		platform1.WithLocked(req.Locked),
-		platform1.WithLockedBy(req.LockedBy),
-		platform1.WithBlocked(req.Blocked),
+		platform1.WithID(req.ID, true),
+		platform1.WithBackup(req.Backup, false),
+		platform1.WithActive(req.Active, false),
+		platform1.WithLocked(req.Locked, false),
+		platform1.WithLockedBy(req.LockedBy, false),
+		platform1.WithBlocked(req.Blocked, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
