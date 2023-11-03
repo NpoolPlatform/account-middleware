@@ -16,7 +16,7 @@ import (
 func (s *Server) GetTransfer(ctx context.Context, in *npool.GetTransferRequest) (*npool.GetTransferResponse, error) {
 	handler, err := transfer1.NewHandler(
 		ctx,
-		transfer1.WithID(&in.ID),
+		transfer1.WithEntID(&in.EntID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

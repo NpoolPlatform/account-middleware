@@ -26,7 +26,7 @@ func init() {
 }
 
 var ret = npool.Transfer{
-	ID:           uuid.NewString(),
+	EntID:        uuid.NewString(),
 	AppID:        uuid.NewString(),
 	UserID:       uuid.NewString(),
 	TargetUserID: uuid.NewString(),
@@ -35,16 +35,17 @@ var ret = npool.Transfer{
 func createTransfer(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithAppID(&ret.AppID),
-		WithUserID(&ret.UserID),
-		WithTargetUserID(&ret.TargetUserID),
+		WithEntID(&ret.EntID, false),
+		WithAppID(&ret.AppID, true),
+		WithUserID(&ret.UserID, true),
+		WithTargetUserID(&ret.TargetUserID, true),
 	)
 	assert.Nil(t, err)
 	info, err := handler.CreateTransfer(context.Background())
 	if assert.Nil(t, err) {
 		ret.UpdatedAt = info.UpdatedAt
 		ret.CreatedAt = info.CreatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -52,7 +53,7 @@ func createTransfer(t *testing.T) {
 func getTransfer(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 	info, err := handler.GetTransfer(context.Background())
@@ -65,7 +66,7 @@ func getTransfers(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithConds(&npool.Conds{
-			ID:           &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			EntID:        &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 			AppID:        &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
 			UserID:       &basetypes.StringVal{Op: cruder.EQ, Value: ret.UserID},
 			TargetUserID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.TargetUserID},
@@ -84,7 +85,7 @@ func getTransfers(t *testing.T) {
 func deleteTransfer(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithID(&ret.ID, true),
 	)
 	assert.Nil(t, err)
 	info, err := handler.DeleteTransfer(context.Background())

@@ -23,10 +23,10 @@ func (s *Server) CreateTransfer(ctx context.Context, in *npool.CreateTransferReq
 	}
 	handler, err := transfer1.NewHandler(
 		ctx,
-		transfer1.WithID(req.ID),
-		transfer1.WithAppID(req.AppID),
-		transfer1.WithUserID(req.UserID),
-		transfer1.WithTargetUserID(req.TargetUserID),
+		transfer1.WithEntID(req.EntID, false),
+		transfer1.WithAppID(req.AppID, true),
+		transfer1.WithUserID(req.UserID, true),
+		transfer1.WithTargetUserID(req.TargetUserID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

@@ -20,7 +20,7 @@ func (h *existHandler) queryTransfer(cli *ent.Client) {
 	h.stm = cli.Transfer.
 		Query().
 		Where(
-			enttransfer.ID(*h.ID),
+			enttransfer.EntID(*h.EntID),
 			enttransfer.DeletedAt(0),
 		)
 }
@@ -35,8 +35,8 @@ func (h *existHandler) queryTransfers(cli *ent.Client) error {
 }
 
 func (h *Handler) ExistTransfer(ctx context.Context) (bool, error) {
-	if h.ID == nil {
-		return false, fmt.Errorf("invalid id")
+	if h.EntID == nil {
+		return false, fmt.Errorf("invalid entid")
 	}
 
 	handler := &existHandler{

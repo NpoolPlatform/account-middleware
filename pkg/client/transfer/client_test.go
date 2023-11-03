@@ -34,14 +34,14 @@ func init() {
 }
 
 var ret = npool.Transfer{
-	ID:           uuid.NewString(),
+	EntID:        uuid.NewString(),
 	AppID:        uuid.NewString(),
 	UserID:       uuid.NewString(),
 	TargetUserID: uuid.NewString(),
 }
 
 var req = npool.TransferReq{
-	ID:           &ret.ID,
+	EntID:        &ret.EntID,
 	AppID:        &ret.AppID,
 	UserID:       &ret.UserID,
 	TargetUserID: &ret.TargetUserID,
@@ -52,12 +52,13 @@ func createTransfer(t *testing.T) {
 	if assert.Nil(t, err) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
 
 func getTransfer(t *testing.T) {
-	info, err := GetTransfer(context.Background(), ret.ID)
+	info, err := GetTransfer(context.Background(), ret.EntID)
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}

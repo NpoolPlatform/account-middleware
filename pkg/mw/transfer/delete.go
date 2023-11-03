@@ -14,9 +14,6 @@ import (
 )
 
 func (h *Handler) DeleteTransfer(ctx context.Context) (*npool.Transfer, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
 	info, err := h.GetTransfer(ctx)
 	if err != nil {
 		return nil, err
