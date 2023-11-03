@@ -23,6 +23,7 @@ type queryHandler struct {
 func (h *queryHandler) selectAccount(stm *ent.AccountQuery) {
 	h.stm = stm.Select(
 		entaccount.FieldID,
+		entaccount.FieldEntID,
 		entaccount.FieldCoinTypeID,
 		entaccount.FieldAddress,
 		entaccount.FieldUsedFor,
@@ -36,15 +37,19 @@ func (h *queryHandler) selectAccount(stm *ent.AccountQuery) {
 	)
 }
 
-func (h *queryHandler) queryAccount(cli *ent.Client) {
-	h.selectAccount(
-		cli.Account.
-			Query().
-			Where(
-				entaccount.ID(*h.ID),
-				entaccount.DeletedAt(0),
-			),
-	)
+func (h *queryHandler) queryAccount(cli *ent.Client) error {
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
+	}
+	stm := cli.Account.Query().Where(entaccount.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entaccount.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entaccount.EntID(*h.EntID))
+	}
+	h.selectAccount(stm)
+	return nil
 }
 
 func (h *queryHandler) queryAccounts(ctx context.Context, cli *ent.Client) error {
@@ -75,16 +80,14 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
 	handler := &queryHandler{
 		Handler: h,
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		handler.queryAccount(cli)
+		if err := handler.queryAccount(cli); err != nil {
+			return err
+		}
 		return handler.scan(_ctx)
 	})
 	if err != nil {

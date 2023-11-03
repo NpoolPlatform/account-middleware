@@ -20,7 +20,7 @@ func (h *existHandler) queryAccount(cli *ent.Client) {
 	h.stm = cli.Account.
 		Query().
 		Where(
-			entaccount.ID(*h.ID),
+			entaccount.EntID(*h.EntID),
 			entaccount.DeletedAt(0),
 		)
 }
@@ -35,8 +35,8 @@ func (h *existHandler) queryAccounts(cli *ent.Client) error {
 }
 
 func (h *Handler) ExistAccount(ctx context.Context) (bool, error) {
-	if h.ID == nil {
-		return false, fmt.Errorf("invalid id")
+	if h.EntID == nil {
+		return false, fmt.Errorf("invalid entid")
 	}
 
 	handler := &existHandler{
