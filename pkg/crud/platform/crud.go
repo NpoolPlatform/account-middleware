@@ -54,6 +54,7 @@ type Conds struct {
 	Backup    *cruder.Cond
 }
 
+//nolint:gocyclo
 func SetQueryConds(q *ent.PlatformQuery, conds *Conds) (*ent.PlatformQuery, error) {
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)

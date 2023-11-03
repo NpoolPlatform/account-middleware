@@ -49,6 +49,7 @@ type Conds struct {
 	TargetUserID *cruder.Cond
 }
 
+//nolint:gocyclo
 func SetQueryConds(q *ent.TransferQuery, conds *Conds) (*ent.TransferQuery, error) {
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)

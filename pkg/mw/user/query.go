@@ -157,7 +157,7 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		if err := handler.queryAccount(cli.Debug()); err != nil {
+		if err := handler.queryAccount(cli); err != nil {
 			return err
 		}
 		if err := handler.queryJoin(); err != nil {

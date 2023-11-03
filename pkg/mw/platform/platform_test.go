@@ -75,6 +75,7 @@ func updateAccount(t *testing.T) {
 
 	info, err := handler.UpdateAccount(context.Background())
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 

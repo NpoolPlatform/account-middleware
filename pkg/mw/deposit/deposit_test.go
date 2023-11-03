@@ -84,6 +84,7 @@ func updateAccount(t *testing.T) {
 
 	info, err := handler.UpdateAccount(context.Background())
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 
@@ -97,6 +98,7 @@ func updateAccount(t *testing.T) {
 
 	info, err = handler.UpdateAccount(context.Background())
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.NotEqual(t, info.ScannableAt, ret.ScannableAt)
 		ret.ScannableAt = info.ScannableAt
 		assert.Equal(t, info, &ret)

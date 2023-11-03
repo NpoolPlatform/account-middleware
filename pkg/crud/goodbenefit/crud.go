@@ -60,6 +60,7 @@ type Conds struct {
 	Backup    *cruder.Cond
 }
 
+//nolint:gocyclo
 func SetQueryConds(q *ent.GoodBenefitQuery, conds *Conds) (*ent.GoodBenefitQuery, error) {
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)

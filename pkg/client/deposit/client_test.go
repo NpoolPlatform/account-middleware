@@ -97,6 +97,7 @@ func updateAccount(t *testing.T) {
 	req.Locked = &ret.Locked
 	info, err = UpdateAccount(context.Background(), &req)
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.NotEqual(t, info.ScannableAt, ret.ScannableAt)
 		ret.ScannableAt = info.ScannableAt
 		assert.Equal(t, info, &ret)

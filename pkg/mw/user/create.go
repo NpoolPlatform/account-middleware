@@ -17,10 +17,6 @@ import (
 	"github.com/google/uuid"
 )
 
-type createHandler struct {
-	*Handler
-}
-
 func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	key := fmt.Sprintf("%v:%v:%v:%v:%v", basetypes.Prefix_PrefixCreateUserAccount, *h.AppID, *h.UserID, *h.CoinTypeID, *h.Address)
 	if h.Memo != nil {

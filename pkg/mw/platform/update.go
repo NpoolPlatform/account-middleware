@@ -16,7 +16,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
 )
 
-func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { //nolint
+func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		platform, err := tx.Platform.
 			Query().

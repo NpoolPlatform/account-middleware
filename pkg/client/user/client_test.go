@@ -91,7 +91,6 @@ func updateAccount(t *testing.T) {
 	info, err := UpdateAccount(context.Background(), retReq)
 	if assert.Nil(t, err) {
 		ret.LabelsStr = info.LabelsStr
-		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
 		ret.DeletedAt = info.DeletedAt
 		assert.Equal(t, ret, info)

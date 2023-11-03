@@ -49,6 +49,7 @@ type Conds struct {
 	AvailableAt *cruder.Cond
 }
 
+//nolint:gocyclo
 func SetQueryConds(q *ent.PaymentQuery, conds *Conds) (*ent.PaymentQuery, error) {
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)
