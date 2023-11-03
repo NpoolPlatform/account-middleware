@@ -17,10 +17,6 @@ import (
 )
 
 func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
 	info, err := h.GetAccount(ctx)
 	if err != nil {
 		return nil, err
@@ -48,7 +44,7 @@ func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.ID(user.AccountID),
+				entaccount.EntID(user.AccountID),
 			).
 			ForUpdate().
 			Only(_ctx)

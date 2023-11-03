@@ -26,7 +26,7 @@ func (h *existHandler) queryAccount(cli *ent.Client) {
 	h.stm = cli.User.
 		Query().
 		Where(
-			entuser.ID(*h.ID),
+			entuser.EntID(*h.EntID),
 			entuser.DeletedAt(0),
 		)
 }
@@ -45,7 +45,7 @@ func (h *existHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 	s.LeftJoin(t).
 		On(
 			s.C(entuser.FieldAccountID),
-			t.C(entaccount.FieldID),
+			t.C(entaccount.FieldEntID),
 		).
 		OnP(
 			sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
@@ -117,8 +117,8 @@ func (h *existHandler) queryJoin() error {
 }
 
 func (h *Handler) ExistAccount(ctx context.Context) (bool, error) {
-	if h.ID == nil {
-		return false, fmt.Errorf("invalid id")
+	if h.EntID == nil {
+		return false, fmt.Errorf("invalid entid")
 	}
 
 	handler := &existHandler{
