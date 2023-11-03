@@ -39,7 +39,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.ID(deposit.AccountID),
+				entaccount.EntID(deposit.AccountID),
 			).
 			ForUpdate().
 			Only(_ctx)

@@ -22,16 +22,16 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	}
 	handler, err := deposit1.NewHandler(
 		ctx,
-		deposit1.WithID(req.ID),
-		deposit1.WithAppID(req.AppID),
-		deposit1.WithUserID(req.UserID),
-		deposit1.WithCoinTypeID(req.CoinTypeID),
-		deposit1.WithAccountID(req.AccountID),
-		deposit1.WithAddress(req.Address),
-		deposit1.WithActive(req.Active),
-		deposit1.WithLocked(req.Locked),
-		deposit1.WithLockedBy(req.LockedBy),
-		deposit1.WithBlocked(req.Blocked),
+		deposit1.WithEntID(req.EntID, false),
+		deposit1.WithAppID(req.AppID, true),
+		deposit1.WithUserID(req.UserID, true),
+		deposit1.WithCoinTypeID(req.CoinTypeID, true),
+		deposit1.WithAccountID(req.AccountID, false),
+		deposit1.WithAddress(req.Address, true),
+		deposit1.WithActive(req.Active, false),
+		deposit1.WithLocked(req.Locked, false),
+		deposit1.WithLockedBy(req.LockedBy, false),
+		deposit1.WithBlocked(req.Blocked, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

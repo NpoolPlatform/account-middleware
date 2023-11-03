@@ -55,8 +55,8 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	}
 
 	id1 := uuid.New()
-	if h.ID == nil {
-		h.ID = &id1
+	if h.EntID == nil {
+		h.EntID = &id1
 	}
 
 	id2 := uuid.New()
@@ -71,7 +71,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		if _, err := accountcrud.CreateSet(
 			tx.Account.Create(),
 			&accountcrud.Req{
-				ID:                     h.AccountID,
+				EntID:                  h.AccountID,
 				CoinTypeID:             h.CoinTypeID,
 				Address:                h.Address,
 				UsedFor:                &usedFor,
@@ -84,7 +84,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		if _, err := depositcrud.CreateSet(
 			tx.Deposit.Create(),
 			&depositcrud.Req{
-				ID:        h.ID,
+				EntID:     h.EntID,
 				AppID:     h.AppID,
 				UserID:    h.UserID,
 				AccountID: h.AccountID,

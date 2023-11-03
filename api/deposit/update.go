@@ -22,14 +22,14 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 	}
 	handler, err := deposit1.NewHandler(
 		ctx,
-		deposit1.WithID(req.ID),
-		deposit1.WithActive(req.Active),
-		deposit1.WithLocked(req.Locked),
-		deposit1.WithLockedBy(req.LockedBy),
-		deposit1.WithBlocked(req.Blocked),
-		deposit1.WithCollectingTID(req.CollectingTID),
-		deposit1.WithIncoming(req.Incoming),
-		deposit1.WithOutcoming(req.Outcoming),
+		deposit1.WithID(req.ID, true),
+		deposit1.WithActive(req.Active, false),
+		deposit1.WithLocked(req.Locked, false),
+		deposit1.WithLockedBy(req.LockedBy, false),
+		deposit1.WithBlocked(req.Blocked, false),
+		deposit1.WithCollectingTID(req.CollectingTID, false),
+		deposit1.WithIncoming(req.Incoming, false),
+		deposit1.WithOutcoming(req.Outcoming, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
