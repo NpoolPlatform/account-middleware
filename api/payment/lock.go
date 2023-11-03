@@ -15,8 +15,8 @@ import (
 func (s *Server) LockAccount(ctx context.Context, in *npool.LockAccountRequest) (*npool.LockAccountResponse, error) {
 	handler, err := payment1.NewHandler(
 		ctx,
-		payment1.WithID(&in.ID),
-		payment1.WithLockedBy(&in.LockedBy),
+		payment1.WithID(&in.ID, true),
+		payment1.WithLockedBy(&in.LockedBy, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

@@ -14,10 +14,6 @@ import (
 )
 
 func (h *Handler) LockAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		payment, err := tx.Payment.
 			Query().
@@ -36,7 +32,7 @@ func (h *Handler) LockAccount(ctx context.Context) (*npool.Account, error) {
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.ID(payment.AccountID),
+				entaccount.EntID(payment.AccountID),
 			).
 			ForUpdate().
 			Only(_ctx)

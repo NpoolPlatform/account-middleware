@@ -23,14 +23,14 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 	}
 	handler, err := payment1.NewHandler(
 		ctx,
-		payment1.WithID(req.ID),
-		payment1.WithAccountID(req.AccountID),
-		payment1.WithActive(req.Active),
-		payment1.WithLocked(req.Locked),
-		payment1.WithLockedBy(req.LockedBy),
-		payment1.WithBlocked(req.Blocked),
-		payment1.WithCollectingTID(req.CollectingTID),
-		payment1.WithAvailableAt(req.AvailableAt),
+		payment1.WithID(req.ID, true),
+		payment1.WithAccountID(req.AccountID, false),
+		payment1.WithActive(req.Active, false),
+		payment1.WithLocked(req.Locked, false),
+		payment1.WithLockedBy(req.LockedBy, false),
+		payment1.WithBlocked(req.Blocked, false),
+		payment1.WithCollectingTID(req.CollectingTID, false),
+		payment1.WithAvailableAt(req.AvailableAt, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
