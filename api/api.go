@@ -36,5 +36,14 @@ func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOpt
 	if err := account.RegisterMiddlewareHandlerFromEndpoint(context.Background(), mux, endpoint, opts); err != nil {
 		return err
 	}
+	if err := goodbenefit.RegisterGateway(mux, endpoint, opts); err != nil {
+		return err
+	}
+	if err := payment.RegisterGateway(mux, endpoint, opts); err != nil {
+		return err
+	}
+	if err := platform.RegisterGateway(mux, endpoint, opts); err != nil {
+		return err
+	}
 	return nil
 }
