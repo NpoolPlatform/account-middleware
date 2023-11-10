@@ -311,6 +311,7 @@ func dropPrimaryKey(ctx context.Context, dbName, table string, tx *sql.DB) error
 			"table", table,
 			"Error", err,
 		)
+		return nil
 	}
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
