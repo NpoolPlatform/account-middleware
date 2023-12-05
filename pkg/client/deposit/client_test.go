@@ -36,7 +36,7 @@ func init() {
 }
 
 var ret = npool.Account{
-	ID:            uuid.NewString(),
+	EntID:         uuid.NewString(),
 	AppID:         uuid.NewString(),
 	UserID:        uuid.NewString(),
 	CoinTypeID:    uuid.NewString(),
@@ -52,15 +52,16 @@ var ret = npool.Account{
 }
 
 var req = npool.AccountReq{
-	ID:         &ret.ID,
-	AppID:      &ret.AppID,
-	UserID:     &ret.UserID,
-	CoinTypeID: &ret.CoinTypeID,
-	AccountID:  &ret.AccountID,
-	Address:    &ret.Address,
-	Active:     &ret.Active,
-	Locked:     &ret.Locked,
-	Blocked:    &ret.Blocked,
+	EntID:         &ret.EntID,
+	AppID:         &ret.AppID,
+	UserID:        &ret.UserID,
+	CoinTypeID:    &ret.CoinTypeID,
+	AccountID:     &ret.AccountID,
+	CollectingTID: &ret.CollectingTID,
+	Address:       &ret.Address,
+	Active:        &ret.Active,
+	Locked:        &ret.Locked,
+	Blocked:       &ret.Blocked,
 }
 
 func createAccount(t *testing.T) {
@@ -69,17 +70,21 @@ func createAccount(t *testing.T) {
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
 		ret.ScannableAt = info.ScannableAt
+		ret.LockedByStr = info.LockedByStr
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
 
 func updateAccount(t *testing.T) {
+	req.ID = &ret.ID
 	collectingTID := uuid.NewString()
 	ret.CollectingTID = collectingTID
 	ret.Locked = true
 	ret.LockedBy = basetypes.AccountLockedBy_Payment
 	ret.LockedByStr = basetypes.AccountLockedBy_Payment.String()
 
+	req.Locked = &ret.Locked
 	req.CollectingTID = &collectingTID
 	req.LockedBy = &ret.LockedBy
 
@@ -92,6 +97,7 @@ func updateAccount(t *testing.T) {
 	req.Locked = &ret.Locked
 	info, err = UpdateAccount(context.Background(), &req)
 	if assert.Nil(t, err) {
+		ret.UpdatedAt = info.UpdatedAt
 		assert.NotEqual(t, info.ScannableAt, ret.ScannableAt)
 		ret.ScannableAt = info.ScannableAt
 		assert.Equal(t, info, &ret)
@@ -124,7 +130,7 @@ func subAccount(t *testing.T) {
 }
 
 func getAccount(t *testing.T) {
-	info, err := GetAccount(context.Background(), ret.ID)
+	info, err := GetAccount(context.Background(), ret.EntID)
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
@@ -134,7 +140,7 @@ func getAccounts(t *testing.T) {
 	infos, total, err := GetAccounts(
 		context.Background(),
 		&npool.Conds{
-			ID:          &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			EntID:       &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 			AppID:       &basetypes.StringVal{Op: cruder.EQ, Value: ret.AppID},
 			UserID:      &basetypes.StringVal{Op: cruder.EQ, Value: ret.UserID},
 			CoinTypeID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},

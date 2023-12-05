@@ -14,7 +14,7 @@ import (
 )
 
 type Req struct {
-	ID         *uuid.UUID
+	EntID      *uuid.UUID
 	AppID      *uuid.UUID
 	UserID     *uuid.UUID
 	CoinTypeID *uuid.UUID
@@ -26,8 +26,8 @@ type Req struct {
 }
 
 func CreateSet(c *ent.UserCreate, req *Req) *ent.UserCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.AppID != nil {
 		c.SetAppID(*req.AppID)
@@ -73,13 +73,25 @@ type Conds struct {
 	CoinTypeID *cruder.Cond
 	AccountID  *cruder.Cond
 	UsedFor    *cruder.Cond
-	IDs        *cruder.Cond
+	EntIDs     *cruder.Cond
 	AccountIDs *cruder.Cond
 }
 
 func SetQueryConds(q *ent.UserQuery, conds *Conds) (*ent.UserQuery, error) { //nolint
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid user entid")
+		}
+		switch conds.EntID.Op {
+		case cruder.EQ:
+			q.Where(entuser.EntID(id))
+		default:
+			return nil, fmt.Errorf("invalid user field")
+		}
+	}
 	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+		id, ok := conds.ID.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid user id")
 		}
@@ -150,14 +162,14 @@ func SetQueryConds(q *ent.UserQuery, conds *Conds) (*ent.UserQuery, error) { //n
 			return nil, fmt.Errorf("invalid user field")
 		}
 	}
-	if conds.IDs != nil {
-		ids, ok := conds.IDs.Val.([]uuid.UUID)
+	if conds.EntIDs != nil {
+		ids, ok := conds.EntIDs.Val.([]uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid user ids")
+			return nil, fmt.Errorf("invalid user entids")
 		}
-		switch conds.IDs.Op {
+		switch conds.EntIDs.Op {
 		case cruder.IN:
-			q.Where(entuser.IDIn(ids...))
+			q.Where(entuser.EntIDIn(ids...))
 		default:
 			return nil, fmt.Errorf("invalid user field")
 		}

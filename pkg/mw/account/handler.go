@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"fmt"
 
 	constant "github.com/NpoolPlatform/account-middleware/pkg/const"
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
@@ -13,7 +14,8 @@ import (
 )
 
 type Handler struct {
-	ID     *uuid.UUID
+	ID     *uint32
+	EntID  *uuid.UUID
 	Conds  *accountcrud.Conds
 	Offset int32
 	Limit  int32
@@ -29,16 +31,32 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(u *uint32, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if u == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
+			return nil
+		}
+		h.ID = u
+		return nil
+	}
+}
+
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
 		}
-		h.ID = &_id
+		h.EntID = &_id
 		return nil
 	}
 }
@@ -50,11 +68,14 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 			return nil
 		}
 		if conds.ID != nil {
-			id, err := uuid.Parse(conds.GetID().GetValue())
+			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: conds.GetID().GetValue()}
+		}
+		if conds.EntID != nil {
+			id, err := uuid.Parse(conds.GetEntID().GetValue())
 			if err != nil {
 				return err
 			}
-			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: id}
+			h.Conds.EntID = &cruder.Cond{Op: conds.GetEntID().GetOp(), Val: id}
 		}
 		if conds.CoinTypeID != nil {
 			id, err := uuid.Parse(conds.GetCoinTypeID().GetValue())
@@ -105,16 +126,16 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 				Val: conds.GetBlocked().GetValue(),
 			}
 		}
-		if len(conds.GetIDs().GetValue()) > 0 {
+		if len(conds.GetEntIDs().GetValue()) > 0 {
 			ids := []uuid.UUID{}
-			for _, id := range conds.GetIDs().GetValue() {
+			for _, id := range conds.GetEntIDs().GetValue() {
 				_id, err := uuid.Parse(id)
 				if err != nil {
 					return err
 				}
 				ids = append(ids, _id)
 			}
-			h.Conds.IDs = &cruder.Cond{Op: conds.GetIDs().GetOp(), Val: ids}
+			h.Conds.EntIDs = &cruder.Cond{Op: conds.GetEntIDs().GetOp(), Val: ids}
 		}
 		if conds.CreatedAt != nil {
 			h.Conds.CreatedAt = &cruder.Cond{

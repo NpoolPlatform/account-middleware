@@ -13,15 +13,15 @@ import (
 )
 
 type Req struct {
-	ID            *uuid.UUID
+	EntID         *uuid.UUID
 	AccountID     *uuid.UUID
 	CollectingTID *uuid.UUID
 	AvailableAt   *uint32
 }
 
 func CreateSet(c *ent.PaymentCreate, req *Req) *ent.PaymentCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.AccountID != nil {
 		c.SetAccountID(*req.AccountID)
@@ -49,9 +49,22 @@ type Conds struct {
 	AvailableAt *cruder.Cond
 }
 
+//nolint:gocyclo
 func SetQueryConds(q *ent.PaymentQuery, conds *Conds) (*ent.PaymentQuery, error) {
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid payment entid")
+		}
+		switch conds.EntID.Op {
+		case cruder.EQ:
+			q.Where(entpayment.EntID(id))
+		default:
+			return nil, fmt.Errorf("invalid payment field")
+		}
+	}
 	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+		id, ok := conds.ID.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid payment id")
 		}

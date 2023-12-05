@@ -15,10 +15,6 @@ import (
 )
 
 func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		user, err := tx.User.
 			Query().
@@ -37,7 +33,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.ID(user.AccountID),
+				entaccount.EntID(user.AccountID),
 			).
 			ForUpdate().
 			Only(_ctx)

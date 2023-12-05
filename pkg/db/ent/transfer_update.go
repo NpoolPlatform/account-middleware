@@ -84,6 +84,20 @@ func (tu *TransferUpdate) AddDeletedAt(u int32) *TransferUpdate {
 	return tu
 }
 
+// SetEntID sets the "ent_id" field.
+func (tu *TransferUpdate) SetEntID(u uuid.UUID) *TransferUpdate {
+	tu.mutation.SetEntID(u)
+	return tu
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (tu *TransferUpdate) SetNillableEntID(u *uuid.UUID) *TransferUpdate {
+	if u != nil {
+		tu.SetEntID(*u)
+	}
+	return tu
+}
+
 // SetAppID sets the "app_id" field.
 func (tu *TransferUpdate) SetAppID(u uuid.UUID) *TransferUpdate {
 	tu.mutation.SetAppID(u)
@@ -212,7 +226,7 @@ func (tu *TransferUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   transfer.Table,
 			Columns: transfer.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: transfer.FieldID,
 			},
 		},
@@ -264,6 +278,13 @@ func (tu *TransferUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: transfer.FieldDeletedAt,
+		})
+	}
+	if value, ok := tu.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: transfer.FieldEntID,
 		})
 	}
 	if value, ok := tu.mutation.AppID(); ok {
@@ -360,6 +381,20 @@ func (tuo *TransferUpdateOne) SetNillableDeletedAt(u *uint32) *TransferUpdateOne
 // AddDeletedAt adds u to the "deleted_at" field.
 func (tuo *TransferUpdateOne) AddDeletedAt(u int32) *TransferUpdateOne {
 	tuo.mutation.AddDeletedAt(u)
+	return tuo
+}
+
+// SetEntID sets the "ent_id" field.
+func (tuo *TransferUpdateOne) SetEntID(u uuid.UUID) *TransferUpdateOne {
+	tuo.mutation.SetEntID(u)
+	return tuo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (tuo *TransferUpdateOne) SetNillableEntID(u *uuid.UUID) *TransferUpdateOne {
+	if u != nil {
+		tuo.SetEntID(*u)
+	}
 	return tuo
 }
 
@@ -504,7 +539,7 @@ func (tuo *TransferUpdateOne) sqlSave(ctx context.Context) (_node *Transfer, err
 			Table:   transfer.Table,
 			Columns: transfer.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: transfer.FieldID,
 			},
 		},
@@ -573,6 +608,13 @@ func (tuo *TransferUpdateOne) sqlSave(ctx context.Context) (_node *Transfer, err
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: transfer.FieldDeletedAt,
+		})
+	}
+	if value, ok := tuo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: transfer.FieldEntID,
 		})
 	}
 	if value, ok := tuo.mutation.AppID(); ok {

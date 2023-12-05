@@ -11,7 +11,7 @@ import (
 )
 
 type Req struct {
-	ID           *uuid.UUID
+	EntID        *uuid.UUID
 	AppID        *uuid.UUID
 	UserID       *uuid.UUID
 	TargetUserID *uuid.UUID
@@ -19,8 +19,8 @@ type Req struct {
 }
 
 func CreateSet(c *ent.TransferCreate, req *Req) *ent.TransferCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.AppID != nil {
 		c.SetAppID(*req.AppID)
@@ -43,14 +43,28 @@ func UpdateSet(u *ent.TransferUpdateOne, req *Req) *ent.TransferUpdateOne {
 
 type Conds struct {
 	ID           *cruder.Cond
+	EntID        *cruder.Cond
 	AppID        *cruder.Cond
 	UserID       *cruder.Cond
 	TargetUserID *cruder.Cond
 }
 
+//nolint:gocyclo
 func SetQueryConds(q *ent.TransferQuery, conds *Conds) (*ent.TransferQuery, error) {
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid transfer entid")
+		}
+		switch conds.EntID.Op {
+		case cruder.EQ:
+			q.Where(enttransfer.EntID(id))
+		default:
+			return nil, fmt.Errorf("invalid transfer field")
+		}
+	}
 	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+		id, ok := conds.ID.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid transfer id")
 		}

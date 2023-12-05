@@ -22,7 +22,7 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 	}
 	handler, err := deposit1.NewHandler(
 		ctx,
-		deposit1.WithID(req.ID),
+		deposit1.WithID(req.ID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

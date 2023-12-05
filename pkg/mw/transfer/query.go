@@ -22,6 +22,7 @@ type queryHandler struct {
 func (h *queryHandler) selectTransfer(stm *ent.TransferQuery) {
 	h.stm = stm.Select(
 		enttransfer.FieldID,
+		enttransfer.FieldEntID,
 		enttransfer.FieldAppID,
 		enttransfer.FieldUserID,
 		enttransfer.FieldTargetUserID,
@@ -30,15 +31,19 @@ func (h *queryHandler) selectTransfer(stm *ent.TransferQuery) {
 	)
 }
 
-func (h *queryHandler) queryTransfer(cli *ent.Client) {
-	h.selectTransfer(
-		cli.Transfer.
-			Query().
-			Where(
-				enttransfer.ID(*h.ID),
-				enttransfer.DeletedAt(0),
-			),
-	)
+func (h *queryHandler) queryTransfer(cli *ent.Client) error {
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
+	}
+	stm := cli.Transfer.Query().Where(enttransfer.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(enttransfer.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(enttransfer.EntID(*h.EntID))
+	}
+	h.selectTransfer(stm)
+	return nil
 }
 
 func (h *queryHandler) queryTransfers(ctx context.Context, cli *ent.Client) error {
@@ -62,16 +67,14 @@ func (h *queryHandler) scan(ctx context.Context) error {
 }
 
 func (h *Handler) GetTransfer(ctx context.Context) (*npool.Transfer, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
 	handler := &queryHandler{
 		Handler: h,
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		handler.queryTransfer(cli)
+		if err := handler.queryTransfer(cli); err != nil {
+			return err
+		}
 		return handler.scan(_ctx)
 	})
 	if err != nil {

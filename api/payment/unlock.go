@@ -15,7 +15,7 @@ import (
 func (s *Server) UnlockAccount(ctx context.Context, in *npool.UnlockAccountRequest) (*npool.UnlockAccountResponse, error) {
 	handler, err := payment1.NewHandler(
 		ctx,
-		payment1.WithID(&in.ID),
+		payment1.WithID(&in.ID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

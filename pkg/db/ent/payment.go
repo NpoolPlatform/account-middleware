@@ -15,13 +15,15 @@ import (
 type Payment struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID uuid.UUID `json:"id,omitempty"`
+	ID uint32 `json:"id,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
 	CreatedAt uint32 `json:"created_at,omitempty"`
 	// UpdatedAt holds the value of the "updated_at" field.
 	UpdatedAt uint32 `json:"updated_at,omitempty"`
 	// DeletedAt holds the value of the "deleted_at" field.
 	DeletedAt uint32 `json:"deleted_at,omitempty"`
+	// EntID holds the value of the "ent_id" field.
+	EntID uuid.UUID `json:"ent_id,omitempty"`
 	// AccountID holds the value of the "account_id" field.
 	AccountID uuid.UUID `json:"account_id,omitempty"`
 	// CollectingTid holds the value of the "collecting_tid" field.
@@ -35,9 +37,9 @@ func (*Payment) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case payment.FieldCreatedAt, payment.FieldUpdatedAt, payment.FieldDeletedAt, payment.FieldAvailableAt:
+		case payment.FieldID, payment.FieldCreatedAt, payment.FieldUpdatedAt, payment.FieldDeletedAt, payment.FieldAvailableAt:
 			values[i] = new(sql.NullInt64)
-		case payment.FieldID, payment.FieldAccountID, payment.FieldCollectingTid:
+		case payment.FieldEntID, payment.FieldAccountID, payment.FieldCollectingTid:
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Payment", columns[i])
@@ -55,11 +57,11 @@ func (pa *Payment) assignValues(columns []string, values []interface{}) error {
 	for i := range columns {
 		switch columns[i] {
 		case payment.FieldID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field id", values[i])
-			} else if value != nil {
-				pa.ID = *value
+			value, ok := values[i].(*sql.NullInt64)
+			if !ok {
+				return fmt.Errorf("unexpected type %T for field id", value)
 			}
+			pa.ID = uint32(value.Int64)
 		case payment.FieldCreatedAt:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field created_at", values[i])
@@ -77,6 +79,12 @@ func (pa *Payment) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field deleted_at", values[i])
 			} else if value.Valid {
 				pa.DeletedAt = uint32(value.Int64)
+			}
+		case payment.FieldEntID:
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field ent_id", values[i])
+			} else if value != nil {
+				pa.EntID = *value
 			}
 		case payment.FieldAccountID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -132,6 +140,9 @@ func (pa *Payment) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("deleted_at=")
 	builder.WriteString(fmt.Sprintf("%v", pa.DeletedAt))
+	builder.WriteString(", ")
+	builder.WriteString("ent_id=")
+	builder.WriteString(fmt.Sprintf("%v", pa.EntID))
 	builder.WriteString(", ")
 	builder.WriteString("account_id=")
 	builder.WriteString(fmt.Sprintf("%v", pa.AccountID))

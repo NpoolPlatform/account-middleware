@@ -28,18 +28,22 @@ type queryHandler struct {
 }
 
 func (h *queryHandler) selectAccount(stm *ent.DepositQuery) *ent.DepositSelect {
-	return stm.Select(entdeposit.FieldID)
+	return stm.Select(entdeposit.FieldEntID)
 }
 
-func (h *queryHandler) queryAccount(cli *ent.Client) {
-	h.stmSelect = h.selectAccount(
-		cli.Deposit.
-			Query().
-			Where(
-				entdeposit.ID(*h.ID),
-				entdeposit.DeletedAt(0),
-			),
-	)
+func (h *queryHandler) queryAccount(cli *ent.Client) error {
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
+	}
+	stm := cli.Deposit.Query().Where(entdeposit.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entdeposit.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entdeposit.EntID(*h.EntID))
+	}
+	h.stmSelect = h.selectAccount(stm)
+	return nil
 }
 
 func (h *queryHandler) queryAccounts(cli *ent.Client) (*ent.DepositSelect, error) {
@@ -53,6 +57,8 @@ func (h *queryHandler) queryAccounts(cli *ent.Client) (*ent.DepositSelect, error
 func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
 	t := sql.Table(entdeposit.Table)
 	s.AppendSelect(
+		t.C(entdeposit.FieldID),
+		t.C(entdeposit.FieldEntID),
 		t.C(entdeposit.FieldAppID),
 		t.C(entdeposit.FieldUserID),
 		t.C(entdeposit.FieldAccountID),
@@ -71,7 +77,7 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 	s.LeftJoin(t).
 		On(
 			s.C(entdeposit.FieldAccountID),
-			t.C(entaccount.FieldID),
+			t.C(entaccount.FieldEntID),
 		).
 		OnP(
 			sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
@@ -185,16 +191,14 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
 	handler := &queryHandler{
 		Handler: h,
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		handler.queryAccount(cli)
+		if err := handler.queryAccount(cli); err != nil {
+			return err
+		}
 		if err := handler.queryJoin(); err != nil {
 			return err
 		}

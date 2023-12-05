@@ -52,7 +52,7 @@ func CreateTransfer(ctx context.Context, in *npool.TransferReq) (*npool.Transfer
 func GetTransfer(ctx context.Context, id string) (*npool.Transfer, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetTransfer(ctx, &npool.GetTransferRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return nil, err
@@ -132,7 +132,7 @@ func DeleteTransfer(ctx context.Context, in *npool.TransferReq) (*npool.Transfer
 func ExistTransfer(ctx context.Context, id string) (bool, error) {
 	exist, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.ExistTransfer(ctx, &npool.ExistTransferRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return false, err

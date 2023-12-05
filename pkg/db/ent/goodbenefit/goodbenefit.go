@@ -18,6 +18,8 @@ const (
 	FieldUpdatedAt = "updated_at"
 	// FieldDeletedAt holds the string denoting the deleted_at field in the database.
 	FieldDeletedAt = "deleted_at"
+	// FieldEntID holds the string denoting the ent_id field in the database.
+	FieldEntID = "ent_id"
 	// FieldGoodID holds the string denoting the good_id field in the database.
 	FieldGoodID = "good_id"
 	// FieldAccountID holds the string denoting the account_id field in the database.
@@ -36,6 +38,7 @@ var Columns = []string{
 	FieldCreatedAt,
 	FieldUpdatedAt,
 	FieldDeletedAt,
+	FieldEntID,
 	FieldGoodID,
 	FieldAccountID,
 	FieldBackup,
@@ -69,6 +72,8 @@ var (
 	UpdateDefaultUpdatedAt func() uint32
 	// DefaultDeletedAt holds the default value on creation for the "deleted_at" field.
 	DefaultDeletedAt func() uint32
+	// DefaultEntID holds the default value on creation for the "ent_id" field.
+	DefaultEntID func() uuid.UUID
 	// DefaultGoodID holds the default value on creation for the "good_id" field.
 	DefaultGoodID func() uuid.UUID
 	// DefaultAccountID holds the default value on creation for the "account_id" field.
@@ -77,6 +82,4 @@ var (
 	DefaultBackup bool
 	// DefaultTransactionID holds the default value on creation for the "transaction_id" field.
 	DefaultTransactionID func() uuid.UUID
-	// DefaultID holds the default value on creation for the "id" field.
-	DefaultID func() uuid.UUID
 )

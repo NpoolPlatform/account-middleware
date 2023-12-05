@@ -23,9 +23,9 @@ func (s *Server) SubBalance(ctx context.Context, in *npool.SubBalanceRequest) (*
 	}
 	handler, err := deposit1.NewHandler(
 		ctx,
-		deposit1.WithID(req.ID),
-		deposit1.WithIncoming(req.Incoming),
-		deposit1.WithOutcoming(req.Outcoming),
+		deposit1.WithID(req.ID, true),
+		deposit1.WithIncoming(req.Incoming, false),
+		deposit1.WithOutcoming(req.Outcoming, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

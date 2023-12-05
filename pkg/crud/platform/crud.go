@@ -14,7 +14,7 @@ import (
 )
 
 type Req struct {
-	ID        *uuid.UUID
+	EntID     *uuid.UUID
 	AccountID *uuid.UUID
 	UsedFor   *basetypes.AccountUsedFor
 	Backup    *bool
@@ -22,8 +22,8 @@ type Req struct {
 }
 
 func CreateSet(c *ent.PlatformCreate, req *Req) *ent.PlatformCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.AccountID != nil {
 		c.SetAccountID(*req.AccountID)
@@ -54,9 +54,22 @@ type Conds struct {
 	Backup    *cruder.Cond
 }
 
+//nolint:gocyclo
 func SetQueryConds(q *ent.PlatformQuery, conds *Conds) (*ent.PlatformQuery, error) {
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid platform entid")
+		}
+		switch conds.EntID.Op {
+		case cruder.EQ:
+			q.Where(entplatform.EntID(id))
+		default:
+			return nil, fmt.Errorf("invalid platform field")
+		}
+	}
 	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+		id, ok := conds.ID.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid platform id")
 		}

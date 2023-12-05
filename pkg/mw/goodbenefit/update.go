@@ -39,7 +39,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.ID(goodbenefit.AccountID),
+				entaccount.EntID(goodbenefit.AccountID),
 			).
 			ForUpdate().
 			Only(_ctx)
@@ -81,7 +81,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 				t := sql.Table(entaccount.Table)
 				s.LeftJoin(t).
 					On(
-						t.C(entaccount.FieldID),
+						t.C(entaccount.FieldEntID),
 						s.C(entgoodbenefit.FieldAccountID),
 					).
 					OnP(

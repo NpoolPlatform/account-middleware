@@ -14,7 +14,6 @@ import (
 	"entgo.io/ent/schema/field"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/predicate"
-	"github.com/google/uuid"
 )
 
 // GoodBenefitQuery is the builder for querying GoodBenefit entities.
@@ -87,8 +86,8 @@ func (gbq *GoodBenefitQuery) FirstX(ctx context.Context) *GoodBenefit {
 
 // FirstID returns the first GoodBenefit ID from the query.
 // Returns a *NotFoundError when no GoodBenefit ID was found.
-func (gbq *GoodBenefitQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (gbq *GoodBenefitQuery) FirstID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = gbq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
@@ -100,7 +99,7 @@ func (gbq *GoodBenefitQuery) FirstID(ctx context.Context) (id uuid.UUID, err err
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (gbq *GoodBenefitQuery) FirstIDX(ctx context.Context) uuid.UUID {
+func (gbq *GoodBenefitQuery) FirstIDX(ctx context.Context) uint32 {
 	id, err := gbq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -138,8 +137,8 @@ func (gbq *GoodBenefitQuery) OnlyX(ctx context.Context) *GoodBenefit {
 // OnlyID is like Only, but returns the only GoodBenefit ID in the query.
 // Returns a *NotSingularError when more than one GoodBenefit ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (gbq *GoodBenefitQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
-	var ids []uuid.UUID
+func (gbq *GoodBenefitQuery) OnlyID(ctx context.Context) (id uint32, err error) {
+	var ids []uint32
 	if ids, err = gbq.Limit(2).IDs(ctx); err != nil {
 		return
 	}
@@ -155,7 +154,7 @@ func (gbq *GoodBenefitQuery) OnlyID(ctx context.Context) (id uuid.UUID, err erro
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (gbq *GoodBenefitQuery) OnlyIDX(ctx context.Context) uuid.UUID {
+func (gbq *GoodBenefitQuery) OnlyIDX(ctx context.Context) uint32 {
 	id, err := gbq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -181,8 +180,8 @@ func (gbq *GoodBenefitQuery) AllX(ctx context.Context) []*GoodBenefit {
 }
 
 // IDs executes the query and returns a list of GoodBenefit IDs.
-func (gbq *GoodBenefitQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
-	var ids []uuid.UUID
+func (gbq *GoodBenefitQuery) IDs(ctx context.Context) ([]uint32, error) {
+	var ids []uint32
 	if err := gbq.Select(goodbenefit.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
@@ -190,7 +189,7 @@ func (gbq *GoodBenefitQuery) IDs(ctx context.Context) ([]uuid.UUID, error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (gbq *GoodBenefitQuery) IDsX(ctx context.Context) []uuid.UUID {
+func (gbq *GoodBenefitQuery) IDsX(ctx context.Context) []uint32 {
 	ids, err := gbq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -377,7 +376,7 @@ func (gbq *GoodBenefitQuery) querySpec() *sqlgraph.QuerySpec {
 			Table:   goodbenefit.Table,
 			Columns: goodbenefit.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: goodbenefit.FieldID,
 			},
 		},

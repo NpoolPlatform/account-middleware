@@ -14,7 +14,8 @@ import (
 )
 
 type Handler struct {
-	ID         *uuid.UUID
+	ID         *uint32
+	EntID      *uuid.UUID
 	AppID      *uuid.UUID
 	UserID     *uuid.UUID
 	CoinTypeID *uuid.UUID
@@ -41,23 +42,42 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(u *uint32, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if u == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
+			return nil
+		}
+		h.ID = u
+		return nil
+	}
+}
+
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
 		}
-		h.ID = &_id
+		h.EntID = &_id
 		return nil
 	}
 }
 
-func WithAppID(id *string) func(context.Context, *Handler) error {
+func WithAppID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid appid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -69,9 +89,12 @@ func WithAppID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithUserID(id *string) func(context.Context, *Handler) error {
+func WithUserID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid userid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -83,9 +106,12 @@ func WithUserID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithCoinTypeID(id *string) func(context.Context, *Handler) error {
+func WithCoinTypeID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid cointypeid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -97,9 +123,12 @@ func WithCoinTypeID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAccountID(id *string) func(context.Context, *Handler) error {
+func WithAccountID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid accountid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
@@ -111,9 +140,12 @@ func WithAccountID(id *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAddress(addr *string) func(context.Context, *Handler) error {
+func WithAddress(addr *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if addr == nil {
+			if must {
+				return fmt.Errorf("invalid address")
+			}
 			return nil
 		}
 		if *addr == "" {
@@ -124,9 +156,12 @@ func WithAddress(addr *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithUsedFor(usedFor *basetypes.AccountUsedFor) func(context.Context, *Handler) error {
+func WithUsedFor(usedFor *basetypes.AccountUsedFor, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if usedFor == nil {
+			if must {
+				return fmt.Errorf("invalid usedfor")
+			}
 			return nil
 		}
 		switch *usedFor {
@@ -140,9 +175,12 @@ func WithUsedFor(usedFor *basetypes.AccountUsedFor) func(context.Context, *Handl
 	}
 }
 
-func WithLabels(labels []string) func(context.Context, *Handler) error {
+func WithLabels(labels []string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if labels == nil {
+			if must {
+				return fmt.Errorf("invalid labels")
+			}
 			return nil
 		}
 		if len(labels) == 0 {
@@ -154,30 +192,33 @@ func WithLabels(labels []string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithActive(active *bool) func(context.Context, *Handler) error {
+func WithActive(active *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Active = active
 		return nil
 	}
 }
 
-func WithBlocked(blocked *bool) func(context.Context, *Handler) error {
+func WithBlocked(blocked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Blocked = blocked
 		return nil
 	}
 }
 
-func WithLocked(locked *bool) func(context.Context, *Handler) error {
+func WithLocked(locked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Locked = locked
 		return nil
 	}
 }
 
-func WithMemo(memo *string) func(context.Context, *Handler) error {
+func WithMemo(memo *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if memo == nil {
+			if must {
+				return fmt.Errorf("invalid memo")
+			}
 			return nil
 		}
 		if *memo == "" {
@@ -196,11 +237,14 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 			return nil
 		}
 		if conds.ID != nil {
-			id, err := uuid.Parse(conds.GetID().GetValue())
+			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: conds.GetID().GetValue()}
+		}
+		if conds.EntID != nil {
+			id, err := uuid.Parse(conds.GetEntID().GetValue())
 			if err != nil {
 				return err
 			}
-			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: id}
+			h.Conds.EntID = &cruder.Cond{Op: conds.GetEntID().GetOp(), Val: id}
 		}
 		if conds.AppID != nil {
 			id, err := uuid.Parse(conds.GetAppID().GetValue())
@@ -236,16 +280,16 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 				Val: basetypes.AccountUsedFor(conds.GetUsedFor().GetValue()),
 			}
 		}
-		if conds.IDs != nil {
+		if conds.EntIDs != nil {
 			ids := []uuid.UUID{}
-			for _, id := range conds.GetIDs().GetValue() {
+			for _, id := range conds.GetEntIDs().GetValue() {
 				_id, err := uuid.Parse(id)
 				if err != nil {
 					return err
 				}
 				ids = append(ids, _id)
 			}
-			h.Conds.IDs = &cruder.Cond{Op: conds.GetIDs().GetOp(), Val: ids}
+			h.Conds.EntIDs = &cruder.Cond{Op: conds.GetEntIDs().GetOp(), Val: ids}
 		}
 		if conds.AccountIDs != nil {
 			accountIDs := []uuid.UUID{}

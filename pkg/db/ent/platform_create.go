@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -65,6 +64,20 @@ func (pc *PlatformCreate) SetNillableDeletedAt(u *uint32) *PlatformCreate {
 	return pc
 }
 
+// SetEntID sets the "ent_id" field.
+func (pc *PlatformCreate) SetEntID(u uuid.UUID) *PlatformCreate {
+	pc.mutation.SetEntID(u)
+	return pc
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (pc *PlatformCreate) SetNillableEntID(u *uuid.UUID) *PlatformCreate {
+	if u != nil {
+		pc.SetEntID(*u)
+	}
+	return pc
+}
+
 // SetAccountID sets the "account_id" field.
 func (pc *PlatformCreate) SetAccountID(u uuid.UUID) *PlatformCreate {
 	pc.mutation.SetAccountID(u)
@@ -108,16 +121,8 @@ func (pc *PlatformCreate) SetNillableBackup(b *bool) *PlatformCreate {
 }
 
 // SetID sets the "id" field.
-func (pc *PlatformCreate) SetID(u uuid.UUID) *PlatformCreate {
+func (pc *PlatformCreate) SetID(u uint32) *PlatformCreate {
 	pc.mutation.SetID(u)
-	return pc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (pc *PlatformCreate) SetNillableID(u *uuid.UUID) *PlatformCreate {
-	if u != nil {
-		pc.SetID(*u)
-	}
 	return pc
 }
 
@@ -221,6 +226,13 @@ func (pc *PlatformCreate) defaults() error {
 		v := platform.DefaultDeletedAt()
 		pc.mutation.SetDeletedAt(v)
 	}
+	if _, ok := pc.mutation.EntID(); !ok {
+		if platform.DefaultEntID == nil {
+			return fmt.Errorf("ent: uninitialized platform.DefaultEntID (forgotten import ent/runtime?)")
+		}
+		v := platform.DefaultEntID()
+		pc.mutation.SetEntID(v)
+	}
 	if _, ok := pc.mutation.AccountID(); !ok {
 		if platform.DefaultAccountID == nil {
 			return fmt.Errorf("ent: uninitialized platform.DefaultAccountID (forgotten import ent/runtime?)")
@@ -236,13 +248,6 @@ func (pc *PlatformCreate) defaults() error {
 		v := platform.DefaultBackup
 		pc.mutation.SetBackup(v)
 	}
-	if _, ok := pc.mutation.ID(); !ok {
-		if platform.DefaultID == nil {
-			return fmt.Errorf("ent: uninitialized platform.DefaultID (forgotten import ent/runtime?)")
-		}
-		v := platform.DefaultID()
-		pc.mutation.SetID(v)
-	}
 	return nil
 }
 
@@ -257,6 +262,9 @@ func (pc *PlatformCreate) check() error {
 	if _, ok := pc.mutation.DeletedAt(); !ok {
 		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Platform.deleted_at"`)}
 	}
+	if _, ok := pc.mutation.EntID(); !ok {
+		return &ValidationError{Name: "ent_id", err: errors.New(`ent: missing required field "Platform.ent_id"`)}
+	}
 	return nil
 }
 
@@ -268,12 +276,9 @@ func (pc *PlatformCreate) sqlSave(ctx context.Context) (*Platform, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
 	}
 	return _node, nil
 }
@@ -284,7 +289,7 @@ func (pc *PlatformCreate) createSpec() (*Platform, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: platform.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: platform.FieldID,
 			},
 		}
@@ -292,7 +297,7 @@ func (pc *PlatformCreate) createSpec() (*Platform, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = pc.conflict
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
 	}
 	if value, ok := pc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -317,6 +322,14 @@ func (pc *PlatformCreate) createSpec() (*Platform, *sqlgraph.CreateSpec) {
 			Column: platform.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if value, ok := pc.mutation.EntID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: platform.FieldEntID,
+		})
+		_node.EntID = value
 	}
 	if value, ok := pc.mutation.AccountID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -447,6 +460,18 @@ func (u *PlatformUpsert) UpdateDeletedAt() *PlatformUpsert {
 // AddDeletedAt adds v to the "deleted_at" field.
 func (u *PlatformUpsert) AddDeletedAt(v uint32) *PlatformUpsert {
 	u.Add(platform.FieldDeletedAt, v)
+	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *PlatformUpsert) SetEntID(v uuid.UUID) *PlatformUpsert {
+	u.Set(platform.FieldEntID, v)
+	return u
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *PlatformUpsert) UpdateEntID() *PlatformUpsert {
+	u.SetExcluded(platform.FieldEntID)
 	return u
 }
 
@@ -617,6 +642,20 @@ func (u *PlatformUpsertOne) UpdateDeletedAt() *PlatformUpsertOne {
 	})
 }
 
+// SetEntID sets the "ent_id" field.
+func (u *PlatformUpsertOne) SetEntID(v uuid.UUID) *PlatformUpsertOne {
+	return u.Update(func(s *PlatformUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *PlatformUpsertOne) UpdateEntID() *PlatformUpsertOne {
+	return u.Update(func(s *PlatformUpsert) {
+		s.UpdateEntID()
+	})
+}
+
 // SetAccountID sets the "account_id" field.
 func (u *PlatformUpsertOne) SetAccountID(v uuid.UUID) *PlatformUpsertOne {
 	return u.Update(func(s *PlatformUpsert) {
@@ -696,12 +735,7 @@ func (u *PlatformUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *PlatformUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: PlatformUpsertOne.ID is not supported by MySQL driver. Use PlatformUpsertOne.Exec instead")
-	}
+func (u *PlatformUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -710,7 +744,7 @@ func (u *PlatformUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *PlatformUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *PlatformUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -761,6 +795,10 @@ func (pcb *PlatformCreateBulk) Save(ctx context.Context) ([]*Platform, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint32(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -956,6 +994,20 @@ func (u *PlatformUpsertBulk) AddDeletedAt(v uint32) *PlatformUpsertBulk {
 func (u *PlatformUpsertBulk) UpdateDeletedAt() *PlatformUpsertBulk {
 	return u.Update(func(s *PlatformUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *PlatformUpsertBulk) SetEntID(v uuid.UUID) *PlatformUpsertBulk {
+	return u.Update(func(s *PlatformUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *PlatformUpsertBulk) UpdateEntID() *PlatformUpsertBulk {
+	return u.Update(func(s *PlatformUpsert) {
+		s.UpdateEntID()
 	})
 }
 

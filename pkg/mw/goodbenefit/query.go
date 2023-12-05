@@ -27,18 +27,22 @@ type queryHandler struct {
 }
 
 func (h *queryHandler) selectAccount(stm *ent.GoodBenefitQuery) *ent.GoodBenefitSelect {
-	return stm.Select(entgoodbenefit.FieldID)
+	return stm.Select(entgoodbenefit.FieldEntID)
 }
 
-func (h *queryHandler) queryAccount(cli *ent.Client) {
-	h.stmSelect = h.selectAccount(
-		cli.GoodBenefit.
-			Query().
-			Where(
-				entgoodbenefit.ID(*h.ID),
-				entgoodbenefit.DeletedAt(0),
-			),
-	)
+func (h *queryHandler) queryAccount(cli *ent.Client) error {
+	if h.ID == nil && h.EntID == nil {
+		return fmt.Errorf("invalid id")
+	}
+	stm := cli.GoodBenefit.Query().Where(entgoodbenefit.DeletedAt(0))
+	if h.ID != nil {
+		stm.Where(entgoodbenefit.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entgoodbenefit.EntID(*h.EntID))
+	}
+	h.stmSelect = h.selectAccount(stm)
+	return nil
 }
 
 func (h *queryHandler) queryAccounts(cli *ent.Client) (*ent.GoodBenefitSelect, error) {
@@ -53,6 +57,7 @@ func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
 	t := sql.Table(entgoodbenefit.Table)
 	s.AppendSelect(
 		t.C(entgoodbenefit.FieldID),
+		t.C(entgoodbenefit.FieldEntID),
 		t.C(entgoodbenefit.FieldGoodID),
 		t.C(entgoodbenefit.FieldAccountID),
 		t.C(entgoodbenefit.FieldBackup),
@@ -67,7 +72,7 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 	s.LeftJoin(t).
 		On(
 			s.C(entgoodbenefit.FieldAccountID),
-			t.C(entaccount.FieldID),
+			t.C(entaccount.FieldEntID),
 		).
 		OnP(
 			sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
@@ -171,16 +176,14 @@ func (h *queryHandler) formalize() {
 }
 
 func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
 	handler := &queryHandler{
 		Handler: h,
 	}
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		handler.queryAccount(cli)
+		if err := handler.queryAccount(cli); err != nil {
+			return err
+		}
 		if err := handler.queryJoin(); err != nil {
 			return err
 		}

@@ -12,7 +12,7 @@ import (
 )
 
 type Req struct {
-	ID                     *uuid.UUID
+	EntID                  *uuid.UUID
 	CoinTypeID             *uuid.UUID
 	Address                *string
 	UsedFor                *basetypes.AccountUsedFor
@@ -25,8 +25,8 @@ type Req struct {
 }
 
 func CreateSet(c *ent.AccountCreate, req *Req) *ent.AccountCreate {
-	if req.ID != nil {
-		c.SetID(*req.ID)
+	if req.EntID != nil {
+		c.SetEntID(*req.EntID)
 	}
 	if req.CoinTypeID != nil {
 		c.SetCoinTypeID(*req.CoinTypeID)
@@ -76,7 +76,8 @@ func UpdateSet(u *ent.AccountUpdateOne, req *Req) *ent.AccountUpdateOne {
 
 type Conds struct {
 	ID                     *cruder.Cond
-	IDs                    *cruder.Cond
+	EntID                  *cruder.Cond
+	EntIDs                 *cruder.Cond
 	CoinTypeID             *cruder.Cond
 	Address                *cruder.Cond
 	UsedFor                *cruder.Cond
@@ -89,8 +90,20 @@ type Conds struct {
 }
 
 func SetQueryConds(q *ent.AccountQuery, conds *Conds) (*ent.AccountQuery, error) { // nolint
+	if conds.EntID != nil {
+		id, ok := conds.EntID.Val.(uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid read announcement entid")
+		}
+		switch conds.EntID.Op {
+		case cruder.EQ:
+			q.Where(entaccount.EntID(id))
+		default:
+			return nil, fmt.Errorf("invalid account field")
+		}
+	}
 	if conds.ID != nil {
-		id, ok := conds.ID.Val.(uuid.UUID)
+		id, ok := conds.ID.Val.(uint32)
 		if !ok {
 			return nil, fmt.Errorf("invalid account id")
 		}
@@ -197,14 +210,14 @@ func SetQueryConds(q *ent.AccountQuery, conds *Conds) (*ent.AccountQuery, error)
 			return nil, fmt.Errorf("invalid account field")
 		}
 	}
-	if conds.IDs != nil {
-		ids, ok := conds.IDs.Val.([]uuid.UUID)
+	if conds.EntIDs != nil {
+		ids, ok := conds.EntIDs.Val.([]uuid.UUID)
 		if !ok {
 			return nil, fmt.Errorf("invalid account ids")
 		}
-		switch conds.IDs.Op {
+		switch conds.EntIDs.Op {
 		case cruder.IN:
-			q.Where(entaccount.IDIn(ids...))
+			q.Where(entaccount.EntIDIn(ids...))
 		default:
 			return nil, fmt.Errorf("invalid account field")
 		}

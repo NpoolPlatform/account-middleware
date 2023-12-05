@@ -23,7 +23,7 @@ func (s *Server) DeleteTransfer(ctx context.Context, in *npool.DeleteTransferReq
 	}
 	handler, err := transfer1.NewHandler(
 		ctx,
-		transfer1.WithID(req.ID),
+		transfer1.WithID(req.ID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

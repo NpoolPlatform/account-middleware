@@ -25,7 +25,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   account.Table,
 			Columns: account.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: account.FieldID,
 			},
 		},
@@ -34,6 +34,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			account.FieldCreatedAt:              {Type: field.TypeUint32, Column: account.FieldCreatedAt},
 			account.FieldUpdatedAt:              {Type: field.TypeUint32, Column: account.FieldUpdatedAt},
 			account.FieldDeletedAt:              {Type: field.TypeUint32, Column: account.FieldDeletedAt},
+			account.FieldEntID:                  {Type: field.TypeUUID, Column: account.FieldEntID},
 			account.FieldCoinTypeID:             {Type: field.TypeUUID, Column: account.FieldCoinTypeID},
 			account.FieldAddress:                {Type: field.TypeString, Column: account.FieldAddress},
 			account.FieldUsedFor:                {Type: field.TypeString, Column: account.FieldUsedFor},
@@ -49,7 +50,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   deposit.Table,
 			Columns: deposit.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: deposit.FieldID,
 			},
 		},
@@ -58,6 +59,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			deposit.FieldCreatedAt:     {Type: field.TypeUint32, Column: deposit.FieldCreatedAt},
 			deposit.FieldUpdatedAt:     {Type: field.TypeUint32, Column: deposit.FieldUpdatedAt},
 			deposit.FieldDeletedAt:     {Type: field.TypeUint32, Column: deposit.FieldDeletedAt},
+			deposit.FieldEntID:         {Type: field.TypeUUID, Column: deposit.FieldEntID},
 			deposit.FieldAppID:         {Type: field.TypeUUID, Column: deposit.FieldAppID},
 			deposit.FieldUserID:        {Type: field.TypeUUID, Column: deposit.FieldUserID},
 			deposit.FieldAccountID:     {Type: field.TypeUUID, Column: deposit.FieldAccountID},
@@ -72,7 +74,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   goodbenefit.Table,
 			Columns: goodbenefit.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: goodbenefit.FieldID,
 			},
 		},
@@ -81,6 +83,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			goodbenefit.FieldCreatedAt:     {Type: field.TypeUint32, Column: goodbenefit.FieldCreatedAt},
 			goodbenefit.FieldUpdatedAt:     {Type: field.TypeUint32, Column: goodbenefit.FieldUpdatedAt},
 			goodbenefit.FieldDeletedAt:     {Type: field.TypeUint32, Column: goodbenefit.FieldDeletedAt},
+			goodbenefit.FieldEntID:         {Type: field.TypeUUID, Column: goodbenefit.FieldEntID},
 			goodbenefit.FieldGoodID:        {Type: field.TypeUUID, Column: goodbenefit.FieldGoodID},
 			goodbenefit.FieldAccountID:     {Type: field.TypeUUID, Column: goodbenefit.FieldAccountID},
 			goodbenefit.FieldBackup:        {Type: field.TypeBool, Column: goodbenefit.FieldBackup},
@@ -92,7 +95,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   payment.Table,
 			Columns: payment.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: payment.FieldID,
 			},
 		},
@@ -101,6 +104,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			payment.FieldCreatedAt:     {Type: field.TypeUint32, Column: payment.FieldCreatedAt},
 			payment.FieldUpdatedAt:     {Type: field.TypeUint32, Column: payment.FieldUpdatedAt},
 			payment.FieldDeletedAt:     {Type: field.TypeUint32, Column: payment.FieldDeletedAt},
+			payment.FieldEntID:         {Type: field.TypeUUID, Column: payment.FieldEntID},
 			payment.FieldAccountID:     {Type: field.TypeUUID, Column: payment.FieldAccountID},
 			payment.FieldCollectingTid: {Type: field.TypeUUID, Column: payment.FieldCollectingTid},
 			payment.FieldAvailableAt:   {Type: field.TypeUint32, Column: payment.FieldAvailableAt},
@@ -111,7 +115,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   platform.Table,
 			Columns: platform.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: platform.FieldID,
 			},
 		},
@@ -120,6 +124,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			platform.FieldCreatedAt: {Type: field.TypeUint32, Column: platform.FieldCreatedAt},
 			platform.FieldUpdatedAt: {Type: field.TypeUint32, Column: platform.FieldUpdatedAt},
 			platform.FieldDeletedAt: {Type: field.TypeUint32, Column: platform.FieldDeletedAt},
+			platform.FieldEntID:     {Type: field.TypeUUID, Column: platform.FieldEntID},
 			platform.FieldAccountID: {Type: field.TypeUUID, Column: platform.FieldAccountID},
 			platform.FieldUsedFor:   {Type: field.TypeString, Column: platform.FieldUsedFor},
 			platform.FieldBackup:    {Type: field.TypeBool, Column: platform.FieldBackup},
@@ -130,7 +135,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   transfer.Table,
 			Columns: transfer.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: transfer.FieldID,
 			},
 		},
@@ -139,6 +144,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			transfer.FieldCreatedAt:    {Type: field.TypeUint32, Column: transfer.FieldCreatedAt},
 			transfer.FieldUpdatedAt:    {Type: field.TypeUint32, Column: transfer.FieldUpdatedAt},
 			transfer.FieldDeletedAt:    {Type: field.TypeUint32, Column: transfer.FieldDeletedAt},
+			transfer.FieldEntID:        {Type: field.TypeUUID, Column: transfer.FieldEntID},
 			transfer.FieldAppID:        {Type: field.TypeUUID, Column: transfer.FieldAppID},
 			transfer.FieldUserID:       {Type: field.TypeUUID, Column: transfer.FieldUserID},
 			transfer.FieldTargetUserID: {Type: field.TypeUUID, Column: transfer.FieldTargetUserID},
@@ -149,7 +155,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			Table:   user.Table,
 			Columns: user.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: user.FieldID,
 			},
 		},
@@ -158,6 +164,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			user.FieldCreatedAt:  {Type: field.TypeUint32, Column: user.FieldCreatedAt},
 			user.FieldUpdatedAt:  {Type: field.TypeUint32, Column: user.FieldUpdatedAt},
 			user.FieldDeletedAt:  {Type: field.TypeUint32, Column: user.FieldDeletedAt},
+			user.FieldEntID:      {Type: field.TypeUUID, Column: user.FieldEntID},
 			user.FieldAppID:      {Type: field.TypeUUID, Column: user.FieldAppID},
 			user.FieldUserID:     {Type: field.TypeUUID, Column: user.FieldUserID},
 			user.FieldCoinTypeID: {Type: field.TypeUUID, Column: user.FieldCoinTypeID},
@@ -211,8 +218,8 @@ func (f *AccountFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *AccountFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *AccountFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(account.FieldID))
 }
 
@@ -229,6 +236,11 @@ func (f *AccountFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *AccountFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(account.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *AccountFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(account.FieldEntID))
 }
 
 // WhereCoinTypeID applies the entql [16]byte predicate on the coin_type_id field.
@@ -306,8 +318,8 @@ func (f *DepositFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *DepositFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *DepositFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(deposit.FieldID))
 }
 
@@ -324,6 +336,11 @@ func (f *DepositFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *DepositFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(deposit.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *DepositFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(deposit.FieldEntID))
 }
 
 // WhereAppID applies the entql [16]byte predicate on the app_id field.
@@ -396,8 +413,8 @@ func (f *GoodBenefitFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *GoodBenefitFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *GoodBenefitFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(goodbenefit.FieldID))
 }
 
@@ -414,6 +431,11 @@ func (f *GoodBenefitFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *GoodBenefitFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(goodbenefit.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *GoodBenefitFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(goodbenefit.FieldEntID))
 }
 
 // WhereGoodID applies the entql [16]byte predicate on the good_id field.
@@ -471,8 +493,8 @@ func (f *PaymentFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *PaymentFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *PaymentFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(payment.FieldID))
 }
 
@@ -489,6 +511,11 @@ func (f *PaymentFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *PaymentFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(payment.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *PaymentFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(payment.FieldEntID))
 }
 
 // WhereAccountID applies the entql [16]byte predicate on the account_id field.
@@ -541,8 +568,8 @@ func (f *PlatformFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *PlatformFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *PlatformFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(platform.FieldID))
 }
 
@@ -559,6 +586,11 @@ func (f *PlatformFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *PlatformFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(platform.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *PlatformFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(platform.FieldEntID))
 }
 
 // WhereAccountID applies the entql [16]byte predicate on the account_id field.
@@ -611,8 +643,8 @@ func (f *TransferFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *TransferFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *TransferFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(transfer.FieldID))
 }
 
@@ -629,6 +661,11 @@ func (f *TransferFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *TransferFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(transfer.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *TransferFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(transfer.FieldEntID))
 }
 
 // WhereAppID applies the entql [16]byte predicate on the app_id field.
@@ -681,8 +718,8 @@ func (f *UserFilter) Where(p entql.P) {
 	})
 }
 
-// WhereID applies the entql [16]byte predicate on the id field.
-func (f *UserFilter) WhereID(p entql.ValueP) {
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *UserFilter) WhereID(p entql.Uint32P) {
 	f.Where(p.Field(user.FieldID))
 }
 
@@ -699,6 +736,11 @@ func (f *UserFilter) WhereUpdatedAt(p entql.Uint32P) {
 // WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
 func (f *UserFilter) WhereDeletedAt(p entql.Uint32P) {
 	f.Where(p.Field(user.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *UserFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(user.FieldEntID))
 }
 
 // WhereAppID applies the entql [16]byte predicate on the app_id field.

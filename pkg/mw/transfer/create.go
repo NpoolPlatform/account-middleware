@@ -18,16 +18,6 @@ import (
 )
 
 func (h *Handler) CreateTransfer(ctx context.Context) (*npool.Transfer, error) {
-	if h.AppID == nil {
-		return nil, fmt.Errorf("invalid appid")
-	}
-	if h.UserID == nil {
-		return nil, fmt.Errorf("invalid userid")
-	}
-	if h.TargetUserID == nil {
-		return nil, fmt.Errorf("invalid targetUserID")
-	}
-
 	key := fmt.Sprintf("%v:%v:%v:%v", basetypes.Prefix_PrefixCreateUserTransfer, *h.AppID, *h.UserID, *h.TargetUserID)
 	if err := redis2.TryLock(key, 0); err != nil {
 		return nil, err
@@ -56,15 +46,15 @@ func (h *Handler) CreateTransfer(ctx context.Context) (*npool.Transfer, error) {
 	}
 
 	id := uuid.New()
-	if h.ID == nil {
-		h.ID = &id
+	if h.EntID == nil {
+		h.EntID = &id
 	}
 
 	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		if _, err := transfercrud.CreateSet(
 			tx.Transfer.Create(),
 			&transfercrud.Req{
-				ID:           h.ID,
+				EntID:        h.EntID,
 				AppID:        h.AppID,
 				UserID:       h.UserID,
 				TargetUserID: h.TargetUserID,

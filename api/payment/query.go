@@ -15,7 +15,7 @@ import (
 func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*npool.GetAccountResponse, error) {
 	handler, err := payment1.NewHandler(
 		ctx,
-		payment1.WithID(&in.ID),
+		payment1.WithEntID(&in.EntID, true),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

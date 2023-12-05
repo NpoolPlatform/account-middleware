@@ -25,13 +25,6 @@ import (
 )
 
 func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { //nolint
-	if h.CoinTypeID == nil {
-		return nil, fmt.Errorf("invalid cointypeid")
-	}
-	if h.Address == nil {
-		return nil, fmt.Errorf("invalid address")
-	}
-
 	key := fmt.Sprintf("%v:%v:%v", basetypes.Prefix_PrefixCreateGoodBenefitAccount, *h.CoinTypeID, *h.Address)
 	if err := redis2.TryLock(key, 0); err != nil {
 		return nil, err
@@ -59,8 +52,8 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 	}
 
 	id1 := uuid.New()
-	if h.ID == nil {
-		h.ID = &id1
+	if h.EntID == nil {
+		h.EntID = &id1
 	}
 
 	id2 := uuid.New()
@@ -75,7 +68,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 		if _, err := accountcrud.CreateSet(
 			tx.Account.Create(),
 			&accountcrud.Req{
-				ID:                     h.AccountID,
+				EntID:                  h.AccountID,
 				CoinTypeID:             h.CoinTypeID,
 				Address:                h.Address,
 				UsedFor:                &usedFor,
@@ -88,7 +81,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 		goodbenefit, err := goodbenefitcrud.CreateSet(
 			tx.GoodBenefit.Create(),
 			&goodbenefitcrud.Req{
-				ID:        h.ID,
+				EntID:     h.EntID,
 				GoodID:    h.GoodID,
 				AccountID: h.AccountID,
 				Backup:    h.Backup,
@@ -110,7 +103,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 				t := sql.Table(entaccount.Table)
 				s.LeftJoin(t).
 					On(
-						t.C(entaccount.FieldID),
+						t.C(entaccount.FieldEntID),
 						s.C(entgoodbenefit.FieldAccountID),
 					).
 					OnP(
@@ -125,7 +118,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) { /
 			}).
 			Where(
 				entgoodbenefit.GoodID(goodbenefit.GoodID),
-				entgoodbenefit.IDNEQ(*h.ID),
+				entgoodbenefit.EntIDNEQ(*h.EntID),
 				entgoodbenefit.Backup(false),
 			).
 			IDs(_ctx)

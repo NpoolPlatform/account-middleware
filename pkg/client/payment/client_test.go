@@ -35,7 +35,7 @@ func init() {
 }
 
 var ret = &npool.Account{
-	ID:            uuid.NewString(),
+	EntID:         uuid.NewString(),
 	CoinTypeID:    uuid.NewString(),
 	AccountID:     uuid.NewString(),
 	Address:       uuid.NewString(),
@@ -47,7 +47,7 @@ var ret = &npool.Account{
 }
 
 var retReq = &npool.AccountReq{
-	ID:            &ret.ID,
+	EntID:         &ret.EntID,
 	CoinTypeID:    &ret.CoinTypeID,
 	AccountID:     &ret.AccountID,
 	Address:       &ret.Address,
@@ -64,6 +64,7 @@ func createAccount(t *testing.T) {
 		ret.UpdatedAt = info.UpdatedAt
 		ret.AccountID = info.AccountID
 		ret.AvailableAt = info.AvailableAt
+		ret.ID = info.ID
 		assert.Equal(t, ret, info)
 	}
 }
@@ -79,6 +80,7 @@ func updateAccount(t *testing.T) {
 	ret.Blocked = blocked
 	ret.CollectingTID = collectingTID
 
+	retReq.ID = &ret.ID
 	retReq.Active = &active
 	retReq.Locked = &locked
 	retReq.Blocked = &blocked
@@ -93,7 +95,7 @@ func updateAccount(t *testing.T) {
 }
 
 func getAccount(t *testing.T) {
-	info, err := GetAccount(context.Background(), ret.ID)
+	info, err := GetAccount(context.Background(), ret.EntID)
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, ret)
 	}
@@ -103,7 +105,7 @@ func getAccounts(t *testing.T) {
 	infos, total, err := GetAccounts(
 		context.Background(),
 		&npool.Conds{
-			ID:         &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			EntID:      &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
 			AccountID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.AccountID},
 			Address:    &basetypes.StringVal{Op: cruder.EQ, Value: ret.Address},

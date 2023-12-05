@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 
-	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -65,6 +64,20 @@ func (tc *TransferCreate) SetNillableDeletedAt(u *uint32) *TransferCreate {
 	return tc
 }
 
+// SetEntID sets the "ent_id" field.
+func (tc *TransferCreate) SetEntID(u uuid.UUID) *TransferCreate {
+	tc.mutation.SetEntID(u)
+	return tc
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (tc *TransferCreate) SetNillableEntID(u *uuid.UUID) *TransferCreate {
+	if u != nil {
+		tc.SetEntID(*u)
+	}
+	return tc
+}
+
 // SetAppID sets the "app_id" field.
 func (tc *TransferCreate) SetAppID(u uuid.UUID) *TransferCreate {
 	tc.mutation.SetAppID(u)
@@ -108,16 +121,8 @@ func (tc *TransferCreate) SetNillableTargetUserID(u *uuid.UUID) *TransferCreate 
 }
 
 // SetID sets the "id" field.
-func (tc *TransferCreate) SetID(u uuid.UUID) *TransferCreate {
+func (tc *TransferCreate) SetID(u uint32) *TransferCreate {
 	tc.mutation.SetID(u)
-	return tc
-}
-
-// SetNillableID sets the "id" field if the given value is not nil.
-func (tc *TransferCreate) SetNillableID(u *uuid.UUID) *TransferCreate {
-	if u != nil {
-		tc.SetID(*u)
-	}
 	return tc
 }
 
@@ -221,6 +226,13 @@ func (tc *TransferCreate) defaults() error {
 		v := transfer.DefaultDeletedAt()
 		tc.mutation.SetDeletedAt(v)
 	}
+	if _, ok := tc.mutation.EntID(); !ok {
+		if transfer.DefaultEntID == nil {
+			return fmt.Errorf("ent: uninitialized transfer.DefaultEntID (forgotten import ent/runtime?)")
+		}
+		v := transfer.DefaultEntID()
+		tc.mutation.SetEntID(v)
+	}
 	if _, ok := tc.mutation.AppID(); !ok {
 		if transfer.DefaultAppID == nil {
 			return fmt.Errorf("ent: uninitialized transfer.DefaultAppID (forgotten import ent/runtime?)")
@@ -242,13 +254,6 @@ func (tc *TransferCreate) defaults() error {
 		v := transfer.DefaultTargetUserID()
 		tc.mutation.SetTargetUserID(v)
 	}
-	if _, ok := tc.mutation.ID(); !ok {
-		if transfer.DefaultID == nil {
-			return fmt.Errorf("ent: uninitialized transfer.DefaultID (forgotten import ent/runtime?)")
-		}
-		v := transfer.DefaultID()
-		tc.mutation.SetID(v)
-	}
 	return nil
 }
 
@@ -262,6 +267,9 @@ func (tc *TransferCreate) check() error {
 	}
 	if _, ok := tc.mutation.DeletedAt(); !ok {
 		return &ValidationError{Name: "deleted_at", err: errors.New(`ent: missing required field "Transfer.deleted_at"`)}
+	}
+	if _, ok := tc.mutation.EntID(); !ok {
+		return &ValidationError{Name: "ent_id", err: errors.New(`ent: missing required field "Transfer.ent_id"`)}
 	}
 	if _, ok := tc.mutation.AppID(); !ok {
 		return &ValidationError{Name: "app_id", err: errors.New(`ent: missing required field "Transfer.app_id"`)}
@@ -283,12 +291,9 @@ func (tc *TransferCreate) sqlSave(ctx context.Context) (*Transfer, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != nil {
-		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
-			_node.ID = *id
-		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
-			return nil, err
-		}
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = uint32(id)
 	}
 	return _node, nil
 }
@@ -299,7 +304,7 @@ func (tc *TransferCreate) createSpec() (*Transfer, *sqlgraph.CreateSpec) {
 		_spec = &sqlgraph.CreateSpec{
 			Table: transfer.Table,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: transfer.FieldID,
 			},
 		}
@@ -307,7 +312,7 @@ func (tc *TransferCreate) createSpec() (*Transfer, *sqlgraph.CreateSpec) {
 	_spec.OnConflict = tc.conflict
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
-		_spec.ID.Value = &id
+		_spec.ID.Value = id
 	}
 	if value, ok := tc.mutation.CreatedAt(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -332,6 +337,14 @@ func (tc *TransferCreate) createSpec() (*Transfer, *sqlgraph.CreateSpec) {
 			Column: transfer.FieldDeletedAt,
 		})
 		_node.DeletedAt = value
+	}
+	if value, ok := tc.mutation.EntID(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: transfer.FieldEntID,
+		})
+		_node.EntID = value
 	}
 	if value, ok := tc.mutation.AppID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -462,6 +475,18 @@ func (u *TransferUpsert) UpdateDeletedAt() *TransferUpsert {
 // AddDeletedAt adds v to the "deleted_at" field.
 func (u *TransferUpsert) AddDeletedAt(v uint32) *TransferUpsert {
 	u.Add(transfer.FieldDeletedAt, v)
+	return u
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *TransferUpsert) SetEntID(v uuid.UUID) *TransferUpsert {
+	u.Set(transfer.FieldEntID, v)
+	return u
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *TransferUpsert) UpdateEntID() *TransferUpsert {
+	u.SetExcluded(transfer.FieldEntID)
 	return u
 }
 
@@ -614,6 +639,20 @@ func (u *TransferUpsertOne) UpdateDeletedAt() *TransferUpsertOne {
 	})
 }
 
+// SetEntID sets the "ent_id" field.
+func (u *TransferUpsertOne) SetEntID(v uuid.UUID) *TransferUpsertOne {
+	return u.Update(func(s *TransferUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *TransferUpsertOne) UpdateEntID() *TransferUpsertOne {
+	return u.Update(func(s *TransferUpsert) {
+		s.UpdateEntID()
+	})
+}
+
 // SetAppID sets the "app_id" field.
 func (u *TransferUpsertOne) SetAppID(v uuid.UUID) *TransferUpsertOne {
 	return u.Update(func(s *TransferUpsert) {
@@ -672,12 +711,7 @@ func (u *TransferUpsertOne) ExecX(ctx context.Context) {
 }
 
 // Exec executes the UPSERT query and returns the inserted/updated ID.
-func (u *TransferUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
-	if u.create.driver.Dialect() == dialect.MySQL {
-		// In case of "ON CONFLICT", there is no way to get back non-numeric ID
-		// fields from the database since MySQL does not support the RETURNING clause.
-		return id, errors.New("ent: TransferUpsertOne.ID is not supported by MySQL driver. Use TransferUpsertOne.Exec instead")
-	}
+func (u *TransferUpsertOne) ID(ctx context.Context) (id uint32, err error) {
 	node, err := u.create.Save(ctx)
 	if err != nil {
 		return id, err
@@ -686,7 +720,7 @@ func (u *TransferUpsertOne) ID(ctx context.Context) (id uuid.UUID, err error) {
 }
 
 // IDX is like ID, but panics if an error occurs.
-func (u *TransferUpsertOne) IDX(ctx context.Context) uuid.UUID {
+func (u *TransferUpsertOne) IDX(ctx context.Context) uint32 {
 	id, err := u.ID(ctx)
 	if err != nil {
 		panic(err)
@@ -737,6 +771,10 @@ func (tcb *TransferCreateBulk) Save(ctx context.Context) ([]*Transfer, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+					id := specs[i].ID.Value.(int64)
+					nodes[i].ID = uint32(id)
+				}
 				mutation.done = true
 				return nodes[i], nil
 			})
@@ -932,6 +970,20 @@ func (u *TransferUpsertBulk) AddDeletedAt(v uint32) *TransferUpsertBulk {
 func (u *TransferUpsertBulk) UpdateDeletedAt() *TransferUpsertBulk {
 	return u.Update(func(s *TransferUpsert) {
 		s.UpdateDeletedAt()
+	})
+}
+
+// SetEntID sets the "ent_id" field.
+func (u *TransferUpsertBulk) SetEntID(v uuid.UUID) *TransferUpsertBulk {
+	return u.Update(func(s *TransferUpsert) {
+		s.SetEntID(v)
+	})
+}
+
+// UpdateEntID sets the "ent_id" field to the value that was provided on create.
+func (u *TransferUpsertBulk) UpdateEntID() *TransferUpsertBulk {
+	return u.Update(func(s *TransferUpsert) {
+		s.UpdateEntID()
 	})
 }
 

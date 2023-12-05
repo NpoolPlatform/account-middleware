@@ -84,6 +84,20 @@ func (pu *PlatformUpdate) AddDeletedAt(u int32) *PlatformUpdate {
 	return pu
 }
 
+// SetEntID sets the "ent_id" field.
+func (pu *PlatformUpdate) SetEntID(u uuid.UUID) *PlatformUpdate {
+	pu.mutation.SetEntID(u)
+	return pu
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (pu *PlatformUpdate) SetNillableEntID(u *uuid.UUID) *PlatformUpdate {
+	if u != nil {
+		pu.SetEntID(*u)
+	}
+	return pu
+}
+
 // SetAccountID sets the "account_id" field.
 func (pu *PlatformUpdate) SetAccountID(u uuid.UUID) *PlatformUpdate {
 	pu.mutation.SetAccountID(u)
@@ -230,7 +244,7 @@ func (pu *PlatformUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Table:   platform.Table,
 			Columns: platform.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: platform.FieldID,
 			},
 		},
@@ -282,6 +296,13 @@ func (pu *PlatformUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: platform.FieldDeletedAt,
+		})
+	}
+	if value, ok := pu.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: platform.FieldEntID,
 		})
 	}
 	if value, ok := pu.mutation.AccountID(); ok {
@@ -396,6 +417,20 @@ func (puo *PlatformUpdateOne) SetNillableDeletedAt(u *uint32) *PlatformUpdateOne
 // AddDeletedAt adds u to the "deleted_at" field.
 func (puo *PlatformUpdateOne) AddDeletedAt(u int32) *PlatformUpdateOne {
 	puo.mutation.AddDeletedAt(u)
+	return puo
+}
+
+// SetEntID sets the "ent_id" field.
+func (puo *PlatformUpdateOne) SetEntID(u uuid.UUID) *PlatformUpdateOne {
+	puo.mutation.SetEntID(u)
+	return puo
+}
+
+// SetNillableEntID sets the "ent_id" field if the given value is not nil.
+func (puo *PlatformUpdateOne) SetNillableEntID(u *uuid.UUID) *PlatformUpdateOne {
+	if u != nil {
+		puo.SetEntID(*u)
+	}
 	return puo
 }
 
@@ -558,7 +593,7 @@ func (puo *PlatformUpdateOne) sqlSave(ctx context.Context) (_node *Platform, err
 			Table:   platform.Table,
 			Columns: platform.Columns,
 			ID: &sqlgraph.FieldSpec{
-				Type:   field.TypeUUID,
+				Type:   field.TypeUint32,
 				Column: platform.FieldID,
 			},
 		},
@@ -627,6 +662,13 @@ func (puo *PlatformUpdateOne) sqlSave(ctx context.Context) (_node *Platform, err
 			Type:   field.TypeUint32,
 			Value:  value,
 			Column: platform.FieldDeletedAt,
+		})
+	}
+	if value, ok := puo.mutation.EntID(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeUUID,
+			Value:  value,
+			Column: platform.FieldEntID,
 		})
 	}
 	if value, ok := puo.mutation.AccountID(); ok {

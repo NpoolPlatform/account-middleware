@@ -16,11 +16,7 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/platform"
 )
 
-func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { //nolint
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
-	}
-
+func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
 		platform, err := tx.Platform.
 			Query().
@@ -39,7 +35,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.ID(platform.AccountID),
+				entaccount.EntID(platform.AccountID),
 			).
 			ForUpdate().
 			Only(_ctx)
@@ -80,7 +76,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 				t := sql.Table(entaccount.Table)
 				s.LeftJoin(t).
 					On(
-						t.C(entaccount.FieldID),
+						t.C(entaccount.FieldEntID),
 						s.C(entplatform.FieldAccountID),
 					).
 					OnP(

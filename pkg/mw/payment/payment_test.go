@@ -26,7 +26,7 @@ func init() {
 }
 
 var ret = npool.Account{
-	ID:            uuid.NewString(),
+	EntID:         uuid.NewString(),
 	CoinTypeID:    uuid.NewString(),
 	AccountID:     uuid.NewString(),
 	Address:       uuid.NewString(),
@@ -41,14 +41,14 @@ var ret = npool.Account{
 func creatAccount(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithCoinTypeID(&ret.CoinTypeID),
-		WithAccountID(&ret.AccountID),
-		WithAddress(&ret.Address),
-		WithActive(&ret.Active),
-		WithLocked(&ret.Locked),
-		WithBlocked(&ret.Blocked),
-		WithCollectingTID(&ret.CollectingTID),
+		WithEntID(&ret.EntID, false),
+		WithCoinTypeID(&ret.CoinTypeID, true),
+		WithAccountID(&ret.AccountID, true),
+		WithAddress(&ret.Address, true),
+		WithActive(&ret.Active, true),
+		WithLocked(&ret.Locked, true),
+		WithBlocked(&ret.Blocked, true),
+		WithCollectingTID(&ret.CollectingTID, true),
 	)
 	assert.Nil(t, err)
 	info, err := handler.CreateAccount(context.Background())
@@ -56,6 +56,7 @@ func creatAccount(t *testing.T) {
 		ret.UpdatedAt = info.UpdatedAt
 		ret.CreatedAt = info.CreatedAt
 		ret.AvailableAt = info.AvailableAt
+		ret.ID = info.ID
 		assert.Equal(t, info, &ret)
 	}
 }
@@ -68,11 +69,11 @@ func updateAccount(t *testing.T) {
 
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithActive(&ret.Active),
-		WithLocked(&ret.Locked),
-		WithLockedBy(&ret.LockedBy),
-		WithBlocked(&ret.Blocked),
+		WithID(&ret.ID, true),
+		WithActive(&ret.Active, false),
+		WithLocked(&ret.Locked, false),
+		WithLockedBy(&ret.LockedBy, false),
+		WithBlocked(&ret.Blocked, false),
 	)
 	assert.Nil(t, err)
 
@@ -86,8 +87,8 @@ func updateAccount(t *testing.T) {
 	ret.Locked = false
 	handler, err = NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
-		WithLocked(&ret.Locked),
+		WithID(&ret.ID, true),
+		WithLocked(&ret.Locked, true),
 	)
 	assert.Nil(t, err)
 
@@ -102,7 +103,7 @@ func updateAccount(t *testing.T) {
 func getAccount(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
-		WithID(&ret.ID),
+		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 	info, err := handler.GetAccount(context.Background())
@@ -115,7 +116,7 @@ func getAccounts(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithConds(&npool.Conds{
-			ID:         &basetypes.StringVal{Op: cruder.EQ, Value: ret.ID},
+			EntID:      &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
 			AccountID:  &basetypes.StringVal{Op: cruder.EQ, Value: ret.AccountID},
 			Address:    &basetypes.StringVal{Op: cruder.EQ, Value: ret.Address},

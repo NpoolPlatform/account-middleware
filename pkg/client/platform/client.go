@@ -52,7 +52,7 @@ func CreateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetAccount(ctx, &npool.GetAccountRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return nil, err
@@ -132,7 +132,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 func ExistAccount(ctx context.Context, id string) (bool, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.ExistAccount(ctx, &npool.ExistAccountRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return false, err
@@ -161,7 +161,7 @@ func ExistAccountConds(ctx context.Context, conds *npool.Conds) (bool, error) {
 	return info.(bool), nil
 }
 
-func DeleteAccount(ctx context.Context, id string) (*npool.Account, error) {
+func DeleteAccount(ctx context.Context, id uint32) (*npool.Account, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.DeleteAccount(ctx, &npool.DeleteAccountRequest{
 			Info: &npool.AccountReq{

@@ -23,18 +23,18 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	}
 	handler, err := user1.NewHandler(
 		ctx,
-		user1.WithID(req.ID),
-		user1.WithAppID(req.AppID),
-		user1.WithUserID(req.UserID),
-		user1.WithCoinTypeID(req.CoinTypeID),
-		user1.WithAccountID(req.AccountID),
-		user1.WithAddress(req.Address),
-		user1.WithUsedFor(req.UsedFor),
-		user1.WithLabels(req.Labels),
-		user1.WithActive(req.Active),
-		user1.WithLocked(req.Locked),
-		user1.WithBlocked(req.Blocked),
-		user1.WithMemo(req.Memo),
+		user1.WithEntID(req.EntID, false),
+		user1.WithAppID(req.AppID, true),
+		user1.WithUserID(req.UserID, true),
+		user1.WithCoinTypeID(req.CoinTypeID, true),
+		user1.WithAccountID(req.AccountID, false),
+		user1.WithAddress(req.Address, true),
+		user1.WithUsedFor(req.UsedFor, true),
+		user1.WithLabels(req.Labels, false),
+		user1.WithActive(req.Active, false),
+		user1.WithLocked(req.Locked, false),
+		user1.WithBlocked(req.Blocked, false),
+		user1.WithMemo(req.Memo, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

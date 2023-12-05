@@ -33,7 +33,7 @@ func withCRUD(ctx context.Context, handler handler) (cruder.Any, error) {
 func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	info, err := withCRUD(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetAccount(ctx, &npool.GetAccountRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return nil, err

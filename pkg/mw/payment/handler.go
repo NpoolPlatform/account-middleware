@@ -14,7 +14,8 @@ import (
 )
 
 type Handler struct {
-	ID            *uuid.UUID
+	ID            *uint32
+	EntID         *uuid.UUID
 	CoinTypeID    *uuid.UUID
 	AccountID     *uuid.UUID
 	Address       *string
@@ -39,23 +40,42 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	return handler, nil
 }
 
-func WithID(id *string) func(context.Context, *Handler) error {
+func WithID(u *uint32, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if u == nil {
+			if must {
+				return fmt.Errorf("invalid id")
+			}
+			return nil
+		}
+		h.ID = u
+		return nil
+	}
+}
+
+func WithEntID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
+			if must {
+				return fmt.Errorf("invalid entid")
+			}
 			return nil
 		}
 		_id, err := uuid.Parse(*id)
 		if err != nil {
 			return err
 		}
-		h.ID = &_id
+		h.EntID = &_id
 		return nil
 	}
 }
 
-func WithCoinTypeID(coinTypeID *string) func(context.Context, *Handler) error {
+func WithCoinTypeID(coinTypeID *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if coinTypeID == nil {
+			if must {
+				return fmt.Errorf("invalid cointypeid")
+			}
 			return nil
 		}
 		_coinTypeID, err := uuid.Parse(*coinTypeID)
@@ -67,9 +87,12 @@ func WithCoinTypeID(coinTypeID *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithAccountID(accountID *string) func(context.Context, *Handler) error {
+func WithAccountID(accountID *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if accountID == nil {
+			if must {
+				return fmt.Errorf("invalid accountid")
+			}
 			return nil
 		}
 		_accountID, err := uuid.Parse(*accountID)
@@ -81,9 +104,12 @@ func WithAccountID(accountID *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithCollectingTID(collectingTID *string) func(context.Context, *Handler) error {
+func WithCollectingTID(collectingTID *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if collectingTID == nil {
+			if must {
+				return fmt.Errorf("invalid collectingtid")
+			}
 			return nil
 		}
 		_collectingTID, err := uuid.Parse(*collectingTID)
@@ -95,9 +121,12 @@ func WithCollectingTID(collectingTID *string) func(context.Context, *Handler) er
 	}
 }
 
-func WithAddress(address *string) func(context.Context, *Handler) error {
+func WithAddress(address *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if address == nil {
+			if must {
+				return fmt.Errorf("invalid address")
+			}
 			return nil
 		}
 		if *address == "" {
@@ -108,23 +137,26 @@ func WithAddress(address *string) func(context.Context, *Handler) error {
 	}
 }
 
-func WithActive(active *bool) func(context.Context, *Handler) error {
+func WithActive(active *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Active = active
 		return nil
 	}
 }
 
-func WithLocked(locked *bool) func(context.Context, *Handler) error {
+func WithLocked(locked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Locked = locked
 		return nil
 	}
 }
 
-func WithLockedBy(lockedBy *basetypes.AccountLockedBy) func(context.Context, *Handler) error {
+func WithLockedBy(lockedBy *basetypes.AccountLockedBy, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if lockedBy == nil {
+			if must {
+				return fmt.Errorf("invalid lockedby")
+			}
 			return nil
 		}
 		switch *lockedBy {
@@ -138,14 +170,14 @@ func WithLockedBy(lockedBy *basetypes.AccountLockedBy) func(context.Context, *Ha
 	}
 }
 
-func WithBlocked(blocked *bool) func(context.Context, *Handler) error {
+func WithBlocked(blocked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Blocked = blocked
 		return nil
 	}
 }
 
-func WithAvailableAt(availableAt *uint32) func(context.Context, *Handler) error {
+func WithAvailableAt(availableAt *uint32, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.AvailableAt = availableAt
 		return nil
@@ -160,11 +192,14 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error {
 			return nil
 		}
 		if conds.ID != nil {
-			id, err := uuid.Parse(conds.GetID().GetValue())
+			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: conds.GetID().GetValue()}
+		}
+		if conds.EntID != nil {
+			id, err := uuid.Parse(conds.GetEntID().GetValue())
 			if err != nil {
 				return err
 			}
-			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: id}
+			h.Conds.EntID = &cruder.Cond{Op: conds.GetEntID().GetOp(), Val: id}
 		}
 		if conds.CoinTypeID != nil {
 			id, err := uuid.Parse(conds.GetCoinTypeID().GetValue())

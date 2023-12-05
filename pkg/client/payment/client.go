@@ -51,7 +51,7 @@ func CreateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetAccount(ctx, &npool.GetAccountRequest{
-			ID: id,
+			EntID: id,
 		})
 		if err != nil {
 			return nil, err
@@ -128,7 +128,7 @@ func UpdateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 	return info.(*npool.Account), nil
 }
 
-func LockAccount(ctx context.Context, id string, lockedBy basetypes.AccountLockedBy) (*npool.Account, error) {
+func LockAccount(ctx context.Context, id uint32, lockedBy basetypes.AccountLockedBy) (*npool.Account, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.LockAccount(ctx, &npool.LockAccountRequest{
 			ID:       id,
@@ -145,7 +145,7 @@ func LockAccount(ctx context.Context, id string, lockedBy basetypes.AccountLocke
 	return info.(*npool.Account), nil
 }
 
-func UnlockAccount(ctx context.Context, id string) (*npool.Account, error) {
+func UnlockAccount(ctx context.Context, id uint32) (*npool.Account, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.UnlockAccount(ctx, &npool.UnlockAccountRequest{
 			ID: id,

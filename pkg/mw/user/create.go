@@ -17,37 +17,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type createHandler struct {
-	*Handler
-}
-
-func (h *createHandler) validate() error {
-	if h.AppID == nil {
-		return fmt.Errorf("invalid appid")
-	}
-	if h.UserID == nil {
-		return fmt.Errorf("invalid userid")
-	}
-	if h.CoinTypeID == nil {
-		return fmt.Errorf("invalid cointypeid")
-	}
-	if h.Address == nil {
-		return fmt.Errorf("invalid address")
-	}
-	if h.UsedFor == nil {
-		return fmt.Errorf("invalid usedfor")
-	}
-	return nil
-}
-
 func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
-	handler := &createHandler{
-		Handler: h,
-	}
-	if err := handler.validate(); err != nil {
-		return nil, err
-	}
-
 	key := fmt.Sprintf("%v:%v:%v:%v:%v", basetypes.Prefix_PrefixCreateUserAccount, *h.AppID, *h.UserID, *h.CoinTypeID, *h.Address)
 	if h.Memo != nil {
 		key = fmt.Sprintf("%v:%v", key, *h.Memo)
@@ -60,8 +30,8 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	}()
 
 	id1 := uuid.New()
-	if h.ID == nil {
-		h.ID = &id1
+	if h.EntID == nil {
+		h.EntID = &id1
 	}
 
 	id2 := uuid.New()
@@ -75,7 +45,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		if _, err := accountcrud.CreateSet(
 			tx.Account.Create(),
 			&accountcrud.Req{
-				ID:                     h.AccountID,
+				EntID:                  h.AccountID,
 				CoinTypeID:             h.CoinTypeID,
 				Address:                h.Address,
 				UsedFor:                h.UsedFor,
@@ -88,7 +58,7 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		if _, err := usercrud.CreateSet(
 			tx.User.Create(),
 			&usercrud.Req{
-				ID:         h.ID,
+				EntID:      h.EntID,
 				AppID:      h.AppID,
 				UserID:     h.UserID,
 				CoinTypeID: h.CoinTypeID,
