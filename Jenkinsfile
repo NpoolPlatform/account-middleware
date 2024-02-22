@@ -25,7 +25,6 @@ pipeline {
         expression { BUILD_TARGET == 'true' }
       }
       steps {
-        sh 'rm output/* -rf'
         sh 'make verify'
       }
     }
