@@ -278,7 +278,6 @@ pipeline {
           set -e
 
           if [ 0 -eq $rc -a x"$revlist" != x ]; then
-            tag=`git describe --tags $revlist`
             tag=`git tag --sort=-v:refname | grep [1\\|3\\|5\\|7\\|9]$ | head -n1`
             set +e
             docker images | grep account-middleware | grep $tag
