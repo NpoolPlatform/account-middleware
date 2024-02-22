@@ -103,28 +103,13 @@ pipeline {
       }
     }
 
-    stage('Generate docker image for feature') {
-      when {
-        expression { BUILD_TARGET == 'true' }
-        expression { BRANCH_NAME != 'master' }
-      }
-      steps {
-        sh 'make verify-build'
-        sh(returnStdout: false, script: '''
-          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          DEVELOPMENT=$feature_name DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images
-        '''.stripIndent())
-      }
-    }
-
     stage('Generate docker image for development') {
       when {
         expression { BUILD_TARGET == 'true' }
-        expression { BRANCH_NAME == 'master' }
       }
       steps {
         sh 'make verify-build'
-        sh 'DEVELOPMENT=development DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
+        sh 'DOCKER_REGISTRY=$DOCKER_REGISTRY make generate-docker-images'
       }
     }
 
@@ -138,7 +123,7 @@ pipeline {
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
             tag=`git describe --tags $revlist`
 
             major=`echo $tag | awk -F '.' '{ print $1 }'`
@@ -179,7 +164,7 @@ pipeline {
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
             tag=`git describe --tags $revlist`
 
             major=`echo $tag | awk -F '.' '{ print $1 }'`
@@ -212,7 +197,7 @@ pipeline {
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ 0 -eq $rc ]; then
+          if [ 0 -eq $rc -a x"$revlist" != x ]; then
             tag=`git describe --tags $revlist`
 
             major=`echo $tag | awk -F '.' '{ print $1 }'`
@@ -257,41 +242,22 @@ pipeline {
       }
     }
 
-    stage('Release docker image for feature') {
-      when {
-        expression { RELEASE_TARGET == 'true' }
-        expression { BRANCH_NAME != 'master' }
-      }
-      steps {
-        sh(returnStdout: false, script: '''
-          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          set +e
-          docker images | grep account-middleware | grep $feature_name
-          rc=$?
-          set -e
-          if [ 0 -eq $rc ]; then
-            TAG=$feature_name DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
-          fi
-          images=`docker images | grep entropypool | grep account-middleware | grep none | awk '{ print $3 }'`
-          for image in $images; do
-            docker rmi $image -f
-          done
-        '''.stripIndent())
-      }
-    }
-
     stage('Release docker image for development') {
       when {
         expression { RELEASE_TARGET == 'true' }
       }
       steps {
         sh(returnStdout: false, script: '''
+          branch=latest
+          if [ "x$BRANCH_NAME" != "xmaster" ]; then
+            branch=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          fi
           set +e
-          docker images | grep account-middleware | grep latest
+          docker images | grep account-middleware | grep $branch
           rc=$?
           set -e
           if [ 0 -eq $rc ]; then
-            TAG=latest DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
+            DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
           fi
           images=`docker images | grep entropypool | grep account-middleware | grep none | awk '{ print $3 }'`
           for image in $images; do
@@ -314,12 +280,13 @@ pipeline {
 
           if [ 0 -eq $rc -a x"$revlist" != x ]; then
             tag=`git describe --tags $revlist`
+            tag=`git tag --sort=-v:refname | grep [1\\|3\\|5\\|7\\|9]$ | head -n1`
             set +e
             docker images | grep account-middleware | grep $tag
             rc=$?
             set -e
             if [ 0 -eq $rc ]; then
-              TAG=$tag DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
+              DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
             fi
           fi
         '''.stripIndent())
@@ -338,31 +305,15 @@ pipeline {
           set -e
 
           if [ 0 -eq $rc -a x"$taglist" != x ]; then
-            tag=`git describe --abbrev=0 --tags $taglist |grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
+            tag=`git tag --sort=-v:refname | grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
             set +e
             docker images | grep account-middleware | grep $tag
             rc=$?
             set -e
             if [ 0 -eq $rc ]; then
-              TAG=$tag DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
+              DOCKER_REGISTRY=$DOCKER_REGISTRY make release-docker-images
             fi
           fi
-        '''.stripIndent())
-      }
-    }
-
-    stage('Deploy for feature') {
-      when {
-        expression { DEPLOY_TARGET == 'true' }
-        expression { TARGET_ENV ==~ /.*development.*/ }
-        expression { BRANCH_NAME != 'master' }
-      }
-      steps {
-        sh(returnStdout: false, script: '''
-          feature_name=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
-          sed -i "s/account-middleware:latest/account-middleware:$feature_name/g" cmd/account-middleware/k8s/02-account-middleware.yaml
-          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/account-middleware/k8s/02-account-middleware.yaml
-          TAG=$feature_name make deploy-to-k8s-cluster
         '''.stripIndent())
       }
     }
@@ -371,11 +322,21 @@ pipeline {
       when {
         expression { DEPLOY_TARGET == 'true' }
         expression { TARGET_ENV ==~ /.*development.*/ }
-        expression { BRANCH_NAME == 'master' }
       }
       steps {
-        sh 'sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/account-middleware/k8s/02-account-middleware.yaml'
-        sh 'TAG=latest make deploy-to-k8s-cluster'
+        sh(returnStdout: false, script: '''
+          branch=latest
+          if [ "x$BRANCH_NAME" != "xmaster" ]; then
+            branch=`echo $BRANCH_NAME | awk -F '/' '{ print $2 }'`
+          fi
+          sed -i "s/account-middleware:latest/account-middleware:$branch/g" cmd/account-middleware/k8s/02-account-middleware.yaml
+          sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/account-middleware/k8s/02-account-middleware.yaml
+          if [ "x$REPLICAS_COUNT" == "x" ];then
+            REPLICAS_COUNT=2
+          fi
+          sed -i "s/replicas: 2/replicas: $REPLICAS_COUNT/g" cmd/account-middleware/k8s/02-account-middleware.yaml
+          make deploy-to-k8s-cluster
+        '''.stripIndent())
       }
     }
 
@@ -390,16 +351,20 @@ pipeline {
           revlist=`git rev-list --tags --max-count=1`
           rc=$?
           set -e
-          if [ ! 0 -eq $rc ]; then
+          if [ ! 0 -eq $rc -o x"$revlist" == x]; then
             exit 0
           fi
-          tag=`git describe --tags $revlist`
+          tag=`git tag --sort=-v:refname | grep [1\\|3\\|5\\|7\\|9]$ | head -n1`
 
           git reset --hard
           git checkout $tag
           sed -i "s/account-middleware:latest/account-middleware:$tag/g" cmd/account-middleware/k8s/02-account-middleware.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/account-middleware/k8s/02-account-middleware.yaml
-          TAG=$tag make deploy-to-k8s-cluster
+          if [ "x$REPLICAS_COUNT" == "x" ];then
+            REPLICAS_COUNT=2
+          fi
+          sed -i "s/replicas: 2/replicas: $REPLICAS_COUNT/g" cmd/account-middleware/k8s/02-account-middleware.yaml
+          make deploy-to-k8s-cluster
         '''.stripIndent())
       }
     }
@@ -415,15 +380,19 @@ pipeline {
           taglist=`git rev-list --tags`
           rc=$?
           set -e
-          if [ ! 0 -eq $rc ]; then
+          if [ ! 0 -eq $rc -o x"$revlist" == x]; then
             exit 0
           fi
-          tag=`git describe --abbrev=0 --tags $taglist |grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
+          tag=`git tag --sort=-v:refname | grep [0\\|2\\|4\\|6\\|8]$ | head -n1`
           git reset --hard
           git checkout $tag
           sed -i "s/account-middleware:latest/account-middleware:$tag/g" cmd/account-middleware/k8s/02-account-middleware.yaml
           sed -i "s/uhub.service.ucloud.cn/$DOCKER_REGISTRY/g" cmd/account-middleware/k8s/02-account-middleware.yaml
-          TAG=$tag make deploy-to-k8s-cluster
+          if [ "x$REPLICAS_COUNT" == "x" ];then
+            REPLICAS_COUNT=2
+          fi
+          sed -i "s/replicas: 2/replicas: $REPLICAS_COUNT/g" cmd/account-middleware/k8s/02-account-middleware.yaml
+          make deploy-to-k8s-cluster
         '''.stripIndent())
       }
     }
