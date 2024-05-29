@@ -79,6 +79,7 @@ type Conds struct {
 	EntID                  *cruder.Cond
 	EntIDs                 *cruder.Cond
 	CoinTypeID             *cruder.Cond
+	CoinTypeIDs            *cruder.Cond
 	Address                *cruder.Cond
 	UsedFor                *cruder.Cond
 	PlatformHoldPrivateKey *cruder.Cond
@@ -122,6 +123,18 @@ func SetQueryConds(q *ent.AccountQuery, conds *Conds) (*ent.AccountQuery, error)
 		switch conds.CoinTypeID.Op {
 		case cruder.EQ:
 			q.Where(entaccount.CoinTypeID(id))
+		default:
+			return nil, fmt.Errorf("invalid account field")
+		}
+	}
+	if conds.CoinTypeIDs != nil {
+		ids, ok := conds.CoinTypeIDs.Val.([]uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid account cointypeids")
+		}
+		switch conds.CoinTypeIDs.Op {
+		case cruder.IN:
+			q.Where(entaccount.CoinTypeIDIn(ids...))
 		default:
 			return nil, fmt.Errorf("invalid account field")
 		}
