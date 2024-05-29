@@ -87,6 +87,20 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 			sql.EQ(t.C(entaccount.FieldCoinTypeID), id),
 		)
 	}
+	if h.Conds != nil && h.Conds.CoinTypeIDs != nil {
+		ids, ok := h.Conds.CoinTypeIDs.Val.([]uuid.UUID)
+		if !ok {
+			return fmt.Errorf("invalid platform cointypeid")
+		}
+		s.Where(
+			sql.In(t.C(entaccount.FieldCoinTypeID), func() (_ids []interface{}) {
+				for _, id := range ids {
+					_ids = append(_ids, interface{}(id))
+				}
+				return
+			}),
+		)
+	}
 	if h.Conds != nil && h.Conds.Address != nil {
 		addr, ok := h.Conds.Address.Val.(string)
 		if !ok {
