@@ -22,7 +22,8 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 	}
 	handler, err := goodbenefit1.NewHandler(
 		ctx,
-		goodbenefit1.WithID(req.ID, true),
+		goodbenefit1.WithID(req.ID, false),
+		goodbenefit1.WithEntID(req.EntID, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
