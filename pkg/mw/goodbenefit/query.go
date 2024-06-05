@@ -98,7 +98,7 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 					_ids = append(_ids, interface{}(id))
 				}
 				return
-			}),
+			}()...),
 		)
 	}
 	if h.Conds != nil && h.Conds.Address != nil {
