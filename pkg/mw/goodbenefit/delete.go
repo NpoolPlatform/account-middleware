@@ -19,6 +19,9 @@ func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
 	if err != nil {
 		return nil, err
 	}
+	if h.ID == nil {
+		h.ID = &info.ID
+	}
 
 	now := uint32(time.Now().Unix())
 	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
