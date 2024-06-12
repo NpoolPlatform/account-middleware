@@ -19,6 +19,9 @@ func (h *Handler) DeleteAccount(ctx context.Context) (*npool.Account, error) {
 	if err != nil {
 		return nil, err
 	}
+	if info == nil {
+		return nil, nil
+	}
 	if h.ID == nil {
 		h.ID = &info.ID
 	}
