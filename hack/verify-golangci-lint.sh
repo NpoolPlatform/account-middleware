@@ -19,8 +19,10 @@ fi
 
 if ! command -v golangci-lint; then
     curl -sfL $URL | sh -s $VERSION
-    PATH=$PWD/bin:$PATH
 fi
+
+PATH=$PWD/bin:$PATH
+whereis golangci-lint
 
 golangci-lint version
 golangci-lint linters
