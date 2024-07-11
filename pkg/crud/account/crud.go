@@ -90,7 +90,7 @@ type Conds struct {
 	CreatedAt              *cruder.Cond
 }
 
-func SetQueryConds(q *ent.AccountQuery, conds *Conds) (*ent.AccountQuery, error) { // nolint
+func SetQueryConds(q *ent.AccountQuery, conds *Conds) (*ent.AccountQuery, error) { //nolint
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)
 		if !ok {
