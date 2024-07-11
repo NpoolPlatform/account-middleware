@@ -49,12 +49,13 @@ func UpdateSet(u *ent.PlatformUpdateOne, req *Req) *ent.PlatformUpdateOne {
 
 type Conds struct {
 	accountcrud.Conds
-	AccountID *cruder.Cond
-	UsedFor   *cruder.Cond
-	Backup    *cruder.Cond
+	AccountID  *cruder.Cond
+	AccountIDs *cruder.Cond
+	UsedFor    *cruder.Cond
+	Backup     *cruder.Cond
 }
 
-//nolint:gocyclo
+//nolint:gocyclo,funlen
 func SetQueryConds(q *ent.PlatformQuery, conds *Conds) (*ent.PlatformQuery, error) {
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)
@@ -88,6 +89,18 @@ func SetQueryConds(q *ent.PlatformQuery, conds *Conds) (*ent.PlatformQuery, erro
 		switch conds.AccountID.Op {
 		case cruder.EQ:
 			q.Where(entplatform.AccountID(id))
+		default:
+			return nil, fmt.Errorf("invalid platform field")
+		}
+	}
+	if conds.AccountIDs != nil {
+		ids, ok := conds.AccountIDs.Val.([]uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid platform accountids")
+		}
+		switch conds.AccountIDs.Op {
+		case cruder.IN:
+			q.Where(entplatform.AccountIDIn(ids...))
 		default:
 			return nil, fmt.Errorf("invalid platform field")
 		}
