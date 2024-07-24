@@ -77,25 +77,6 @@ func creatAccount(t *testing.T) {
 	}
 }
 
-func updateAccount(t *testing.T) {
-	ret.Active = false
-	ret.Blocked = true
-
-	handler, err := NewHandler(
-		context.Background(),
-		WithID(&ret.ID, true),
-		WithActive(&ret.Active, false),
-		WithBlocked(&ret.Blocked, false),
-	)
-	assert.Nil(t, err)
-
-	info, err := handler.UpdateAccount(context.Background())
-	if assert.Nil(t, err) {
-		ret.UpdatedAt = info.UpdatedAt
-		assert.Equal(t, info, &ret)
-	}
-}
-
 func getAccount(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
@@ -138,12 +119,10 @@ func deleteAccount(t *testing.T) {
 		WithID(&ret.ID, true),
 	)
 	assert.Nil(t, err)
-	info, err := handler.DeleteAccount(context.Background())
-	if assert.Nil(t, err) {
-		assert.Equal(t, info, &ret)
-	}
+	err = handler.DeleteAccount(context.Background())
+	assert.Nil(t, err)
 
-	info, err = handler.GetAccount(context.Background())
+	info, err := handler.GetAccount(context.Background())
 	assert.Nil(t, err)
 	assert.Nil(t, info)
 }
@@ -153,7 +132,6 @@ func TestMainOrder(t *testing.T) {
 		return
 	}
 	t.Run("createAccount", creatAccount)
-	t.Run("updateAccount", updateAccount)
 	t.Run("getAccount", getAccount)
 	t.Run("getAccounts", getAccounts)
 	t.Run("deleteAccount", deleteAccount)

@@ -34,7 +34,20 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 		return &npool.DeleteAccountResponse{}, status.Error(codes.Aborted, err.Error())
 	}
 
-	info, err := handler.DeleteAccount(ctx)
+	info, err := handler.GetAccount(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"DeleteAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.DeleteAccountResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+	if info == nil {
+		return &npool.DeleteAccountResponse{}, nil
+	}
+
+	err = handler.DeleteAccount(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"DeleteAccount",

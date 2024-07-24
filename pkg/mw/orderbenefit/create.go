@@ -8,7 +8,6 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
-	orderbenefitcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
@@ -36,7 +35,10 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 		h.AccountID = &id2
 	}
 
-	privateKey := true
+	privateKey := false
+	usedFor := basetypes.AccountUsedFor_OrderBenefit
+
+	sqlH := h.newSQLHandler()
 
 	err := db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
 		if _, err := accountcrud.CreateSet(
@@ -45,25 +47,24 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 				EntID:                  h.AccountID,
 				CoinTypeID:             h.CoinTypeID,
 				Address:                h.Address,
-				UsedFor:                basetypes.AccountUsedFor_OrderBenefit.Enum(),
+				UsedFor:                &usedFor,
 				PlatformHoldPrivateKey: &privateKey,
 			},
 		).Save(ctx); err != nil {
 			return err
 		}
 
-		if _, err := orderbenefitcrud.CreateSet(
-			tx.OrderBenefit.Create(),
-			&orderbenefitcrud.Req{
-				EntID:      h.EntID,
-				AppID:      h.AppID,
-				UserID:     h.UserID,
-				CoinTypeID: h.CoinTypeID,
-				AccountID:  h.AccountID,
-				OrderID:    h.OrderID,
-			},
-		).Save(ctx); err != nil {
+		sql, err := sqlH.genCreateSQL()
+		if err != nil {
 			return err
+		}
+
+		rc, err := tx.ExecContext(ctx, sql)
+		if err != nil {
+			return err
+		}
+		if n, err := rc.RowsAffected(); err != nil || n != 1 {
+			return fmt.Errorf("fail create gooduser: %v", err)
 		}
 		return nil
 	})
