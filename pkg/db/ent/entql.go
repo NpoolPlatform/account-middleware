@@ -6,6 +6,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/payment"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/transfer"
@@ -19,7 +20,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 7)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 8)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   account.Table,
@@ -92,6 +93,28 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[3] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   orderbenefit.Table,
+			Columns: orderbenefit.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: orderbenefit.FieldID,
+			},
+		},
+		Type: "OrderBenefit",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			orderbenefit.FieldCreatedAt:  {Type: field.TypeUint32, Column: orderbenefit.FieldCreatedAt},
+			orderbenefit.FieldUpdatedAt:  {Type: field.TypeUint32, Column: orderbenefit.FieldUpdatedAt},
+			orderbenefit.FieldDeletedAt:  {Type: field.TypeUint32, Column: orderbenefit.FieldDeletedAt},
+			orderbenefit.FieldEntID:      {Type: field.TypeUUID, Column: orderbenefit.FieldEntID},
+			orderbenefit.FieldAppID:      {Type: field.TypeUUID, Column: orderbenefit.FieldAppID},
+			orderbenefit.FieldUserID:     {Type: field.TypeUUID, Column: orderbenefit.FieldUserID},
+			orderbenefit.FieldCoinTypeID: {Type: field.TypeUUID, Column: orderbenefit.FieldCoinTypeID},
+			orderbenefit.FieldAccountID:  {Type: field.TypeUUID, Column: orderbenefit.FieldAccountID},
+			orderbenefit.FieldOrderID:    {Type: field.TypeUUID, Column: orderbenefit.FieldOrderID},
+		},
+	}
+	graph.Nodes[4] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   payment.Table,
 			Columns: payment.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -110,7 +133,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			payment.FieldAvailableAt:   {Type: field.TypeUint32, Column: payment.FieldAvailableAt},
 		},
 	}
-	graph.Nodes[4] = &sqlgraph.Node{
+	graph.Nodes[5] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   platform.Table,
 			Columns: platform.Columns,
@@ -130,7 +153,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			platform.FieldBackup:    {Type: field.TypeBool, Column: platform.FieldBackup},
 		},
 	}
-	graph.Nodes[5] = &sqlgraph.Node{
+	graph.Nodes[6] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   transfer.Table,
 			Columns: transfer.Columns,
@@ -150,7 +173,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			transfer.FieldTargetUserID: {Type: field.TypeUUID, Column: transfer.FieldTargetUserID},
 		},
 	}
-	graph.Nodes[6] = &sqlgraph.Node{
+	graph.Nodes[7] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -459,6 +482,91 @@ func (f *GoodBenefitFilter) WhereTransactionID(p entql.ValueP) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (obq *OrderBenefitQuery) addPredicate(pred func(s *sql.Selector)) {
+	obq.predicates = append(obq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the OrderBenefitQuery builder.
+func (obq *OrderBenefitQuery) Filter() *OrderBenefitFilter {
+	return &OrderBenefitFilter{config: obq.config, predicateAdder: obq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *OrderBenefitMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the OrderBenefitMutation builder.
+func (m *OrderBenefitMutation) Filter() *OrderBenefitFilter {
+	return &OrderBenefitFilter{config: m.config, predicateAdder: m}
+}
+
+// OrderBenefitFilter provides a generic filtering capability at runtime for OrderBenefitQuery.
+type OrderBenefitFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *OrderBenefitFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *OrderBenefitFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(orderbenefit.FieldID))
+}
+
+// WhereCreatedAt applies the entql uint32 predicate on the created_at field.
+func (f *OrderBenefitFilter) WhereCreatedAt(p entql.Uint32P) {
+	f.Where(p.Field(orderbenefit.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql uint32 predicate on the updated_at field.
+func (f *OrderBenefitFilter) WhereUpdatedAt(p entql.Uint32P) {
+	f.Where(p.Field(orderbenefit.FieldUpdatedAt))
+}
+
+// WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
+func (f *OrderBenefitFilter) WhereDeletedAt(p entql.Uint32P) {
+	f.Where(p.Field(orderbenefit.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *OrderBenefitFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(orderbenefit.FieldEntID))
+}
+
+// WhereAppID applies the entql [16]byte predicate on the app_id field.
+func (f *OrderBenefitFilter) WhereAppID(p entql.ValueP) {
+	f.Where(p.Field(orderbenefit.FieldAppID))
+}
+
+// WhereUserID applies the entql [16]byte predicate on the user_id field.
+func (f *OrderBenefitFilter) WhereUserID(p entql.ValueP) {
+	f.Where(p.Field(orderbenefit.FieldUserID))
+}
+
+// WhereCoinTypeID applies the entql [16]byte predicate on the coin_type_id field.
+func (f *OrderBenefitFilter) WhereCoinTypeID(p entql.ValueP) {
+	f.Where(p.Field(orderbenefit.FieldCoinTypeID))
+}
+
+// WhereAccountID applies the entql [16]byte predicate on the account_id field.
+func (f *OrderBenefitFilter) WhereAccountID(p entql.ValueP) {
+	f.Where(p.Field(orderbenefit.FieldAccountID))
+}
+
+// WhereOrderID applies the entql [16]byte predicate on the order_id field.
+func (f *OrderBenefitFilter) WhereOrderID(p entql.ValueP) {
+	f.Where(p.Field(orderbenefit.FieldOrderID))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (pq *PaymentQuery) addPredicate(pred func(s *sql.Selector)) {
 	pq.predicates = append(pq.predicates, pred)
 }
@@ -487,7 +595,7 @@ type PaymentFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PaymentFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -562,7 +670,7 @@ type PlatformFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PlatformFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -637,7 +745,7 @@ type TransferFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TransferFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -712,7 +820,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})

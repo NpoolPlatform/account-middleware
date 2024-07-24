@@ -374,7 +374,6 @@ func (pc *PlatformCreate) createSpec() (*Platform, *sqlgraph.CreateSpec) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (pc *PlatformCreate) OnConflict(opts ...sql.ConflictOption) *PlatformUpsertOne {
 	pc.conflict = opts
 	return &PlatformUpsertOne{
@@ -388,7 +387,6 @@ func (pc *PlatformCreate) OnConflict(opts ...sql.ConflictOption) *PlatformUpsert
 //	client.Platform.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (pc *PlatformCreate) OnConflictColumns(columns ...string) *PlatformUpsertOne {
 	pc.conflict = append(pc.conflict, sql.ConflictColumns(columns...))
 	return &PlatformUpsertOne{
@@ -540,7 +538,6 @@ func (u *PlatformUpsert) ClearBackup() *PlatformUpsert {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *PlatformUpsertOne) UpdateNewValues() *PlatformUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -554,10 +551,9 @@ func (u *PlatformUpsertOne) UpdateNewValues() *PlatformUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//  client.Platform.Create().
-//      OnConflict(sql.ResolveWithIgnore()).
-//      Exec(ctx)
-//
+//	client.Platform.Create().
+//	    OnConflict(sql.ResolveWithIgnore()).
+//	    Exec(ctx)
 func (u *PlatformUpsertOne) Ignore() *PlatformUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -853,7 +849,6 @@ func (pcb *PlatformCreateBulk) ExecX(ctx context.Context) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
-//
 func (pcb *PlatformCreateBulk) OnConflict(opts ...sql.ConflictOption) *PlatformUpsertBulk {
 	pcb.conflict = opts
 	return &PlatformUpsertBulk{
@@ -867,7 +862,6 @@ func (pcb *PlatformCreateBulk) OnConflict(opts ...sql.ConflictOption) *PlatformU
 //	client.Platform.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-//
 func (pcb *PlatformCreateBulk) OnConflictColumns(columns ...string) *PlatformUpsertBulk {
 	pcb.conflict = append(pcb.conflict, sql.ConflictColumns(columns...))
 	return &PlatformUpsertBulk{
@@ -892,7 +886,6 @@ type PlatformUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
-//
 func (u *PlatformUpsertBulk) UpdateNewValues() *PlatformUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -912,7 +905,6 @@ func (u *PlatformUpsertBulk) UpdateNewValues() *PlatformUpsertBulk {
 //	client.Platform.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
-//
 func (u *PlatformUpsertBulk) Ignore() *PlatformUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

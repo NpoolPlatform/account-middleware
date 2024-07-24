@@ -8,6 +8,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/payment"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/schema"
@@ -202,6 +203,60 @@ func init() {
 	goodbenefitDescTransactionID := goodbenefitFields[3].Descriptor()
 	// goodbenefit.DefaultTransactionID holds the default value on creation for the transaction_id field.
 	goodbenefit.DefaultTransactionID = goodbenefitDescTransactionID.Default.(func() uuid.UUID)
+	orderbenefitMixin := schema.OrderBenefit{}.Mixin()
+	orderbenefit.Policy = privacy.NewPolicies(orderbenefitMixin[0], schema.OrderBenefit{})
+	orderbenefit.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := orderbenefit.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	orderbenefitMixinFields0 := orderbenefitMixin[0].Fields()
+	_ = orderbenefitMixinFields0
+	orderbenefitMixinFields1 := orderbenefitMixin[1].Fields()
+	_ = orderbenefitMixinFields1
+	orderbenefitFields := schema.OrderBenefit{}.Fields()
+	_ = orderbenefitFields
+	// orderbenefitDescCreatedAt is the schema descriptor for created_at field.
+	orderbenefitDescCreatedAt := orderbenefitMixinFields0[0].Descriptor()
+	// orderbenefit.DefaultCreatedAt holds the default value on creation for the created_at field.
+	orderbenefit.DefaultCreatedAt = orderbenefitDescCreatedAt.Default.(func() uint32)
+	// orderbenefitDescUpdatedAt is the schema descriptor for updated_at field.
+	orderbenefitDescUpdatedAt := orderbenefitMixinFields0[1].Descriptor()
+	// orderbenefit.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	orderbenefit.DefaultUpdatedAt = orderbenefitDescUpdatedAt.Default.(func() uint32)
+	// orderbenefit.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	orderbenefit.UpdateDefaultUpdatedAt = orderbenefitDescUpdatedAt.UpdateDefault.(func() uint32)
+	// orderbenefitDescDeletedAt is the schema descriptor for deleted_at field.
+	orderbenefitDescDeletedAt := orderbenefitMixinFields0[2].Descriptor()
+	// orderbenefit.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	orderbenefit.DefaultDeletedAt = orderbenefitDescDeletedAt.Default.(func() uint32)
+	// orderbenefitDescEntID is the schema descriptor for ent_id field.
+	orderbenefitDescEntID := orderbenefitMixinFields1[1].Descriptor()
+	// orderbenefit.DefaultEntID holds the default value on creation for the ent_id field.
+	orderbenefit.DefaultEntID = orderbenefitDescEntID.Default.(func() uuid.UUID)
+	// orderbenefitDescAppID is the schema descriptor for app_id field.
+	orderbenefitDescAppID := orderbenefitFields[0].Descriptor()
+	// orderbenefit.DefaultAppID holds the default value on creation for the app_id field.
+	orderbenefit.DefaultAppID = orderbenefitDescAppID.Default.(func() uuid.UUID)
+	// orderbenefitDescUserID is the schema descriptor for user_id field.
+	orderbenefitDescUserID := orderbenefitFields[1].Descriptor()
+	// orderbenefit.DefaultUserID holds the default value on creation for the user_id field.
+	orderbenefit.DefaultUserID = orderbenefitDescUserID.Default.(func() uuid.UUID)
+	// orderbenefitDescCoinTypeID is the schema descriptor for coin_type_id field.
+	orderbenefitDescCoinTypeID := orderbenefitFields[2].Descriptor()
+	// orderbenefit.DefaultCoinTypeID holds the default value on creation for the coin_type_id field.
+	orderbenefit.DefaultCoinTypeID = orderbenefitDescCoinTypeID.Default.(func() uuid.UUID)
+	// orderbenefitDescAccountID is the schema descriptor for account_id field.
+	orderbenefitDescAccountID := orderbenefitFields[3].Descriptor()
+	// orderbenefit.DefaultAccountID holds the default value on creation for the account_id field.
+	orderbenefit.DefaultAccountID = orderbenefitDescAccountID.Default.(func() uuid.UUID)
+	// orderbenefitDescOrderID is the schema descriptor for order_id field.
+	orderbenefitDescOrderID := orderbenefitFields[4].Descriptor()
+	// orderbenefit.DefaultOrderID holds the default value on creation for the order_id field.
+	orderbenefit.DefaultOrderID = orderbenefitDescOrderID.Default.(func() uuid.UUID)
 	paymentMixin := schema.Payment{}.Mixin()
 	payment.Policy = privacy.NewPolicies(paymentMixin[0], schema.Payment{})
 	payment.Hooks[0] = func(next ent.Mutator) ent.Mutator {
