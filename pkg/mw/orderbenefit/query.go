@@ -174,44 +174,47 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 	return handler.infos[0], nil
 }
 
-func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
-	handler := &queryHandler{
-		Handler: h,
-	}
-
+func (h *queryHandler) getAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
 	var err error
 	err = db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
-		handler.stmSelect, err = handler.queryAccounts(cli)
+		h.stmSelect, err = h.queryAccounts(cli)
 		if err != nil {
 			return err
 		}
-		handler.stmCount, err = handler.queryAccounts(cli)
+		h.stmCount, err = h.queryAccounts(cli)
 		if err != nil {
 			return err
 		}
 
-		if err := handler.queryJoin(); err != nil {
+		if err := h.queryJoin(); err != nil {
 			return err
 		}
 
-		_total, err := handler.stmCount.Count(_ctx)
+		_total, err := h.stmCount.Count(_ctx)
 		if err != nil {
 			return err
 		}
-		handler.total = uint32(_total)
+		h.total = uint32(_total)
 
-		handler.stmSelect.
+		h.stmSelect.
 			Offset(int(h.Offset)).
 			Limit(int(h.Limit)).
 			Order(ent.Desc(entorderbenefit.FieldCreatedAt))
 
-		return handler.scan(_ctx)
+		return h.scan(_ctx)
 	})
 	if err != nil {
 		return nil, 0, err
 	}
 
-	handler.formalize()
+	h.formalize()
 
-	return handler.infos, handler.total, nil
+	return h.infos, h.total, nil
+}
+
+func (h *Handler) GetAccounts(ctx context.Context) ([]*npool.Account, uint32, error) {
+	handler := &queryHandler{
+		Handler: h,
+	}
+	return handler.getAccounts(ctx)
 }

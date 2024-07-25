@@ -9,23 +9,31 @@ import (
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
 
+	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 	"github.com/google/uuid"
 )
 
 type Handler struct {
 	orderbenefitcrud.Req
-	ID      *uint32
-	Address *string
-	Active  *bool
-	Blocked *bool
-	Locked  *bool
-	Conds   *orderbenefitcrud.Conds
-	Offset  int32
-	Limit   int32
+	ID                     *uint32
+	Address                *string
+	platformHoldPrivateKey *bool
+	usedFor                *basetypes.AccountUsedFor
+	Active                 *bool
+	Blocked                *bool
+	Locked                 *bool
+	Conds                  *orderbenefitcrud.Conds
+	Offset                 int32
+	Limit                  int32
 }
 
 func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) error) (*Handler, error) {
 	handler := &Handler{}
+	privateKey := false
+	usedFor := basetypes.AccountUsedFor_OrderBenefit
+
+	handler.platformHoldPrivateKey = &privateKey
+	handler.usedFor = &usedFor
 	for _, opt := range options {
 		if err := opt(ctx, handler); err != nil {
 			return nil, err
