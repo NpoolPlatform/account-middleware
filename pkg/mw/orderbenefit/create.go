@@ -70,6 +70,10 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 		if err != nil {
 			return false, err
 		}
+
+		if baseAccount != nil && baseAccount.UsedFor != *h.usedFor {
+			return false, fmt.Errorf("invalid account usedfor")
+		}
 	}
 
 	if baseAccount == nil && (h.CoinTypeID == nil || h.Address == nil) {
