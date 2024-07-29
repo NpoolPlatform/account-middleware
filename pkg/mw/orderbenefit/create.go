@@ -17,7 +17,6 @@ import (
 	"github.com/google/uuid"
 )
 
-//nolint:gocyclo
 func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) {
 	var baseAccount *pbaccount.Account
 
@@ -36,7 +35,7 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 			return false, fmt.Errorf("invalid accountid")
 		}
 
-		if baseAccount.UsedFor != *h.usedFor {
+		if baseAccount.UsedFor != *h.UsedFor {
 			return false, fmt.Errorf("invalid account usedfor")
 		}
 
@@ -80,8 +79,8 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 					EntID:                  h.AccountID,
 					CoinTypeID:             h.CoinTypeID,
 					Address:                h.Address,
-					UsedFor:                h.usedFor,
-					PlatformHoldPrivateKey: h.platformHoldPrivateKey,
+					UsedFor:                h.UsedFor,
+					PlatformHoldPrivateKey: h.PlatformHoldPrivateKey,
 				},
 			).Save(ctx); err != nil {
 				return err
@@ -113,7 +112,6 @@ func (h *Handler) CreateAccounts(ctx context.Context) ([]*npool.Account, error) 
 	entIDs := []uuid.UUID{}
 
 	err := db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		fmt.Println("error ssssssssss", h.Reqs)
 		for _, req := range h.Reqs {
 			h.baseReq = *req
 
@@ -135,8 +133,8 @@ func (h *Handler) CreateAccounts(ctx context.Context) ([]*npool.Account, error) 
 						EntID:                  h.AccountID,
 						CoinTypeID:             h.CoinTypeID,
 						Address:                h.Address,
-						UsedFor:                h.usedFor,
-						PlatformHoldPrivateKey: h.platformHoldPrivateKey,
+						UsedFor:                h.UsedFor,
+						PlatformHoldPrivateKey: h.PlatformHoldPrivateKey,
 					},
 				).Save(ctx); err != nil {
 					return err

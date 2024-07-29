@@ -61,3 +61,33 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 		Info: info,
 	}, nil
 }
+
+//nolint:dupl
+func (s *Server) DeleteAccounts(ctx context.Context, in *npool.DeleteAccountsRequest) (*npool.DeleteAccountsResponse, error) {
+	handler, err := orderbenefit1.NewHandler(
+		ctx,
+		orderbenefit1.WithReqs(in.GetInfos(), true),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"DeleteAccounts",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.DeleteAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	infos, err := handler.DeleteAccounts(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"DeleteAccounts",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.DeleteAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	return &npool.DeleteAccountsResponse{
+		Infos: infos,
+	}, nil
+}

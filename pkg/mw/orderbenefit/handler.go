@@ -17,8 +17,8 @@ type baseReq struct {
 	orderbenefitcrud.Req
 	ID                     *uint32
 	Address                *string
-	platformHoldPrivateKey *bool
-	usedFor                *basetypes.AccountUsedFor
+	PlatformHoldPrivateKey *bool
+	UsedFor                *basetypes.AccountUsedFor
 	Active                 *bool
 	Blocked                *bool
 	Locked                 *bool
@@ -37,8 +37,8 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	privateKey := false
 	usedFor := basetypes.AccountUsedFor_OrderBenefit
 
-	handler.platformHoldPrivateKey = &privateKey
-	handler.usedFor = &usedFor
+	handler.PlatformHoldPrivateKey = &privateKey
+	handler.UsedFor = &usedFor
 	for _, opt := range options {
 		if err := opt(ctx, handler); err != nil {
 			return nil, err
@@ -199,6 +199,7 @@ func WithLocked(locked *bool, must bool) func(context.Context, *Handler) error {
 	}
 }
 
+//nolint:gocyclo
 func WithReqs(reqs []*orderbenefit.AccountReq, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if len(reqs) == 0 && must {

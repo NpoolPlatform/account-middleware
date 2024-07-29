@@ -58,6 +58,7 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 	}, nil
 }
 
+//nolint:dupl
 func (s *Server) CreateAccounts(ctx context.Context, in *npool.CreateAccountsRequest) (*npool.CreateAccountsResponse, error) {
 	handler, err := orderbenefit1.NewHandler(
 		ctx,
