@@ -49,6 +49,22 @@ func CreateAccount(ctx context.Context, in *npool.AccountReq) (*npool.Account, e
 	return info.(*npool.Account), nil
 }
 
+func CreateAccounts(ctx context.Context, infos []*npool.AccountReq) ([]*npool.Account, error) {
+	ret, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
+		resp, err := cli.CreateAccounts(ctx, &npool.CreateAccountsRequest{
+			Infos: infos,
+		})
+		if err != nil {
+			return nil, err
+		}
+		return resp.Infos, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return ret.([]*npool.Account), nil
+}
+
 func GetAccount(ctx context.Context, id string) (*npool.Account, error) {
 	info, err := do(ctx, func(_ctx context.Context, cli npool.MiddlewareClient) (cruder.Any, error) {
 		resp, err := cli.GetAccount(ctx, &npool.GetAccountRequest{
