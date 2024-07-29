@@ -7,12 +7,12 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 	"github.com/NpoolPlatform/account-middleware/pkg/mw/account"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
-	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
+	"github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	pbaccount "github.com/NpoolPlatform/message/npool/account/mw/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
-	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"github.com/google/uuid"
 )
@@ -60,14 +60,6 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 }
 
 func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
-	key := fmt.Sprintf("%v:%v:%v:%v", basetypes.Prefix_PrefixCreateUserAccount, *h.AppID, *h.UserID, *h.OrderID)
-	if err := redis2.TryLock(key, 0); err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = redis2.Unlock(key)
-	}()
-
 	if h.EntID == nil {
 		id := uuid.New()
 		h.EntID = &id
@@ -115,4 +107,69 @@ func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
 	}
 
 	return h.GetAccount(ctx)
+}
+
+func (h *Handler) CreateAccounts(ctx context.Context) ([]*npool.Account, error) {
+	entIDs := []uuid.UUID{}
+
+	err := db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
+		fmt.Println("error ssssssssss", h.Reqs)
+		for _, req := range h.Reqs {
+			h.baseReq = *req
+
+			if h.EntID == nil {
+				id := uuid.New()
+				h.EntID = &id
+			}
+
+			createBaseAccount, err := h.checkBaseAccount(ctx)
+			if err != nil {
+				return err
+			}
+
+			sqlH := h.newSQLHandler()
+			if !createBaseAccount {
+				if _, err := accountcrud.CreateSet(
+					tx.Account.Create(),
+					&accountcrud.Req{
+						EntID:                  h.AccountID,
+						CoinTypeID:             h.CoinTypeID,
+						Address:                h.Address,
+						UsedFor:                h.usedFor,
+						PlatformHoldPrivateKey: h.platformHoldPrivateKey,
+					},
+				).Save(ctx); err != nil {
+					return err
+				}
+			}
+
+			sql, err := sqlH.genCreateSQL()
+			if err != nil {
+				return err
+			}
+
+			rc, err := tx.ExecContext(ctx, sql)
+			if err != nil {
+				return err
+			}
+			if n, err := rc.RowsAffected(); err != nil || n != 1 {
+				return fmt.Errorf("fail create accounts: %v", err)
+			}
+
+			entIDs = append(entIDs, *h.EntID)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	h.Conds = &orderbenefit.Conds{
+		EntIDs: &cruder.Cond{Op: cruder.IN, Val: entIDs},
+	}
+	h.Offset = 0
+	h.Limit = int32(len(entIDs))
+
+	infos, _, err := h.GetAccounts(ctx)
+	return infos, err
 }

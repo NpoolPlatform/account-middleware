@@ -57,3 +57,32 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		Info: info,
 	}, nil
 }
+
+func (s *Server) CreateAccounts(ctx context.Context, in *npool.CreateAccountsRequest) (*npool.CreateAccountsResponse, error) {
+	handler, err := orderbenefit1.NewHandler(
+		ctx,
+		orderbenefit1.WithReqs(in.GetInfos(), true),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"CreateAccounts",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	infos, err := handler.CreateAccounts(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"CreateAccounts",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.CreateAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	return &npool.CreateAccountsResponse{
+		Infos: infos,
+	}, nil
+}

@@ -72,7 +72,7 @@ func SetQueryConds(q *ent.OrderBenefitQuery, conds *Conds) (*ent.OrderBenefitQue
 		case cruder.EQ:
 			q.Where(entorderbenefit.EntID(id))
 		default:
-			return nil, fmt.Errorf("invalid orderbenefit field")
+			return nil, fmt.Errorf("invalid orderbenefit entid")
 		}
 	}
 	if conds.ID != nil {
@@ -84,7 +84,7 @@ func SetQueryConds(q *ent.OrderBenefitQuery, conds *Conds) (*ent.OrderBenefitQue
 		case cruder.EQ:
 			q.Where(entorderbenefit.ID(id))
 		default:
-			return nil, fmt.Errorf("invalid orderbenefit field")
+			return nil, fmt.Errorf("invalid orderbenefit id")
 		}
 	}
 	if conds.AppID != nil {
@@ -96,7 +96,7 @@ func SetQueryConds(q *ent.OrderBenefitQuery, conds *Conds) (*ent.OrderBenefitQue
 		case cruder.EQ:
 			q.Where(entorderbenefit.AppID(id))
 		default:
-			return nil, fmt.Errorf("invalid orderbenefit field")
+			return nil, fmt.Errorf("invalid orderbenefit appid")
 		}
 	}
 	if conds.UserID != nil {
@@ -108,7 +108,7 @@ func SetQueryConds(q *ent.OrderBenefitQuery, conds *Conds) (*ent.OrderBenefitQue
 		case cruder.EQ:
 			q.Where(entorderbenefit.UserID(id))
 		default:
-			return nil, fmt.Errorf("invalid orderbenefit field")
+			return nil, fmt.Errorf("invalid orderbenefit orderbenefitid")
 		}
 	}
 	if conds.CoinTypeID != nil {
@@ -120,7 +120,7 @@ func SetQueryConds(q *ent.OrderBenefitQuery, conds *Conds) (*ent.OrderBenefitQue
 		case cruder.EQ:
 			q.Where(entorderbenefit.CoinTypeID(id))
 		default:
-			return nil, fmt.Errorf("invalid orderbenefit field")
+			return nil, fmt.Errorf("invalid orderbenefit cointypeid")
 		}
 	}
 	if conds.AccountID != nil {
@@ -132,19 +132,19 @@ func SetQueryConds(q *ent.OrderBenefitQuery, conds *Conds) (*ent.OrderBenefitQue
 		case cruder.EQ:
 			q.Where(entorderbenefit.AccountID(id))
 		default:
-			return nil, fmt.Errorf("invalid orderbenefit field")
+			return nil, fmt.Errorf("invalid orderbenefit accountid")
 		}
 	}
 	if conds.OrderID != nil {
 		id, ok := conds.OrderID.Val.(uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid orderid accountid")
+			return nil, fmt.Errorf("invalid orderbenefit orderid")
 		}
 		switch conds.OrderID.Op {
 		case cruder.EQ:
 			q.Where(entorderbenefit.OrderID(id))
 		default:
-			return nil, fmt.Errorf("invalid orderid field")
+			return nil, fmt.Errorf("invalid orderbenefit orderid")
 		}
 	}
 	if conds.EntIDs != nil {
@@ -156,7 +156,7 @@ func SetQueryConds(q *ent.OrderBenefitQuery, conds *Conds) (*ent.OrderBenefitQue
 		case cruder.IN:
 			q.Where(entorderbenefit.EntIDIn(ids...))
 		default:
-			return nil, fmt.Errorf("invalid orderbenefit field")
+			return nil, fmt.Errorf("invalid orderbenefit entids")
 		}
 	}
 	if conds.AccountIDs != nil {
@@ -168,7 +168,7 @@ func SetQueryConds(q *ent.OrderBenefitQuery, conds *Conds) (*ent.OrderBenefitQue
 		case cruder.IN:
 			q.Where(entorderbenefit.AccountIDIn(ids...))
 		default:
-			return nil, fmt.Errorf("invalid orderbenefit field")
+			return nil, fmt.Errorf("invalid orderbenefit accountids")
 		}
 	}
 	q.Where(entorderbenefit.DeletedAt(0))
