@@ -13,7 +13,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type Handler struct {
+type baseReq struct {
 	orderbenefitcrud.Req
 	ID                     *uint32
 	Address                *string
@@ -23,8 +23,13 @@ type Handler struct {
 	Blocked                *bool
 	Locked                 *bool
 	Conds                  *orderbenefitcrud.Conds
-	Offset                 int32
-	Limit                  int32
+}
+
+type Handler struct {
+	baseReq
+	Reqs   []*baseReq
+	Offset int32
+	Limit  int32
 }
 
 func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) error) (*Handler, error) {

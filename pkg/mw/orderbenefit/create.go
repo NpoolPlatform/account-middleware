@@ -7,10 +7,8 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 	"github.com/NpoolPlatform/account-middleware/pkg/mw/account"
-	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
-	"github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	redis2 "github.com/NpoolPlatform/go-service-framework/pkg/redis"
 	pbaccount "github.com/NpoolPlatform/message/npool/account/mw/v1/account"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
@@ -19,48 +17,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func (h *Handler) queryBaseAccount(ctx context.Context) (*npool.Account, error) {
-	h.Conds = &orderbenefit.Conds{}
-	h.Conds.AppID = &cruder.Cond{
-		Op:  cruder.EQ,
-		Val: *h.AppID,
-	}
-	h.Conds.UserID = &cruder.Cond{
-		Op:  cruder.EQ,
-		Val: *h.UserID,
-	}
-	h.Conds.UsedFor = &cruder.Cond{
-		Op:  cruder.EQ,
-		Val: *h.usedFor,
-	}
-	h.Conds.CoinTypeID = &cruder.Cond{
-		Op:  cruder.EQ,
-		Val: *h.CoinTypeID,
-	}
-	h.Conds.Address = &cruder.Cond{
-		Op:  cruder.EQ,
-		Val: *h.Address,
-	}
-
-	h.Limit = 1
-	h.Offset = 0
-
-	handler := queryHandler{Handler: h}
-	accInfos, _, err := handler.getAccounts(ctx)
-	if err != nil || len(accInfos) == 0 {
-		return nil, err
-	}
-	return accInfos[0], nil
-}
-
 //nolint:gocyclo
 func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) {
 	var baseAccount *pbaccount.Account
 
-	if h.AccountID == nil {
-		id := uuid.New()
-		h.AccountID = &id
-	} else {
+	if h.AccountID != nil {
 		accountID := h.AccountID.String()
 		accountH, err := account.NewHandler(ctx, account.WithEntID(&accountID, true))
 		if err != nil {
@@ -71,45 +32,28 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 			return false, err
 		}
 
-		if baseAccount != nil && baseAccount.UsedFor != *h.usedFor {
+		if baseAccount == nil {
+			return false, fmt.Errorf("invalid accountid")
+		}
+
+		if baseAccount.UsedFor != *h.usedFor {
 			return false, fmt.Errorf("invalid account usedfor")
 		}
-	}
 
-	if baseAccount == nil && (h.CoinTypeID == nil || h.Address == nil) {
-		return false, fmt.Errorf("invalid cointypeid or address")
-	}
-
-	if baseAccount != nil {
 		if h.CoinTypeID != nil && baseAccount.CoinTypeID != h.CoinTypeID.String() {
 			return false, fmt.Errorf("invalid cointypeid")
-		} else if h.CoinTypeID == nil {
-			cointypeID, err := uuid.Parse(baseAccount.CoinTypeID)
-			if err != nil {
-				return false, err
-			}
-			h.CoinTypeID = &cointypeID
 		}
 
 		if h.Address != nil && baseAccount.Address != *h.Address {
 			return false, fmt.Errorf("invalid address")
-		} else if h.Address == nil {
-			h.Address = &baseAccount.Address
 		}
+
 		return true, nil
+	} else if h.CoinTypeID == nil || h.Address == nil {
+		return false, fmt.Errorf("invalid cointypeid or address")
 	} else {
-		historyAccount, err := h.queryBaseAccount(ctx)
-		if err != nil {
-			return false, err
-		}
-		if historyAccount != nil {
-			accountID, err := uuid.Parse(historyAccount.AccountID)
-			if err != nil {
-				return false, err
-			}
-			h.AccountID = &accountID
-			return true, nil
-		}
+		id := uuid.New()
+		h.AccountID = &id
 	}
 
 	return false, nil

@@ -37,7 +37,6 @@ var ret = &npool.Account{
 	EntID:      uuid.NewString(),
 	AppID:      uuid.NewString(),
 	UserID:     uuid.NewString(),
-	AccountID:  uuid.NewString(),
 	CoinTypeID: uuid.NewString(),
 	Address:    uuid.NewString(),
 	OrderID:    uuid.NewString(),
@@ -48,7 +47,6 @@ var retReq = &npool.AccountReq{
 	EntID:      &ret.EntID,
 	AppID:      &ret.AppID,
 	UserID:     &ret.UserID,
-	AccountID:  &ret.AccountID,
 	CoinTypeID: &ret.CoinTypeID,
 	OrderID:    &ret.OrderID,
 	Address:    &ret.Address,
@@ -58,6 +56,7 @@ func createAccount(t *testing.T) {
 	info, err := CreateAccount(context.Background(), retReq)
 	if assert.Nil(t, err) {
 		ret.ID = info.ID
+		ret.AccountID = info.AccountID
 		ret.UsedFor = info.UsedFor
 		ret.UsedForStr = info.UsedForStr
 		ret.CreatedAt = info.CreatedAt

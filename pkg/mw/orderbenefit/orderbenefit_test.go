@@ -31,7 +31,6 @@ var (
 		AppID:      uuid.NewString(),
 		UserID:     uuid.NewString(),
 		CoinTypeID: uuid.NewString(),
-		AccountID:  uuid.NewString(),
 		OrderID:    uuid.NewString(),
 		Address:    uuid.NewString(),
 		Active:     true,
@@ -45,7 +44,6 @@ var (
 		AppID:      &ret.AppID,
 		UserID:     &ret.UserID,
 		CoinTypeID: &ret.CoinTypeID,
-		AccountID:  &ret.AccountID,
 		Address:    &ret.Address,
 		OrderID:    &ret.OrderID,
 		Active:     &ret.Active,
@@ -61,13 +59,14 @@ func creatAccount(t *testing.T) {
 		WithAppID(retReq.AppID, true),
 		WithUserID(retReq.UserID, true),
 		WithCoinTypeID(retReq.CoinTypeID, true),
-		WithAccountID(retReq.AccountID, true),
-		WithAddress(retReq.Address, true),
-		WithOrderID(retReq.OrderID, true),
+		WithAccountID(retReq.AccountID, false),
+		WithAddress(retReq.Address, false),
+		WithOrderID(retReq.OrderID, false),
 	)
 	assert.Nil(t, err)
 	info, err := handler.CreateAccount(context.Background())
 	if assert.Nil(t, err) {
+		ret.AccountID = info.AccountID
 		ret.UsedFor = info.UsedFor
 		ret.UsedForStr = info.UsedForStr
 		ret.UpdatedAt = info.UpdatedAt
