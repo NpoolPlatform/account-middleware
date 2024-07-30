@@ -46,11 +46,9 @@ func (h *Handler) UnlockAccount(ctx context.Context) (*npool.Account, error) {
 			return fmt.Errorf("not locked")
 		}
 
-		if account.Locked && h.Locked != nil && !*h.Locked {
-			const coolDown = uint32(60 * 60)
-			availableAt := uint32(time.Now().Unix()) + coolDown
-			h.AvailableAt = &availableAt
-		}
+		const coolDown = uint32(60 * 60)
+		availableAt := uint32(time.Now().Unix()) + coolDown
+		h.AvailableAt = &availableAt
 
 		locked := false
 		if _, err := accountcrud.UpdateSet(
