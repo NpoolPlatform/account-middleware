@@ -264,7 +264,6 @@ func (gbq *GoodBenefitQuery) Clone() *GoodBenefitQuery {
 //		GroupBy(goodbenefit.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (gbq *GoodBenefitQuery) GroupBy(field string, fields ...string) *GoodBenefitGroupBy {
 	grbuild := &GoodBenefitGroupBy{config: gbq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -291,7 +290,6 @@ func (gbq *GoodBenefitQuery) GroupBy(field string, fields ...string) *GoodBenefi
 //	client.GoodBenefit.Query().
 //		Select(goodbenefit.FieldCreatedAt).
 //		Scan(ctx, &v)
-//
 func (gbq *GoodBenefitQuery) Select(fields ...string) *GoodBenefitSelect {
 	gbq.fields = append(gbq.fields, fields...)
 	selbuild := &GoodBenefitSelect{GoodBenefitQuery: gbq}

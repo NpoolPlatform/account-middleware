@@ -11,6 +11,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/payment"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/predicate"
@@ -31,13 +32,14 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeAccount     = "Account"
-	TypeDeposit     = "Deposit"
-	TypeGoodBenefit = "GoodBenefit"
-	TypePayment     = "Payment"
-	TypePlatform    = "Platform"
-	TypeTransfer    = "Transfer"
-	TypeUser        = "User"
+	TypeAccount      = "Account"
+	TypeDeposit      = "Deposit"
+	TypeGoodBenefit  = "GoodBenefit"
+	TypeOrderBenefit = "OrderBenefit"
+	TypePayment      = "Payment"
+	TypePlatform     = "Platform"
+	TypeTransfer     = "Transfer"
+	TypeUser         = "User"
 )
 
 // AccountMutation represents an operation that mutates the Account nodes in the graph.
@@ -3211,6 +3213,955 @@ func (m *GoodBenefitMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *GoodBenefitMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown GoodBenefit edge %s", name)
+}
+
+// OrderBenefitMutation represents an operation that mutates the OrderBenefit nodes in the graph.
+type OrderBenefitMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *uint32
+	created_at    *uint32
+	addcreated_at *int32
+	updated_at    *uint32
+	addupdated_at *int32
+	deleted_at    *uint32
+	adddeleted_at *int32
+	ent_id        *uuid.UUID
+	app_id        *uuid.UUID
+	user_id       *uuid.UUID
+	coin_type_id  *uuid.UUID
+	account_id    *uuid.UUID
+	order_id      *uuid.UUID
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*OrderBenefit, error)
+	predicates    []predicate.OrderBenefit
+}
+
+var _ ent.Mutation = (*OrderBenefitMutation)(nil)
+
+// orderbenefitOption allows management of the mutation configuration using functional options.
+type orderbenefitOption func(*OrderBenefitMutation)
+
+// newOrderBenefitMutation creates new mutation for the OrderBenefit entity.
+func newOrderBenefitMutation(c config, op Op, opts ...orderbenefitOption) *OrderBenefitMutation {
+	m := &OrderBenefitMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeOrderBenefit,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withOrderBenefitID sets the ID field of the mutation.
+func withOrderBenefitID(id uint32) orderbenefitOption {
+	return func(m *OrderBenefitMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *OrderBenefit
+		)
+		m.oldValue = func(ctx context.Context) (*OrderBenefit, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().OrderBenefit.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withOrderBenefit sets the old OrderBenefit of the mutation.
+func withOrderBenefit(node *OrderBenefit) orderbenefitOption {
+	return func(m *OrderBenefitMutation) {
+		m.oldValue = func(context.Context) (*OrderBenefit, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m OrderBenefitMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m OrderBenefitMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of OrderBenefit entities.
+func (m *OrderBenefitMutation) SetID(id uint32) {
+	m.id = &id
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *OrderBenefitMutation) ID() (id uint32, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *OrderBenefitMutation) IDs(ctx context.Context) ([]uint32, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []uint32{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().OrderBenefit.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (m *OrderBenefitMutation) SetCreatedAt(u uint32) {
+	m.created_at = &u
+	m.addcreated_at = nil
+}
+
+// CreatedAt returns the value of the "created_at" field in the mutation.
+func (m *OrderBenefitMutation) CreatedAt() (r uint32, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreatedAt returns the old "created_at" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldCreatedAt(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+// AddCreatedAt adds u to the "created_at" field.
+func (m *OrderBenefitMutation) AddCreatedAt(u int32) {
+	if m.addcreated_at != nil {
+		*m.addcreated_at += u
+	} else {
+		m.addcreated_at = &u
+	}
+}
+
+// AddedCreatedAt returns the value that was added to the "created_at" field in this mutation.
+func (m *OrderBenefitMutation) AddedCreatedAt() (r int32, exists bool) {
+	v := m.addcreated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCreatedAt resets all changes to the "created_at" field.
+func (m *OrderBenefitMutation) ResetCreatedAt() {
+	m.created_at = nil
+	m.addcreated_at = nil
+}
+
+// SetUpdatedAt sets the "updated_at" field.
+func (m *OrderBenefitMutation) SetUpdatedAt(u uint32) {
+	m.updated_at = &u
+	m.addupdated_at = nil
+}
+
+// UpdatedAt returns the value of the "updated_at" field in the mutation.
+func (m *OrderBenefitMutation) UpdatedAt() (r uint32, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUpdatedAt returns the old "updated_at" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldUpdatedAt(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// AddUpdatedAt adds u to the "updated_at" field.
+func (m *OrderBenefitMutation) AddUpdatedAt(u int32) {
+	if m.addupdated_at != nil {
+		*m.addupdated_at += u
+	} else {
+		m.addupdated_at = &u
+	}
+}
+
+// AddedUpdatedAt returns the value that was added to the "updated_at" field in this mutation.
+func (m *OrderBenefitMutation) AddedUpdatedAt() (r int32, exists bool) {
+	v := m.addupdated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *OrderBenefitMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+	m.addupdated_at = nil
+}
+
+// SetDeletedAt sets the "deleted_at" field.
+func (m *OrderBenefitMutation) SetDeletedAt(u uint32) {
+	m.deleted_at = &u
+	m.adddeleted_at = nil
+}
+
+// DeletedAt returns the value of the "deleted_at" field in the mutation.
+func (m *OrderBenefitMutation) DeletedAt() (r uint32, exists bool) {
+	v := m.deleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDeletedAt returns the old "deleted_at" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldDeletedAt(ctx context.Context) (v uint32, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDeletedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDeletedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDeletedAt: %w", err)
+	}
+	return oldValue.DeletedAt, nil
+}
+
+// AddDeletedAt adds u to the "deleted_at" field.
+func (m *OrderBenefitMutation) AddDeletedAt(u int32) {
+	if m.adddeleted_at != nil {
+		*m.adddeleted_at += u
+	} else {
+		m.adddeleted_at = &u
+	}
+}
+
+// AddedDeletedAt returns the value that was added to the "deleted_at" field in this mutation.
+func (m *OrderBenefitMutation) AddedDeletedAt() (r int32, exists bool) {
+	v := m.adddeleted_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDeletedAt resets all changes to the "deleted_at" field.
+func (m *OrderBenefitMutation) ResetDeletedAt() {
+	m.deleted_at = nil
+	m.adddeleted_at = nil
+}
+
+// SetEntID sets the "ent_id" field.
+func (m *OrderBenefitMutation) SetEntID(u uuid.UUID) {
+	m.ent_id = &u
+}
+
+// EntID returns the value of the "ent_id" field in the mutation.
+func (m *OrderBenefitMutation) EntID() (r uuid.UUID, exists bool) {
+	v := m.ent_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEntID returns the old "ent_id" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldEntID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEntID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEntID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEntID: %w", err)
+	}
+	return oldValue.EntID, nil
+}
+
+// ResetEntID resets all changes to the "ent_id" field.
+func (m *OrderBenefitMutation) ResetEntID() {
+	m.ent_id = nil
+}
+
+// SetAppID sets the "app_id" field.
+func (m *OrderBenefitMutation) SetAppID(u uuid.UUID) {
+	m.app_id = &u
+}
+
+// AppID returns the value of the "app_id" field in the mutation.
+func (m *OrderBenefitMutation) AppID() (r uuid.UUID, exists bool) {
+	v := m.app_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAppID returns the old "app_id" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldAppID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAppID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAppID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAppID: %w", err)
+	}
+	return oldValue.AppID, nil
+}
+
+// ClearAppID clears the value of the "app_id" field.
+func (m *OrderBenefitMutation) ClearAppID() {
+	m.app_id = nil
+	m.clearedFields[orderbenefit.FieldAppID] = struct{}{}
+}
+
+// AppIDCleared returns if the "app_id" field was cleared in this mutation.
+func (m *OrderBenefitMutation) AppIDCleared() bool {
+	_, ok := m.clearedFields[orderbenefit.FieldAppID]
+	return ok
+}
+
+// ResetAppID resets all changes to the "app_id" field.
+func (m *OrderBenefitMutation) ResetAppID() {
+	m.app_id = nil
+	delete(m.clearedFields, orderbenefit.FieldAppID)
+}
+
+// SetUserID sets the "user_id" field.
+func (m *OrderBenefitMutation) SetUserID(u uuid.UUID) {
+	m.user_id = &u
+}
+
+// UserID returns the value of the "user_id" field in the mutation.
+func (m *OrderBenefitMutation) UserID() (r uuid.UUID, exists bool) {
+	v := m.user_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldUserID returns the old "user_id" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldUserID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldUserID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldUserID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUserID: %w", err)
+	}
+	return oldValue.UserID, nil
+}
+
+// ClearUserID clears the value of the "user_id" field.
+func (m *OrderBenefitMutation) ClearUserID() {
+	m.user_id = nil
+	m.clearedFields[orderbenefit.FieldUserID] = struct{}{}
+}
+
+// UserIDCleared returns if the "user_id" field was cleared in this mutation.
+func (m *OrderBenefitMutation) UserIDCleared() bool {
+	_, ok := m.clearedFields[orderbenefit.FieldUserID]
+	return ok
+}
+
+// ResetUserID resets all changes to the "user_id" field.
+func (m *OrderBenefitMutation) ResetUserID() {
+	m.user_id = nil
+	delete(m.clearedFields, orderbenefit.FieldUserID)
+}
+
+// SetCoinTypeID sets the "coin_type_id" field.
+func (m *OrderBenefitMutation) SetCoinTypeID(u uuid.UUID) {
+	m.coin_type_id = &u
+}
+
+// CoinTypeID returns the value of the "coin_type_id" field in the mutation.
+func (m *OrderBenefitMutation) CoinTypeID() (r uuid.UUID, exists bool) {
+	v := m.coin_type_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCoinTypeID returns the old "coin_type_id" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldCoinTypeID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCoinTypeID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCoinTypeID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCoinTypeID: %w", err)
+	}
+	return oldValue.CoinTypeID, nil
+}
+
+// ClearCoinTypeID clears the value of the "coin_type_id" field.
+func (m *OrderBenefitMutation) ClearCoinTypeID() {
+	m.coin_type_id = nil
+	m.clearedFields[orderbenefit.FieldCoinTypeID] = struct{}{}
+}
+
+// CoinTypeIDCleared returns if the "coin_type_id" field was cleared in this mutation.
+func (m *OrderBenefitMutation) CoinTypeIDCleared() bool {
+	_, ok := m.clearedFields[orderbenefit.FieldCoinTypeID]
+	return ok
+}
+
+// ResetCoinTypeID resets all changes to the "coin_type_id" field.
+func (m *OrderBenefitMutation) ResetCoinTypeID() {
+	m.coin_type_id = nil
+	delete(m.clearedFields, orderbenefit.FieldCoinTypeID)
+}
+
+// SetAccountID sets the "account_id" field.
+func (m *OrderBenefitMutation) SetAccountID(u uuid.UUID) {
+	m.account_id = &u
+}
+
+// AccountID returns the value of the "account_id" field in the mutation.
+func (m *OrderBenefitMutation) AccountID() (r uuid.UUID, exists bool) {
+	v := m.account_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAccountID returns the old "account_id" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldAccountID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAccountID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAccountID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAccountID: %w", err)
+	}
+	return oldValue.AccountID, nil
+}
+
+// ClearAccountID clears the value of the "account_id" field.
+func (m *OrderBenefitMutation) ClearAccountID() {
+	m.account_id = nil
+	m.clearedFields[orderbenefit.FieldAccountID] = struct{}{}
+}
+
+// AccountIDCleared returns if the "account_id" field was cleared in this mutation.
+func (m *OrderBenefitMutation) AccountIDCleared() bool {
+	_, ok := m.clearedFields[orderbenefit.FieldAccountID]
+	return ok
+}
+
+// ResetAccountID resets all changes to the "account_id" field.
+func (m *OrderBenefitMutation) ResetAccountID() {
+	m.account_id = nil
+	delete(m.clearedFields, orderbenefit.FieldAccountID)
+}
+
+// SetOrderID sets the "order_id" field.
+func (m *OrderBenefitMutation) SetOrderID(u uuid.UUID) {
+	m.order_id = &u
+}
+
+// OrderID returns the value of the "order_id" field in the mutation.
+func (m *OrderBenefitMutation) OrderID() (r uuid.UUID, exists bool) {
+	v := m.order_id
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOrderID returns the old "order_id" field's value of the OrderBenefit entity.
+// If the OrderBenefit object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *OrderBenefitMutation) OldOrderID(ctx context.Context) (v uuid.UUID, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOrderID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOrderID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOrderID: %w", err)
+	}
+	return oldValue.OrderID, nil
+}
+
+// ClearOrderID clears the value of the "order_id" field.
+func (m *OrderBenefitMutation) ClearOrderID() {
+	m.order_id = nil
+	m.clearedFields[orderbenefit.FieldOrderID] = struct{}{}
+}
+
+// OrderIDCleared returns if the "order_id" field was cleared in this mutation.
+func (m *OrderBenefitMutation) OrderIDCleared() bool {
+	_, ok := m.clearedFields[orderbenefit.FieldOrderID]
+	return ok
+}
+
+// ResetOrderID resets all changes to the "order_id" field.
+func (m *OrderBenefitMutation) ResetOrderID() {
+	m.order_id = nil
+	delete(m.clearedFields, orderbenefit.FieldOrderID)
+}
+
+// Where appends a list predicates to the OrderBenefitMutation builder.
+func (m *OrderBenefitMutation) Where(ps ...predicate.OrderBenefit) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *OrderBenefitMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (OrderBenefit).
+func (m *OrderBenefitMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *OrderBenefitMutation) Fields() []string {
+	fields := make([]string, 0, 9)
+	if m.created_at != nil {
+		fields = append(fields, orderbenefit.FieldCreatedAt)
+	}
+	if m.updated_at != nil {
+		fields = append(fields, orderbenefit.FieldUpdatedAt)
+	}
+	if m.deleted_at != nil {
+		fields = append(fields, orderbenefit.FieldDeletedAt)
+	}
+	if m.ent_id != nil {
+		fields = append(fields, orderbenefit.FieldEntID)
+	}
+	if m.app_id != nil {
+		fields = append(fields, orderbenefit.FieldAppID)
+	}
+	if m.user_id != nil {
+		fields = append(fields, orderbenefit.FieldUserID)
+	}
+	if m.coin_type_id != nil {
+		fields = append(fields, orderbenefit.FieldCoinTypeID)
+	}
+	if m.account_id != nil {
+		fields = append(fields, orderbenefit.FieldAccountID)
+	}
+	if m.order_id != nil {
+		fields = append(fields, orderbenefit.FieldOrderID)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *OrderBenefitMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case orderbenefit.FieldCreatedAt:
+		return m.CreatedAt()
+	case orderbenefit.FieldUpdatedAt:
+		return m.UpdatedAt()
+	case orderbenefit.FieldDeletedAt:
+		return m.DeletedAt()
+	case orderbenefit.FieldEntID:
+		return m.EntID()
+	case orderbenefit.FieldAppID:
+		return m.AppID()
+	case orderbenefit.FieldUserID:
+		return m.UserID()
+	case orderbenefit.FieldCoinTypeID:
+		return m.CoinTypeID()
+	case orderbenefit.FieldAccountID:
+		return m.AccountID()
+	case orderbenefit.FieldOrderID:
+		return m.OrderID()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *OrderBenefitMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case orderbenefit.FieldCreatedAt:
+		return m.OldCreatedAt(ctx)
+	case orderbenefit.FieldUpdatedAt:
+		return m.OldUpdatedAt(ctx)
+	case orderbenefit.FieldDeletedAt:
+		return m.OldDeletedAt(ctx)
+	case orderbenefit.FieldEntID:
+		return m.OldEntID(ctx)
+	case orderbenefit.FieldAppID:
+		return m.OldAppID(ctx)
+	case orderbenefit.FieldUserID:
+		return m.OldUserID(ctx)
+	case orderbenefit.FieldCoinTypeID:
+		return m.OldCoinTypeID(ctx)
+	case orderbenefit.FieldAccountID:
+		return m.OldAccountID(ctx)
+	case orderbenefit.FieldOrderID:
+		return m.OldOrderID(ctx)
+	}
+	return nil, fmt.Errorf("unknown OrderBenefit field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *OrderBenefitMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case orderbenefit.FieldCreatedAt:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreatedAt(v)
+		return nil
+	case orderbenefit.FieldUpdatedAt:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUpdatedAt(v)
+		return nil
+	case orderbenefit.FieldDeletedAt:
+		v, ok := value.(uint32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDeletedAt(v)
+		return nil
+	case orderbenefit.FieldEntID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEntID(v)
+		return nil
+	case orderbenefit.FieldAppID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAppID(v)
+		return nil
+	case orderbenefit.FieldUserID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetUserID(v)
+		return nil
+	case orderbenefit.FieldCoinTypeID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCoinTypeID(v)
+		return nil
+	case orderbenefit.FieldAccountID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAccountID(v)
+		return nil
+	case orderbenefit.FieldOrderID:
+		v, ok := value.(uuid.UUID)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOrderID(v)
+		return nil
+	}
+	return fmt.Errorf("unknown OrderBenefit field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *OrderBenefitMutation) AddedFields() []string {
+	var fields []string
+	if m.addcreated_at != nil {
+		fields = append(fields, orderbenefit.FieldCreatedAt)
+	}
+	if m.addupdated_at != nil {
+		fields = append(fields, orderbenefit.FieldUpdatedAt)
+	}
+	if m.adddeleted_at != nil {
+		fields = append(fields, orderbenefit.FieldDeletedAt)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *OrderBenefitMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case orderbenefit.FieldCreatedAt:
+		return m.AddedCreatedAt()
+	case orderbenefit.FieldUpdatedAt:
+		return m.AddedUpdatedAt()
+	case orderbenefit.FieldDeletedAt:
+		return m.AddedDeletedAt()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *OrderBenefitMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case orderbenefit.FieldCreatedAt:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCreatedAt(v)
+		return nil
+	case orderbenefit.FieldUpdatedAt:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddUpdatedAt(v)
+		return nil
+	case orderbenefit.FieldDeletedAt:
+		v, ok := value.(int32)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDeletedAt(v)
+		return nil
+	}
+	return fmt.Errorf("unknown OrderBenefit numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *OrderBenefitMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(orderbenefit.FieldAppID) {
+		fields = append(fields, orderbenefit.FieldAppID)
+	}
+	if m.FieldCleared(orderbenefit.FieldUserID) {
+		fields = append(fields, orderbenefit.FieldUserID)
+	}
+	if m.FieldCleared(orderbenefit.FieldCoinTypeID) {
+		fields = append(fields, orderbenefit.FieldCoinTypeID)
+	}
+	if m.FieldCleared(orderbenefit.FieldAccountID) {
+		fields = append(fields, orderbenefit.FieldAccountID)
+	}
+	if m.FieldCleared(orderbenefit.FieldOrderID) {
+		fields = append(fields, orderbenefit.FieldOrderID)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *OrderBenefitMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *OrderBenefitMutation) ClearField(name string) error {
+	switch name {
+	case orderbenefit.FieldAppID:
+		m.ClearAppID()
+		return nil
+	case orderbenefit.FieldUserID:
+		m.ClearUserID()
+		return nil
+	case orderbenefit.FieldCoinTypeID:
+		m.ClearCoinTypeID()
+		return nil
+	case orderbenefit.FieldAccountID:
+		m.ClearAccountID()
+		return nil
+	case orderbenefit.FieldOrderID:
+		m.ClearOrderID()
+		return nil
+	}
+	return fmt.Errorf("unknown OrderBenefit nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *OrderBenefitMutation) ResetField(name string) error {
+	switch name {
+	case orderbenefit.FieldCreatedAt:
+		m.ResetCreatedAt()
+		return nil
+	case orderbenefit.FieldUpdatedAt:
+		m.ResetUpdatedAt()
+		return nil
+	case orderbenefit.FieldDeletedAt:
+		m.ResetDeletedAt()
+		return nil
+	case orderbenefit.FieldEntID:
+		m.ResetEntID()
+		return nil
+	case orderbenefit.FieldAppID:
+		m.ResetAppID()
+		return nil
+	case orderbenefit.FieldUserID:
+		m.ResetUserID()
+		return nil
+	case orderbenefit.FieldCoinTypeID:
+		m.ResetCoinTypeID()
+		return nil
+	case orderbenefit.FieldAccountID:
+		m.ResetAccountID()
+		return nil
+	case orderbenefit.FieldOrderID:
+		m.ResetOrderID()
+		return nil
+	}
+	return fmt.Errorf("unknown OrderBenefit field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *OrderBenefitMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *OrderBenefitMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *OrderBenefitMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *OrderBenefitMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *OrderBenefitMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *OrderBenefitMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *OrderBenefitMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown OrderBenefit unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *OrderBenefitMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown OrderBenefit edge %s", name)
 }
 
 // PaymentMutation represents an operation that mutates the Payment nodes in the graph.

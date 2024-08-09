@@ -13,6 +13,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/payment"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/platform"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/transfer"
@@ -33,6 +34,8 @@ type Client struct {
 	Deposit *DepositClient
 	// GoodBenefit is the client for interacting with the GoodBenefit builders.
 	GoodBenefit *GoodBenefitClient
+	// OrderBenefit is the client for interacting with the OrderBenefit builders.
+	OrderBenefit *OrderBenefitClient
 	// Payment is the client for interacting with the Payment builders.
 	Payment *PaymentClient
 	// Platform is the client for interacting with the Platform builders.
@@ -57,6 +60,7 @@ func (c *Client) init() {
 	c.Account = NewAccountClient(c.config)
 	c.Deposit = NewDepositClient(c.config)
 	c.GoodBenefit = NewGoodBenefitClient(c.config)
+	c.OrderBenefit = NewOrderBenefitClient(c.config)
 	c.Payment = NewPaymentClient(c.config)
 	c.Platform = NewPlatformClient(c.config)
 	c.Transfer = NewTransferClient(c.config)
@@ -92,15 +96,16 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Account:     NewAccountClient(cfg),
-		Deposit:     NewDepositClient(cfg),
-		GoodBenefit: NewGoodBenefitClient(cfg),
-		Payment:     NewPaymentClient(cfg),
-		Platform:    NewPlatformClient(cfg),
-		Transfer:    NewTransferClient(cfg),
-		User:        NewUserClient(cfg),
+		ctx:          ctx,
+		config:       cfg,
+		Account:      NewAccountClient(cfg),
+		Deposit:      NewDepositClient(cfg),
+		GoodBenefit:  NewGoodBenefitClient(cfg),
+		OrderBenefit: NewOrderBenefitClient(cfg),
+		Payment:      NewPaymentClient(cfg),
+		Platform:     NewPlatformClient(cfg),
+		Transfer:     NewTransferClient(cfg),
+		User:         NewUserClient(cfg),
 	}, nil
 }
 
@@ -118,15 +123,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:         ctx,
-		config:      cfg,
-		Account:     NewAccountClient(cfg),
-		Deposit:     NewDepositClient(cfg),
-		GoodBenefit: NewGoodBenefitClient(cfg),
-		Payment:     NewPaymentClient(cfg),
-		Platform:    NewPlatformClient(cfg),
-		Transfer:    NewTransferClient(cfg),
-		User:        NewUserClient(cfg),
+		ctx:          ctx,
+		config:       cfg,
+		Account:      NewAccountClient(cfg),
+		Deposit:      NewDepositClient(cfg),
+		GoodBenefit:  NewGoodBenefitClient(cfg),
+		OrderBenefit: NewOrderBenefitClient(cfg),
+		Payment:      NewPaymentClient(cfg),
+		Platform:     NewPlatformClient(cfg),
+		Transfer:     NewTransferClient(cfg),
+		User:         NewUserClient(cfg),
 	}, nil
 }
 
@@ -136,7 +142,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 //		Account.
 //		Query().
 //		Count(ctx)
-//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
@@ -159,6 +164,7 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Account.Use(hooks...)
 	c.Deposit.Use(hooks...)
 	c.GoodBenefit.Use(hooks...)
+	c.OrderBenefit.Use(hooks...)
 	c.Payment.Use(hooks...)
 	c.Platform.Use(hooks...)
 	c.Transfer.Use(hooks...)
@@ -436,6 +442,97 @@ func (c *GoodBenefitClient) GetX(ctx context.Context, id uint32) *GoodBenefit {
 func (c *GoodBenefitClient) Hooks() []Hook {
 	hooks := c.hooks.GoodBenefit
 	return append(hooks[:len(hooks):len(hooks)], goodbenefit.Hooks[:]...)
+}
+
+// OrderBenefitClient is a client for the OrderBenefit schema.
+type OrderBenefitClient struct {
+	config
+}
+
+// NewOrderBenefitClient returns a client for the OrderBenefit from the given config.
+func NewOrderBenefitClient(c config) *OrderBenefitClient {
+	return &OrderBenefitClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `orderbenefit.Hooks(f(g(h())))`.
+func (c *OrderBenefitClient) Use(hooks ...Hook) {
+	c.hooks.OrderBenefit = append(c.hooks.OrderBenefit, hooks...)
+}
+
+// Create returns a builder for creating a OrderBenefit entity.
+func (c *OrderBenefitClient) Create() *OrderBenefitCreate {
+	mutation := newOrderBenefitMutation(c.config, OpCreate)
+	return &OrderBenefitCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of OrderBenefit entities.
+func (c *OrderBenefitClient) CreateBulk(builders ...*OrderBenefitCreate) *OrderBenefitCreateBulk {
+	return &OrderBenefitCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for OrderBenefit.
+func (c *OrderBenefitClient) Update() *OrderBenefitUpdate {
+	mutation := newOrderBenefitMutation(c.config, OpUpdate)
+	return &OrderBenefitUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *OrderBenefitClient) UpdateOne(ob *OrderBenefit) *OrderBenefitUpdateOne {
+	mutation := newOrderBenefitMutation(c.config, OpUpdateOne, withOrderBenefit(ob))
+	return &OrderBenefitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *OrderBenefitClient) UpdateOneID(id uint32) *OrderBenefitUpdateOne {
+	mutation := newOrderBenefitMutation(c.config, OpUpdateOne, withOrderBenefitID(id))
+	return &OrderBenefitUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for OrderBenefit.
+func (c *OrderBenefitClient) Delete() *OrderBenefitDelete {
+	mutation := newOrderBenefitMutation(c.config, OpDelete)
+	return &OrderBenefitDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *OrderBenefitClient) DeleteOne(ob *OrderBenefit) *OrderBenefitDeleteOne {
+	return c.DeleteOneID(ob.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *OrderBenefitClient) DeleteOneID(id uint32) *OrderBenefitDeleteOne {
+	builder := c.Delete().Where(orderbenefit.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &OrderBenefitDeleteOne{builder}
+}
+
+// Query returns a query builder for OrderBenefit.
+func (c *OrderBenefitClient) Query() *OrderBenefitQuery {
+	return &OrderBenefitQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a OrderBenefit entity by its id.
+func (c *OrderBenefitClient) Get(ctx context.Context, id uint32) (*OrderBenefit, error) {
+	return c.Query().Where(orderbenefit.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *OrderBenefitClient) GetX(ctx context.Context, id uint32) *OrderBenefit {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *OrderBenefitClient) Hooks() []Hook {
+	hooks := c.hooks.OrderBenefit
+	return append(hooks[:len(hooks):len(hooks)], orderbenefit.Hooks[:]...)
 }
 
 // PaymentClient is a client for the Payment schema.

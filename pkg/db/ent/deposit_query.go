@@ -264,7 +264,6 @@ func (dq *DepositQuery) Clone() *DepositQuery {
 //		GroupBy(deposit.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (dq *DepositQuery) GroupBy(field string, fields ...string) *DepositGroupBy {
 	grbuild := &DepositGroupBy{config: dq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -291,7 +290,6 @@ func (dq *DepositQuery) GroupBy(field string, fields ...string) *DepositGroupBy 
 //	client.Deposit.Query().
 //		Select(deposit.FieldCreatedAt).
 //		Scan(ctx, &v)
-//
 func (dq *DepositQuery) Select(fields ...string) *DepositSelect {
 	dq.fields = append(dq.fields, fields...)
 	selbuild := &DepositSelect{DepositQuery: dq}

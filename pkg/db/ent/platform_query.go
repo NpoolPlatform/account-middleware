@@ -264,7 +264,6 @@ func (pq *PlatformQuery) Clone() *PlatformQuery {
 //		GroupBy(platform.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (pq *PlatformQuery) GroupBy(field string, fields ...string) *PlatformGroupBy {
 	grbuild := &PlatformGroupBy{config: pq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -291,7 +290,6 @@ func (pq *PlatformQuery) GroupBy(field string, fields ...string) *PlatformGroupB
 //	client.Platform.Query().
 //		Select(platform.FieldCreatedAt).
 //		Scan(ctx, &v)
-//
 func (pq *PlatformQuery) Select(fields ...string) *PlatformSelect {
 	pq.fields = append(pq.fields, fields...)
 	selbuild := &PlatformSelect{PlatformQuery: pq}
