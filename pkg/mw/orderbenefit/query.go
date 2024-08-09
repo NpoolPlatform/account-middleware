@@ -13,6 +13,7 @@ import (
 
 	orderbenefitcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
+	v1 "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"github.com/google/uuid"
 )
@@ -142,6 +143,7 @@ func (h *queryHandler) formalize() {
 		if _, err := uuid.Parse(info.CoinTypeID); err != nil {
 			info.CoinTypeID = uuid.Nil.String()
 		}
+		info.UsedFor = v1.AccountUsedFor(v1.AccountUsedFor_value[info.UsedForStr])
 	}
 }
 
