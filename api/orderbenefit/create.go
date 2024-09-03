@@ -40,29 +40,28 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 			"In", in,
 			"Error", err,
 		)
-		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
-	info, err := handler.CreateAccount(ctx)
+	err = handler.CreateAccount(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"CreateAccount",
 			"In", in,
 			"Error", err,
 		)
-		return &npool.CreateAccountResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.CreateAccountResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
-	return &npool.CreateAccountResponse{
-		Info: info,
-	}, nil
+	return &npool.CreateAccountResponse{}, nil
 }
 
 //nolint:dupl
 func (s *Server) CreateAccounts(ctx context.Context, in *npool.CreateAccountsRequest) (*npool.CreateAccountsResponse, error) {
-	handler, err := orderbenefit1.NewHandler(
+	handler, err := orderbenefit1.NewMultiCreateHandler(
 		ctx,
-		orderbenefit1.WithReqs(in.GetInfos(), true),
+		in.GetInfos(),
+		true,
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -70,20 +69,18 @@ func (s *Server) CreateAccounts(ctx context.Context, in *npool.CreateAccountsReq
 			"In", in,
 			"Error", err,
 		)
-		return &npool.CreateAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.CreateAccountsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
-	infos, err := handler.CreateAccounts(ctx)
+	err = handler.CreateOrderBenefits(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"CreateAccounts",
 			"In", in,
 			"Error", err,
 		)
-		return &npool.CreateAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.CreateAccountsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
-	return &npool.CreateAccountsResponse{
-		Infos: infos,
-	}, nil
+	return &npool.CreateAccountsResponse{}, nil
 }

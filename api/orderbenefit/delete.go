@@ -23,7 +23,12 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 	}
 	handler, err := orderbenefit1.NewHandler(
 		ctx,
-		orderbenefit1.WithID(req.ID, true),
+		orderbenefit1.WithID(req.ID, false),
+		orderbenefit1.WithEntID(req.EntID, false),
+		orderbenefit1.WithAppID(req.AppID, true),
+		orderbenefit1.WithUserID(req.UserID, true),
+		orderbenefit1.WithOrderID(req.OrderID, true),
+		orderbenefit1.WithAccountID(req.AccountID, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -31,7 +36,7 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 			"In", in,
 			"Error", err,
 		)
-		return &npool.DeleteAccountResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.DeleteAccountResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
 	info, err := handler.GetAccount(ctx)
@@ -41,7 +46,7 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 			"In", in,
 			"Error", err,
 		)
-		return &npool.DeleteAccountResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.DeleteAccountResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 	if info == nil {
 		return &npool.DeleteAccountResponse{}, nil
@@ -54,7 +59,7 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 			"In", in,
 			"Error", err,
 		)
-		return &npool.DeleteAccountResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.DeleteAccountResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
 	return &npool.DeleteAccountResponse{
@@ -64,9 +69,10 @@ func (s *Server) DeleteAccount(ctx context.Context, in *npool.DeleteAccountReque
 
 //nolint:dupl
 func (s *Server) DeleteAccounts(ctx context.Context, in *npool.DeleteAccountsRequest) (*npool.DeleteAccountsResponse, error) {
-	handler, err := orderbenefit1.NewHandler(
+	handler, err := orderbenefit1.NewMultiDeleteHandler(
 		ctx,
-		orderbenefit1.WithReqs(in.GetInfos(), true),
+		in.GetInfos(),
+		true,
 	)
 	if err != nil {
 		logger.Sugar().Errorw(
@@ -74,20 +80,18 @@ func (s *Server) DeleteAccounts(ctx context.Context, in *npool.DeleteAccountsReq
 			"In", in,
 			"Error", err,
 		)
-		return &npool.DeleteAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.DeleteAccountsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
-	infos, err := handler.DeleteAccounts(ctx)
+	err = handler.DeleteOrderBenefits(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"DeleteAccounts",
 			"In", in,
 			"Error", err,
 		)
-		return &npool.DeleteAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.DeleteAccountsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
-	return &npool.DeleteAccountsResponse{
-		Infos: infos,
-	}, nil
+	return &npool.DeleteAccountsResponse{}, nil
 }

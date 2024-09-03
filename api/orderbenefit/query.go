@@ -24,7 +24,7 @@ func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*
 			"In", in,
 			"Error", err,
 		)
-		return &npool.GetAccountResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.GetAccountResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
 	info, err := handler.GetAccount(ctx)
@@ -34,7 +34,7 @@ func (s *Server) GetAccount(ctx context.Context, in *npool.GetAccountRequest) (*
 			"In", in,
 			"Error", err,
 		)
-		return &npool.GetAccountResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.GetAccountResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
 	return &npool.GetAccountResponse{
@@ -55,7 +55,7 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 			"In", in,
 			"Error", err,
 		)
-		return &npool.GetAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
 	infos, total, err := handler.GetAccounts(ctx)
@@ -65,7 +65,7 @@ func (s *Server) GetAccounts(ctx context.Context, in *npool.GetAccountsRequest) 
 			"In", in,
 			"Error", err,
 		)
-		return &npool.GetAccountsResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.GetAccountsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
 	return &npool.GetAccountsResponse{

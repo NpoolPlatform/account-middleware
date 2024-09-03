@@ -64,16 +64,8 @@ func creatAccount(t *testing.T) {
 		WithOrderID(retReq.OrderID, false),
 	)
 	assert.Nil(t, err)
-	info, err := handler.CreateAccount(context.Background())
-	if assert.Nil(t, err) {
-		ret.AccountID = info.AccountID
-		ret.UsedFor = info.UsedFor
-		ret.UsedForStr = info.UsedForStr
-		ret.UpdatedAt = info.UpdatedAt
-		ret.CreatedAt = info.CreatedAt
-		ret.ID = info.ID
-		assert.Equal(t, info, &ret)
-	}
+	err = handler.CreateAccount(context.Background())
+	assert.Nil(t, err)
 }
 
 func getAccount(t *testing.T) {

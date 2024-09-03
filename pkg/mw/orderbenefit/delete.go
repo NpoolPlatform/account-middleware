@@ -8,10 +8,7 @@ import (
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
 	"github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
 
-	crud "github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	entaccount "github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
-	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
-	"github.com/google/uuid"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/db"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
@@ -45,14 +42,23 @@ func (h *deleteHandler) deleteAccountBase(ctx context.Context, tx *ent.Tx) error
 	return err
 }
 
-func (h *deleteHandler) deleteOrderBenefit(ctx context.Context, tx *ent.Tx) error {
-	now := uint32(time.Now().Unix())
-	updateOne := crud.UpdateSet(tx.OrderBenefit.UpdateOneID(*h.ID), &crud.Req{DeletedAt: &now})
-	_, err := updateOne.Save(ctx)
-	return err
+func (h *Handler) checkAccountInfo(info *orderbenefit.Account) error {
+	if h.AppID != nil && h.AppID.String() != info.AppID {
+		return fmt.Errorf("invalid appid")
+	}
+	if h.UserID != nil && h.UserID.String() != info.UserID {
+		return fmt.Errorf("invalid userid")
+	}
+	if h.OrderID != nil && h.OrderID.String() != info.OrderID {
+		return fmt.Errorf("invalid orderid")
+	}
+	if h.AccountID != nil && h.AccountID.String() != info.AccountID {
+		return fmt.Errorf("invalid accountid")
+	}
+	return nil
 }
 
-func (h *Handler) DeleteAccount(ctx context.Context) error {
+func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	info, err := h.GetAccount(ctx)
 	if err != nil {
 		return err
@@ -62,75 +68,23 @@ func (h *Handler) DeleteAccount(ctx context.Context) error {
 		return nil
 	}
 
+	if err := h.checkAccountInfo(info); err != nil {
+		return err
+	}
+
 	h.ID = &info.ID
 	handler := &deleteHandler{
 		Handler: h,
 	}
 
-	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		if err := handler.deleteAccountBase(_ctx, tx); err != nil {
-			return err
-		}
-		return nil
-	})
+	if err := handler.deleteAccountBase(ctx, tx); err != nil {
+		return err
+	}
+	return nil
 }
 
-func (h *Handler) DeleteAccounts(ctx context.Context) ([]*orderbenefit.Account, error) {
-	entIDs := []uuid.UUID{}
-	accountIDMap := make(map[string]*uuid.UUID)
-	for _, req := range h.Reqs {
-		if req.EntID == nil {
-			return nil, fmt.Errorf("invaild entid")
-		}
-		entIDs = append(entIDs, *req.EntID)
-		if req.AccountID != nil {
-			accountIDMap[req.EntID.String()] = req.AccountID
-		}
-	}
-
-	h.Conds = &crud.Conds{
-		EntIDs: &cruder.Cond{
-			Op:  cruder.IN,
-			Val: entIDs,
-		},
-	}
-
-	h.Limit = int32(len(entIDs))
-	h.Offset = 0
-
-	infos, _, err := h.GetAccounts(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	err = db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		for _, info := range infos {
-			h.ID = &info.ID
-			handler := &deleteHandler{
-				Handler: h,
-			}
-			if err := handler.deleteOrderBenefit(_ctx, tx); err != nil {
-				return err
-			}
-
-			_, ok := accountIDMap[info.EntID]
-			if !ok {
-				accountID, err := uuid.Parse(info.AccountID)
-				if err != nil {
-					return err
-				}
-				handler.AccountID = &accountID
-				err = handler.deleteAccountBase(ctx, tx)
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return nil
+func (h *Handler) DeleteAccount(ctx context.Context) error {
+	return db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
+		return h.DeleteAccountWithTx(ctx, tx)
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return infos, nil
 }

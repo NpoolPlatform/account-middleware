@@ -10,6 +10,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 	entaccount "github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	entorderbenefit "github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	orderbenefitcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
@@ -75,7 +76,7 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
 			s.C(entorderbenefit.FieldAccountID),
 			t.C(entaccount.FieldEntID),
 		).
-		OnP(
+		Where(
 			sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
 		)
 
@@ -116,22 +117,22 @@ func (h *queryHandler) queryJoinAccount(s *sql.Selector) error {
 	return nil
 }
 
-func (h *queryHandler) queryJoin() error {
-	var err error
+func (h *queryHandler) queryJoin() {
 	h.stmSelect.Modify(func(s *sql.Selector) {
 		h.queryJoinMyself(s)
-		err = h.queryJoinAccount(s)
+		if err := h.queryJoinAccount(s); err != nil {
+			logger.Sugar().Errorw("queryJoinAccount", "Error", err)
+		}
 	})
-	if err != nil {
-		return err
-	}
+
 	if h.stmCount == nil {
-		return nil
+		return
 	}
 	h.stmCount.Modify(func(s *sql.Selector) {
-		err = h.queryJoinAccount(s)
+		if err := h.queryJoinAccount(s); err != nil {
+			logger.Sugar().Errorw("queryJoinAccount", "Error", err)
+		}
 	})
-	return err
 }
 
 func (h *queryHandler) scan(ctx context.Context) error {
@@ -156,9 +157,7 @@ func (h *Handler) GetAccount(ctx context.Context) (*npool.Account, error) {
 		if err := handler.queryAccount(cli); err != nil {
 			return err
 		}
-		if err := handler.queryJoin(); err != nil {
-			return err
-		}
+		handler.queryJoin()
 		return handler.scan(_ctx)
 	})
 	if err != nil {
@@ -188,10 +187,7 @@ func (h *queryHandler) getAccounts(ctx context.Context) ([]*npool.Account, uint3
 			return err
 		}
 
-		if err := h.queryJoin(); err != nil {
-			return err
-		}
-
+		h.queryJoin()
 		_total, err := h.stmCount.Count(_ctx)
 		if err != nil {
 			return err

@@ -7,12 +7,9 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 	"github.com/NpoolPlatform/account-middleware/pkg/mw/account"
-	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
-	"github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	pbaccount "github.com/NpoolPlatform/message/npool/account/mw/v1/account"
-	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
 
 	"github.com/google/uuid"
 )
@@ -35,7 +32,7 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 			return false, fmt.Errorf("invalid accountid")
 		}
 
-		if baseAccount.UsedFor != *h.UsedFor {
+		if baseAccount.UsedFor != *h.accountReq.UsedFor {
 			return false, fmt.Errorf("invalid account usedfor")
 		}
 
@@ -43,12 +40,12 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 			return false, fmt.Errorf("invalid cointypeid")
 		}
 
-		if h.Address != nil && baseAccount.Address != *h.Address {
+		if h.accountReq.Address != nil && baseAccount.Address != *h.accountReq.Address {
 			return false, fmt.Errorf("invalid address")
 		}
 
 		return true, nil
-	} else if h.CoinTypeID == nil || h.Address == nil {
+	} else if h.CoinTypeID == nil || h.accountReq.Address == nil {
 		return false, fmt.Errorf("invalid cointypeid or address")
 	} else {
 		id := uuid.New()
@@ -58,116 +55,51 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 	return false, nil
 }
 
-func (h *Handler) CreateAccount(ctx context.Context) (*npool.Account, error) {
+func (h *Handler) CreateAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	if h.EntID == nil {
 		id := uuid.New()
 		h.EntID = &id
 	}
 
-	createBaseAccount, err := h.checkBaseAccount(ctx)
+	accountExist, err := h.checkBaseAccount(ctx)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	sqlH := h.newSQLHandler()
 
-	err = db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		if !createBaseAccount {
-			if _, err := accountcrud.CreateSet(
-				tx.Account.Create(),
-				&accountcrud.Req{
-					EntID:                  h.AccountID,
-					CoinTypeID:             h.CoinTypeID,
-					Address:                h.Address,
-					UsedFor:                h.UsedFor,
-					PlatformHoldPrivateKey: h.PlatformHoldPrivateKey,
-				},
-			).Save(ctx); err != nil {
-				return err
-			}
-		}
-
-		sql, err := sqlH.genCreateSQL()
-		if err != nil {
+	if !accountExist {
+		if _, err := accountcrud.CreateSet(
+			tx.Account.Create(),
+			&accountcrud.Req{
+				EntID:                  h.AccountID,
+				CoinTypeID:             h.CoinTypeID,
+				Address:                h.accountReq.Address,
+				UsedFor:                h.accountReq.UsedFor,
+				PlatformHoldPrivateKey: h.accountReq.PlatformHoldPrivateKey,
+			},
+		).Save(ctx); err != nil {
 			return err
 		}
-
-		rc, err := tx.ExecContext(ctx, sql)
-		if err != nil {
-			return err
-		}
-		if n, err := rc.RowsAffected(); err != nil || n != 1 {
-			return fmt.Errorf("fail create account: %v", err)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
 	}
 
-	return h.GetAccount(ctx)
+	sql, err := sqlH.genCreateSQL()
+	if err != nil {
+		return err
+	}
+
+	rc, err := tx.ExecContext(ctx, sql)
+	if err != nil {
+		return err
+	}
+	if n, err := rc.RowsAffected(); err != nil || n != 1 {
+		return fmt.Errorf("fail create account: %v", err)
+	}
+	return nil
 }
 
-func (h *Handler) CreateAccounts(ctx context.Context) ([]*npool.Account, error) {
-	entIDs := []uuid.UUID{}
-
-	err := db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		for _, req := range h.Reqs {
-			h.baseReq = *req
-
-			if h.EntID == nil {
-				id := uuid.New()
-				h.EntID = &id
-			}
-
-			createBaseAccount, err := h.checkBaseAccount(ctx)
-			if err != nil {
-				return err
-			}
-
-			sqlH := h.newSQLHandler()
-			if !createBaseAccount {
-				if _, err := accountcrud.CreateSet(
-					tx.Account.Create(),
-					&accountcrud.Req{
-						EntID:                  h.AccountID,
-						CoinTypeID:             h.CoinTypeID,
-						Address:                h.Address,
-						UsedFor:                h.UsedFor,
-						PlatformHoldPrivateKey: h.PlatformHoldPrivateKey,
-					},
-				).Save(ctx); err != nil {
-					return err
-				}
-			}
-
-			sql, err := sqlH.genCreateSQL()
-			if err != nil {
-				return err
-			}
-
-			rc, err := tx.ExecContext(ctx, sql)
-			if err != nil {
-				return err
-			}
-			if n, err := rc.RowsAffected(); err != nil || n != 1 {
-				return fmt.Errorf("fail create accounts: %v", err)
-			}
-
-			entIDs = append(entIDs, *h.EntID)
-		}
-		return nil
+func (h *Handler) CreateAccount(ctx context.Context) error {
+	return db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
+		return h.CreateAccountWithTx(ctx, tx)
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	h.Conds = &orderbenefit.Conds{
-		EntIDs: &cruder.Cond{Op: cruder.IN, Val: entIDs},
-	}
-	h.Offset = 0
-	h.Limit = int32(len(entIDs))
-
-	infos, _, err := h.GetAccounts(ctx)
-	return infos, err
 }

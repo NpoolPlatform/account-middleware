@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	constant "github.com/NpoolPlatform/account-middleware/pkg/const"
+	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
 	orderbenefitcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 	"github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
@@ -13,23 +14,13 @@ import (
 	"github.com/google/uuid"
 )
 
-type baseReq struct {
-	orderbenefitcrud.Req
-	ID                     *uint32
-	Address                *string
-	PlatformHoldPrivateKey *bool
-	UsedFor                *basetypes.AccountUsedFor
-	Active                 *bool
-	Blocked                *bool
-	Locked                 *bool
-	Conds                  *orderbenefitcrud.Conds
-}
-
 type Handler struct {
-	baseReq
-	Reqs   []*baseReq
-	Offset int32
-	Limit  int32
+	orderbenefitcrud.Req
+	ID         *uint32
+	accountReq accountcrud.Req
+	Conds      *orderbenefitcrud.Conds
+	Offset     int32
+	Limit      int32
 }
 
 func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) error) (*Handler, error) {
@@ -37,8 +28,8 @@ func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) 
 	privateKey := false
 	usedFor := basetypes.AccountUsedFor_OrderBenefit
 
-	handler.PlatformHoldPrivateKey = &privateKey
-	handler.UsedFor = &usedFor
+	handler.accountReq.PlatformHoldPrivateKey = &privateKey
+	handler.accountReq.UsedFor = &usedFor
 	for _, opt := range options {
 		if err := opt(ctx, handler); err != nil {
 			return nil, err
@@ -156,7 +147,7 @@ func WithAddress(addr *string, must bool) func(context.Context, *Handler) error 
 		if *addr == "" {
 			return fmt.Errorf("invalid address")
 		}
-		h.Address = addr
+		h.accountReq.Address = addr
 		return nil
 	}
 }
@@ -180,190 +171,128 @@ func WithOrderID(id *string, must bool) func(context.Context, *Handler) error {
 
 func WithActive(active *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		h.Active = active
+		h.accountReq.Active = active
 		return nil
 	}
 }
 
 func WithBlocked(blocked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		h.Blocked = blocked
+		h.accountReq.Blocked = blocked
 		return nil
 	}
 }
 
 func WithLocked(locked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		h.Locked = locked
+		h.accountReq.Locked = locked
 		return nil
 	}
 }
 
-//nolint:gocyclo
-func WithReqs(reqs []*orderbenefit.AccountReq, must bool) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		if len(reqs) == 0 && must {
-			return fmt.Errorf("invalid reqs")
-		}
-
-		h.Reqs = []*baseReq{}
-
-		for _, req := range reqs {
-			_req := baseReq{}
-			if req.EntID != nil {
-				entID, err := uuid.Parse(*req.EntID)
-				if err != nil {
-					return err
-				}
-				_req.EntID = &entID
-			}
-
-			if req.AppID != nil {
-				appID, err := uuid.Parse(*req.AppID)
-				if err != nil {
-					return err
-				}
-				_req.AppID = &appID
-			}
-			if req.UserID != nil {
-				userID, err := uuid.Parse(*req.UserID)
-				if err != nil {
-					return err
-				}
-				_req.UserID = &userID
-			}
-			if req.CoinTypeID != nil {
-				coinTypeID, err := uuid.Parse(*req.CoinTypeID)
-				if err != nil {
-					return err
-				}
-				_req.CoinTypeID = &coinTypeID
-			}
-			if req.AccountID != nil {
-				accountID, err := uuid.Parse(*req.AccountID)
-				if err != nil {
-					return err
-				}
-				_req.AccountID = &accountID
-			}
-			if req.OrderID != nil {
-				orderID, err := uuid.Parse(*req.OrderID)
-				if err != nil {
-					return err
-				}
-				_req.OrderID = &orderID
-			}
-
-			_req.Address = req.Address
-			_req.Active = req.Active
-			_req.Blocked = req.Blocked
-			_req.Locked = req.Locked
-			h.Reqs = append(h.Reqs, &_req)
-		}
-
-		return nil
+//nolint:gocyclo,funlen
+func (h *Handler) withBaseConds(conds *orderbenefit.Conds) error {
+	if conds.ID != nil {
+		h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: conds.GetID().GetValue()}
 	}
+	if conds.EntID != nil {
+		id, err := uuid.Parse(conds.GetEntID().GetValue())
+		if err != nil {
+			return err
+		}
+		h.Conds.EntID = &cruder.Cond{Op: conds.GetEntID().GetOp(), Val: id}
+	}
+	if conds.AppID != nil {
+		id, err := uuid.Parse(conds.GetAppID().GetValue())
+		if err != nil {
+			return err
+		}
+		h.Conds.AppID = &cruder.Cond{Op: conds.GetAppID().GetOp(), Val: id}
+	}
+	if conds.UserID != nil {
+		id, err := uuid.Parse(conds.GetUserID().GetValue())
+		if err != nil {
+			return err
+		}
+		h.Conds.UserID = &cruder.Cond{Op: conds.GetUserID().GetOp(), Val: id}
+	}
+	if conds.CoinTypeID != nil {
+		id, err := uuid.Parse(conds.GetCoinTypeID().GetValue())
+		if err != nil {
+			return err
+		}
+		h.Conds.CoinTypeID = &cruder.Cond{Op: conds.GetCoinTypeID().GetOp(), Val: id}
+	}
+	if conds.AccountID != nil {
+		id, err := uuid.Parse(conds.GetAccountID().GetValue())
+		if err != nil {
+			return err
+		}
+		h.Conds.AccountID = &cruder.Cond{Op: conds.GetAccountID().GetOp(), Val: id}
+	}
+	if conds.OrderID != nil {
+		id, err := uuid.Parse(conds.GetOrderID().GetValue())
+		if err != nil {
+			return err
+		}
+		h.Conds.OrderID = &cruder.Cond{Op: conds.GetOrderID().GetOp(), Val: id}
+	}
+	if conds.EntIDs != nil {
+		ids := []uuid.UUID{}
+		for _, id := range conds.GetEntIDs().GetValue() {
+			_id, err := uuid.Parse(id)
+			if err != nil {
+				return err
+			}
+			ids = append(ids, _id)
+		}
+		h.Conds.EntIDs = &cruder.Cond{Op: conds.GetEntIDs().GetOp(), Val: ids}
+	}
+	if conds.AccountIDs != nil {
+		accountIDs := []uuid.UUID{}
+		for _, accountID := range conds.GetAccountIDs().GetValue() {
+			_accountID, err := uuid.Parse(accountID)
+			if err != nil {
+				return err
+			}
+			accountIDs = append(accountIDs, _accountID)
+		}
+		h.Conds.AccountIDs = &cruder.Cond{Op: conds.GetAccountIDs().GetOp(), Val: accountIDs}
+	}
+	if conds.Active != nil {
+		h.Conds.Active = &cruder.Cond{
+			Op:  conds.GetActive().GetOp(),
+			Val: conds.GetActive().GetValue(),
+		}
+	}
+	if conds.Address != nil {
+		h.Conds.Address = &cruder.Cond{
+			Op:  conds.GetAddress().GetOp(),
+			Val: conds.GetAddress().GetValue(),
+		}
+	}
+	if conds.Blocked != nil {
+		h.Conds.Blocked = &cruder.Cond{
+			Op:  conds.GetBlocked().GetOp(),
+			Val: conds.GetBlocked().GetValue(),
+		}
+	}
+	if conds.Address != nil {
+		h.Conds.Address = &cruder.Cond{
+			Op:  conds.GetAddress().GetOp(),
+			Val: conds.GetAddress().GetValue(),
+		}
+	}
+	return nil
 }
 
-//nolint:gocyclo
 func WithConds(conds *orderbenefit.Conds) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Conds = &orderbenefitcrud.Conds{}
 		if conds == nil {
 			return nil
 		}
-		if conds.ID != nil {
-			h.Conds.ID = &cruder.Cond{Op: conds.GetID().GetOp(), Val: conds.GetID().GetValue()}
-		}
-		if conds.EntID != nil {
-			id, err := uuid.Parse(conds.GetEntID().GetValue())
-			if err != nil {
-				return err
-			}
-			h.Conds.EntID = &cruder.Cond{Op: conds.GetEntID().GetOp(), Val: id}
-		}
-		if conds.AppID != nil {
-			id, err := uuid.Parse(conds.GetAppID().GetValue())
-			if err != nil {
-				return err
-			}
-			h.Conds.AppID = &cruder.Cond{Op: conds.GetAppID().GetOp(), Val: id}
-		}
-		if conds.UserID != nil {
-			id, err := uuid.Parse(conds.GetUserID().GetValue())
-			if err != nil {
-				return err
-			}
-			h.Conds.UserID = &cruder.Cond{Op: conds.GetUserID().GetOp(), Val: id}
-		}
-		if conds.CoinTypeID != nil {
-			id, err := uuid.Parse(conds.GetCoinTypeID().GetValue())
-			if err != nil {
-				return err
-			}
-			h.Conds.CoinTypeID = &cruder.Cond{Op: conds.GetCoinTypeID().GetOp(), Val: id}
-		}
-		if conds.AccountID != nil {
-			id, err := uuid.Parse(conds.GetAccountID().GetValue())
-			if err != nil {
-				return err
-			}
-			h.Conds.AccountID = &cruder.Cond{Op: conds.GetAccountID().GetOp(), Val: id}
-		}
-		if conds.OrderID != nil {
-			id, err := uuid.Parse(conds.GetOrderID().GetValue())
-			if err != nil {
-				return err
-			}
-			h.Conds.OrderID = &cruder.Cond{Op: conds.GetOrderID().GetOp(), Val: id}
-		}
-		if conds.EntIDs != nil {
-			ids := []uuid.UUID{}
-			for _, id := range conds.GetEntIDs().GetValue() {
-				_id, err := uuid.Parse(id)
-				if err != nil {
-					return err
-				}
-				ids = append(ids, _id)
-			}
-			h.Conds.EntIDs = &cruder.Cond{Op: conds.GetEntIDs().GetOp(), Val: ids}
-		}
-		if conds.AccountIDs != nil {
-			accountIDs := []uuid.UUID{}
-			for _, accountID := range conds.GetAccountIDs().GetValue() {
-				_accountID, err := uuid.Parse(accountID)
-				if err != nil {
-					return err
-				}
-				accountIDs = append(accountIDs, _accountID)
-			}
-			h.Conds.AccountIDs = &cruder.Cond{Op: conds.GetAccountIDs().GetOp(), Val: accountIDs}
-		}
-		if conds.Active != nil {
-			h.Conds.Active = &cruder.Cond{
-				Op:  conds.GetActive().GetOp(),
-				Val: conds.GetActive().GetValue(),
-			}
-		}
-		if conds.Address != nil {
-			h.Conds.Address = &cruder.Cond{
-				Op:  conds.GetAddress().GetOp(),
-				Val: conds.GetAddress().GetValue(),
-			}
-		}
-		if conds.Blocked != nil {
-			h.Conds.Blocked = &cruder.Cond{
-				Op:  conds.GetBlocked().GetOp(),
-				Val: conds.GetBlocked().GetValue(),
-			}
-		}
-		if conds.Address != nil {
-			h.Conds.Address = &cruder.Cond{
-				Op:  conds.GetAddress().GetOp(),
-				Val: conds.GetAddress().GetValue(),
-			}
-		}
-		return nil
+		return h.withBaseConds(conds)
 	}
 }
 

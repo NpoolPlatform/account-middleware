@@ -10,6 +10,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 	entaccount "github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 	entorderbenefit "github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
+	"github.com/NpoolPlatform/go-service-framework/pkg/logger"
 
 	orderbenefitcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/orderbenefit"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
@@ -47,7 +48,7 @@ func (h *existHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 			s.C(entorderbenefit.FieldAccountID),
 			t.C(entaccount.FieldEntID),
 		).
-		OnP(
+		Where(
 			sql.EQ(t.C(entaccount.FieldDeletedAt), 0),
 		)
 
@@ -108,12 +109,12 @@ func (h *existHandler) queryJoinAccount(s *sql.Selector) error { //nolint
 	return nil
 }
 
-func (h *existHandler) queryJoin() error {
-	var err error
+func (h *existHandler) queryJoin() {
 	h.stm.Modify(func(s *sql.Selector) {
-		err = h.queryJoinAccount(s)
+		if err := h.queryJoinAccount(s); err != nil {
+			logger.Sugar().Errorw("queryJoinAccount", "Error", err)
+		}
 	})
-	return err
 }
 
 func (h *Handler) ExistAccount(ctx context.Context) (bool, error) {
@@ -129,9 +130,7 @@ func (h *Handler) ExistAccount(ctx context.Context) (bool, error) {
 
 	err := db.WithClient(ctx, func(_ctx context.Context, cli *ent.Client) error {
 		handler.queryAccount(cli)
-		if err := handler.queryJoin(); err != nil {
-			return err
-		}
+		handler.queryJoin()
 		_exist, err := handler.stm.Exist(_ctx)
 		if err != nil {
 			return err
@@ -156,9 +155,7 @@ func (h *Handler) ExistAccountConds(ctx context.Context) (bool, error) {
 		if err := handler.queryAccounts(cli); err != nil {
 			return err
 		}
-		if err := handler.queryJoin(); err != nil {
-			return err
-		}
+		handler.queryJoin()
 		_exist, err := handler.stm.Exist(_ctx)
 		if err != nil {
 			return err

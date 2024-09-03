@@ -24,7 +24,7 @@ func (s *Server) ExistAccountConds(ctx context.Context, in *npool.ExistAccountCo
 			"In", in,
 			"Error", err,
 		)
-		return &npool.ExistAccountCondsResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.ExistAccountCondsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
 	exist, err := handler.ExistAccountConds(ctx)
@@ -34,7 +34,7 @@ func (s *Server) ExistAccountConds(ctx context.Context, in *npool.ExistAccountCo
 			"In", in,
 			"Error", err,
 		)
-		return &npool.ExistAccountCondsResponse{}, status.Error(codes.Aborted, err.Error())
+		return &npool.ExistAccountCondsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
 	return &npool.ExistAccountCondsResponse{
