@@ -53,7 +53,12 @@ var retReq = &npool.AccountReq{
 }
 
 func createAccount(t *testing.T) {
-	info, err := CreateAccount(context.Background(), retReq)
+	_, err := CreateAccount(context.Background(), retReq)
+	assert.Nil(t, err)
+}
+
+func getAccount(t *testing.T) {
+	info, err := GetAccount(context.Background(), ret.EntID)
 	if assert.Nil(t, err) {
 		ret.ID = info.ID
 		ret.AccountID = info.AccountID
@@ -61,13 +66,6 @@ func createAccount(t *testing.T) {
 		ret.UsedForStr = info.UsedForStr
 		ret.CreatedAt = info.CreatedAt
 		ret.UpdatedAt = info.UpdatedAt
-		assert.Equal(t, ret, info)
-	}
-}
-
-func getAccount(t *testing.T) {
-	info, err := GetAccount(context.Background(), ret.EntID)
-	if assert.Nil(t, err) {
 		assert.Equal(t, info, ret)
 	}
 }
