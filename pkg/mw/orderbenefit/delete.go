@@ -37,7 +37,6 @@ func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	}
 
 	h.ID = &info.ID
-
 	now := uint32(time.Now().Unix())
 	account, err := tx.Account.
 		Query().
@@ -50,14 +49,12 @@ func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 		return err
 	}
 
-	if _, err := accountcrud.UpdateSet(
+	_, err = accountcrud.UpdateSet(
 		account.Update(),
 		&accountcrud.Req{
 			DeletedAt: &now,
 		},
-	).Save(ctx); err != nil {
-		return err
-	}
+	).Save(ctx)
 
 	return err
 }
