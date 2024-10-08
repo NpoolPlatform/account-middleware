@@ -35,6 +35,7 @@ func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	if h.AccountID != nil && h.AccountID.String() != info.AccountID {
 		return fmt.Errorf("invalid accountid")
 	}
+
 	h.ID = &info.ID
 
 	now := uint32(time.Now().Unix())
@@ -57,6 +58,7 @@ func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	).Save(ctx); err != nil {
 		return err
 	}
+
 	return err
 }
 
