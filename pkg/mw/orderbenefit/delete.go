@@ -84,7 +84,5 @@ func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 }
 
 func (h *Handler) DeleteAccount(ctx context.Context) error {
-	return db.WithTx(ctx, func(ctx context.Context, tx *ent.Tx) error {
-		return nil
-	})
+	return db.WithTx(ctx, h.DeleteAccountWithTx)
 }
