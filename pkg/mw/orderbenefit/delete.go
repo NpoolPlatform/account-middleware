@@ -33,6 +33,9 @@ func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	if h.OrderID != nil && h.OrderID.String() != info.OrderID {
 		return fmt.Errorf("invalid orderid")
 	}
+	if h.AccountID != nil && h.AccountID.String() != info.AccountID {
+		return fmt.Errorf("invalid accountid")
+	}
 	accountID, err := uuid.Parse(info.AccountID)
 	if err != nil {
 		return err

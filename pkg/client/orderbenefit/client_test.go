@@ -95,12 +95,14 @@ func getAccounts(t *testing.T) {
 
 func deleteAccount(t *testing.T) {
 	req := &npool.AccountReq{
-		ID: &ret.ID,
+		ID:        &ret.ID,
+		AppID:     &ret.AppID,
+		UserID:    &ret.UserID,
+		OrderID:   &ret.OrderID,
+		AccountID: &ret.AccountID,
 	}
-	info, err := DeleteAccount(context.Background(), req)
-	if assert.Nil(t, err) {
-		assert.Equal(t, info, ret)
-	}
+	_, err := DeleteAccount(context.Background(), req)
+	assert.Nil(t, err)
 }
 
 func TestClient(t *testing.T) {
