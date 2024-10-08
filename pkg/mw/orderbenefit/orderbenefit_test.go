@@ -76,6 +76,10 @@ func getAccount(t *testing.T) {
 	assert.Nil(t, err)
 	info, err := handler.GetAccount(context.Background())
 	if assert.Nil(t, err) {
+		ret.ID = info.ID
+		ret.AccountID = info.AccountID
+		ret.CreatedAt = info.CreatedAt
+		ret.UpdatedAt = info.UpdatedAt
 		assert.Equal(t, info, &ret)
 	}
 }
