@@ -6,6 +6,7 @@ import (
 	"time"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
+	"github.com/google/uuid"
 
 	entaccount "github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
 
@@ -32,8 +33,9 @@ func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	if h.OrderID != nil && h.OrderID.String() != info.OrderID {
 		return fmt.Errorf("invalid orderid")
 	}
-	if h.AccountID != nil && h.AccountID.String() != info.AccountID {
-		return fmt.Errorf("invalid accountid")
+	accountID, err := uuid.Parse(info.AccountID)
+	if err != nil {
+		return err
 	}
 
 	h.ID = &info.ID
@@ -41,7 +43,7 @@ func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	account, err := tx.Account.
 		Query().
 		Where(
-			entaccount.EntID(*h.AccountID),
+			entaccount.EntID(accountID),
 		).
 		ForUpdate().
 		Only(ctx)
