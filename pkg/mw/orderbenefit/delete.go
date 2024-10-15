@@ -16,6 +16,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
 )
 
+//nolint:gocyclo
 func (h *Handler) DeleteAccountWithTx(ctx context.Context, tx *ent.Tx) error {
 	info, err := h.GetAccount(ctx)
 	if err != nil {

@@ -12,11 +12,11 @@ import (
 
 type sqlHandler struct {
 	*Handler
-	BondAccountID *uuid.UUID
-	BondOrderID   *uuid.UUID
-	bondVals      map[string]string
-	baseVals      map[string]string
-	idVals        map[string]string
+	BondCoinTypeID *uuid.UUID
+	BondOrderID    *uuid.UUID
+	bondVals       map[string]string
+	baseVals       map[string]string
+	idVals         map[string]string
 }
 
 func (h *Handler) newSQLHandler() *sqlHandler {
@@ -64,6 +64,7 @@ func (h *sqlHandler) baseKeys() error {
 			return err
 		}
 		h.baseVals[orderbenefit.FieldCoinTypeID] = string(strBytes)
+		h.BondCoinTypeID = h.CoinTypeID
 	}
 	if h.AccountID != nil {
 		strBytes, err := json.Marshal(*h.AccountID)
@@ -71,7 +72,6 @@ func (h *sqlHandler) baseKeys() error {
 			return err
 		}
 		h.baseVals[orderbenefit.FieldAccountID] = string(strBytes)
-		h.BondAccountID = h.AccountID
 	}
 	if h.OrderID != nil {
 		strBytes, err := json.Marshal(*h.OrderID)
@@ -82,14 +82,14 @@ func (h *sqlHandler) baseKeys() error {
 		h.BondOrderID = h.OrderID
 	}
 
-	if h.BondAccountID == nil {
-		return fmt.Errorf("please give account id")
+	if h.BondCoinTypeID == nil {
+		return fmt.Errorf("please give cointype id")
 	}
-	strBytes, err := json.Marshal(*h.BondAccountID)
+	strBytes, err := json.Marshal(*h.BondCoinTypeID)
 	if err != nil {
 		return err
 	}
-	h.bondVals[orderbenefit.FieldAccountID] = string(strBytes)
+	h.bondVals[orderbenefit.FieldCoinTypeID] = string(strBytes)
 
 	if h.BondOrderID == nil {
 		return fmt.Errorf("please give order id")

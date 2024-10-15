@@ -42,10 +42,17 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 		if h.CoinTypeID != nil && baseAccount.CoinTypeID != h.CoinTypeID.String() {
 			return false, fmt.Errorf("invalid cointypeid")
 		}
+		if h.CoinTypeID == nil {
+			h.CoinTypeID = func() *uuid.UUID { id, _ := uuid.Parse(baseAccount.CoinTypeID); return &id }()
+		}
 
 		if h.accountReq.Address != nil && baseAccount.Address != *h.accountReq.Address {
 			return false, fmt.Errorf("invalid address")
 		}
+		if h.accountReq.Address == nil {
+			h.accountReq.Address = &baseAccount.Address
+		}
+
 		return true, nil
 	} else if h.CoinTypeID == nil || h.accountReq.Address == nil {
 		return false, fmt.Errorf("invalid cointypeid or address")
