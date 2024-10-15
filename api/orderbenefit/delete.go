@@ -83,7 +83,7 @@ func (s *Server) DeleteAccounts(ctx context.Context, in *npool.DeleteAccountsReq
 		return &npool.DeleteAccountsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
-	err = handler.DeleteOrderBenefits(ctx)
+	err = handler.DeleteAccounts(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"DeleteAccounts",

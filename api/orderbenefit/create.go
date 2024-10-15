@@ -72,7 +72,7 @@ func (s *Server) CreateAccounts(ctx context.Context, in *npool.CreateAccountsReq
 		return &npool.CreateAccountsResponse{}, status.Error(codes.Internal, "internal server error")
 	}
 
-	err = handler.CreateOrderBenefits(ctx)
+	err = handler.CreateAccounts(ctx)
 	if err != nil {
 		logger.Sugar().Errorw(
 			"CreateAccounts",

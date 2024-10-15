@@ -82,7 +82,7 @@ func NewMultiDeleteHandler(ctx context.Context, reqs []*orderbenefit.AccountReq,
 	return &MultiDeleteHandler{mh}, nil
 }
 
-func (h *MultiCreateHandler) CreateOrderBenefitsWithTx(ctx context.Context, tx *ent.Tx) error {
+func (h *MultiCreateHandler) CreateAccountsWithTx(ctx context.Context, tx *ent.Tx) error {
 	for _, handler := range h.Handlers {
 		if err := handler.CreateAccountWithTx(ctx, tx); err != nil {
 			return err
@@ -91,13 +91,13 @@ func (h *MultiCreateHandler) CreateOrderBenefitsWithTx(ctx context.Context, tx *
 	return nil
 }
 
-func (h *MultiCreateHandler) CreateOrderBenefits(ctx context.Context) error {
+func (h *MultiCreateHandler) CreateAccounts(ctx context.Context) error {
 	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		return h.CreateOrderBenefitsWithTx(_ctx, tx)
+		return h.CreateAccountsWithTx(_ctx, tx)
 	})
 }
 
-func (h *MultiDeleteHandler) DeleteOrderBenefitsWithTx(ctx context.Context, tx *ent.Tx) error {
+func (h *MultiDeleteHandler) DeleteAccountsWithTx(ctx context.Context, tx *ent.Tx) error {
 	for _, handler := range h.Handlers {
 		if err := handler.DeleteAccountWithTx(ctx, tx); err != nil {
 			return err
@@ -106,8 +106,8 @@ func (h *MultiDeleteHandler) DeleteOrderBenefitsWithTx(ctx context.Context, tx *
 	return nil
 }
 
-func (h *MultiDeleteHandler) DeleteOrderBenefits(ctx context.Context) error {
+func (h *MultiDeleteHandler) DeleteAccounts(ctx context.Context) error {
 	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		return h.DeleteOrderBenefitsWithTx(_ctx, tx)
+		return h.DeleteAccountsWithTx(_ctx, tx)
 	})
 }
