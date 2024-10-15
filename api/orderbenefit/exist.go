@@ -41,3 +41,32 @@ func (s *Server) ExistAccountConds(ctx context.Context, in *npool.ExistAccountCo
 		Info: exist,
 	}, nil
 }
+
+func (s *Server) ExistAccount(ctx context.Context, in *npool.ExistAccountRequest) (*npool.ExistAccountResponse, error) {
+	handler, err := orderbenefit1.NewHandler(
+		ctx,
+		orderbenefit1.WithEntID(&in.EntID, true),
+	)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"ExistAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.ExistAccountResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	info, err := handler.ExistAccount(ctx)
+	if err != nil {
+		logger.Sugar().Errorw(
+			"ExistAccount",
+			"In", in,
+			"Error", err,
+		)
+		return &npool.ExistAccountResponse{}, status.Error(codes.Aborted, err.Error())
+	}
+
+	return &npool.ExistAccountResponse{
+		Info: info,
+	}, nil
+}

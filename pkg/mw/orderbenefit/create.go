@@ -6,36 +6,39 @@ import (
 
 	"github.com/NpoolPlatform/account-middleware/pkg/db"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
-	"github.com/NpoolPlatform/account-middleware/pkg/mw/account"
+	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
 
 	accountcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/account"
-	pbaccount "github.com/NpoolPlatform/message/npool/account/mw/v1/account"
+	"github.com/NpoolPlatform/message/npool/account/mw/v1/orderbenefit"
+	v1 "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"github.com/google/uuid"
 )
 
 func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) {
-	var baseAccount *pbaccount.Account
-
 	if h.AccountID != nil {
-		accountID := h.AccountID.String()
-		accountH, err := account.NewHandler(ctx, account.WithEntID(&accountID, true))
-		if err != nil {
-			return false, err
-		}
-		baseAccount, err = accountH.GetAccount(ctx)
+		queryH, err := NewHandler(ctx,
+			WithConds(&orderbenefit.Conds{
+				AppID:     &v1.StringVal{Op: cruder.EQ, Value: h.AppID.String()},
+				UserID:    &v1.StringVal{Op: cruder.EQ, Value: h.UserID.String()},
+				AccountID: &v1.StringVal{Op: cruder.EQ, Value: h.AccountID.String()},
+			}),
+			WithOffset(0),
+			WithLimit(1),
+		)
 		if err != nil {
 			return false, err
 		}
 
-		if baseAccount == nil {
+		baseAccounts, _, err := queryH.GetAccounts(ctx)
+		if err != nil {
+			return false, err
+		}
+		if len(baseAccounts) < 1 {
 			return false, fmt.Errorf("invalid accountid")
 		}
 
-		if baseAccount.UsedFor != *h.accountReq.UsedFor {
-			return false, fmt.Errorf("invalid account usedfor")
-		}
-
+		baseAccount := baseAccounts[0]
 		if h.CoinTypeID != nil && baseAccount.CoinTypeID != h.CoinTypeID.String() {
 			return false, fmt.Errorf("invalid cointypeid")
 		}
@@ -43,7 +46,6 @@ func (h *Handler) checkBaseAccount(ctx context.Context) (exist bool, err error) 
 		if h.accountReq.Address != nil && baseAccount.Address != *h.accountReq.Address {
 			return false, fmt.Errorf("invalid address")
 		}
-
 		return true, nil
 	} else if h.CoinTypeID == nil || h.accountReq.Address == nil {
 		return false, fmt.Errorf("invalid cointypeid or address")
