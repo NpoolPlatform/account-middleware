@@ -20,6 +20,8 @@ type Tx struct {
 	Deposit *DepositClient
 	// GoodBenefit is the client for interacting with the GoodBenefit builders.
 	GoodBenefit *GoodBenefitClient
+	// OrderBenefit is the client for interacting with the OrderBenefit builders.
+	OrderBenefit *OrderBenefitClient
 	// Payment is the client for interacting with the Payment builders.
 	Payment *PaymentClient
 	// Platform is the client for interacting with the Platform builders.
@@ -166,6 +168,7 @@ func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
 	tx.Deposit = NewDepositClient(tx.config)
 	tx.GoodBenefit = NewGoodBenefitClient(tx.config)
+	tx.OrderBenefit = NewOrderBenefitClient(tx.config)
 	tx.Payment = NewPaymentClient(tx.config)
 	tx.Platform = NewPlatformClient(tx.config)
 	tx.Transfer = NewTransferClient(tx.config)

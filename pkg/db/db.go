@@ -58,7 +58,6 @@ func WithTx(ctx context.Context, fn func(ctx context.Context, tx *ent.Tx) error)
 			}
 		}
 	}()
-
 	if err := fn(ctx, tx); err != nil {
 		return err
 	}
