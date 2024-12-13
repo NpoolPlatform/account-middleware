@@ -9,6 +9,9 @@ import (
 // Account is the predicate function for account builders.
 type Account func(*sql.Selector)
 
+// Contract is the predicate function for contract builders.
+type Contract func(*sql.Selector)
+
 // Deposit is the predicate function for deposit builders.
 type Deposit func(*sql.Selector)
 

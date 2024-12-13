@@ -37,6 +37,33 @@ var (
 			},
 		},
 	}
+	// ContractsColumns holds the columns for the "contracts" table.
+	ContractsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUint32, Increment: true},
+		{Name: "created_at", Type: field.TypeUint32},
+		{Name: "updated_at", Type: field.TypeUint32},
+		{Name: "deleted_at", Type: field.TypeUint32},
+		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
+		{Name: "good_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "pledge_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "backup", Type: field.TypeBool, Nullable: true, Default: false},
+		{Name: "transaction_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "contract_type", Type: field.TypeString, Nullable: true, Default: "DefaultContractType"},
+	}
+	// ContractsTable holds the schema information for the "contracts" table.
+	ContractsTable = &schema.Table{
+		Name:       "contracts",
+		Columns:    ContractsColumns,
+		PrimaryKey: []*schema.Column{ContractsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "contract_ent_id",
+				Unique:  true,
+				Columns: []*schema.Column{ContractsColumns[4]},
+			},
+		},
+	}
 	// DepositsColumns holds the columns for the "deposits" table.
 	DepositsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUint32, Increment: true},
@@ -219,6 +246,7 @@ var (
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		AccountsTable,
+		ContractsTable,
 		DepositsTable,
 		GoodBenefitsTable,
 		OrderBenefitsTable,

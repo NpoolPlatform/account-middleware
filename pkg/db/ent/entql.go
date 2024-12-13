@@ -4,6 +4,7 @@ package ent
 
 import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/contract"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
@@ -20,7 +21,7 @@ import (
 
 // schemaGraph holds a representation of ent/schema at runtime.
 var schemaGraph = func() *sqlgraph.Schema {
-	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 8)}
+	graph := &sqlgraph.Schema{Nodes: make([]*sqlgraph.Node, 9)}
 	graph.Nodes[0] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   account.Table,
@@ -48,6 +49,29 @@ var schemaGraph = func() *sqlgraph.Schema {
 	}
 	graph.Nodes[1] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
+			Table:   contract.Table,
+			Columns: contract.Columns,
+			ID: &sqlgraph.FieldSpec{
+				Type:   field.TypeUint32,
+				Column: contract.FieldID,
+			},
+		},
+		Type: "Contract",
+		Fields: map[string]*sqlgraph.FieldSpec{
+			contract.FieldCreatedAt:     {Type: field.TypeUint32, Column: contract.FieldCreatedAt},
+			contract.FieldUpdatedAt:     {Type: field.TypeUint32, Column: contract.FieldUpdatedAt},
+			contract.FieldDeletedAt:     {Type: field.TypeUint32, Column: contract.FieldDeletedAt},
+			contract.FieldEntID:         {Type: field.TypeUUID, Column: contract.FieldEntID},
+			contract.FieldGoodID:        {Type: field.TypeUUID, Column: contract.FieldGoodID},
+			contract.FieldPledgeID:      {Type: field.TypeUUID, Column: contract.FieldPledgeID},
+			contract.FieldAccountID:     {Type: field.TypeUUID, Column: contract.FieldAccountID},
+			contract.FieldBackup:        {Type: field.TypeBool, Column: contract.FieldBackup},
+			contract.FieldTransactionID: {Type: field.TypeUUID, Column: contract.FieldTransactionID},
+			contract.FieldContractType:  {Type: field.TypeString, Column: contract.FieldContractType},
+		},
+	}
+	graph.Nodes[2] = &sqlgraph.Node{
+		NodeSpec: sqlgraph.NodeSpec{
 			Table:   deposit.Table,
 			Columns: deposit.Columns,
 			ID: &sqlgraph.FieldSpec{
@@ -70,7 +94,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			deposit.FieldScannableAt:   {Type: field.TypeUint32, Column: deposit.FieldScannableAt},
 		},
 	}
-	graph.Nodes[2] = &sqlgraph.Node{
+	graph.Nodes[3] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   goodbenefit.Table,
 			Columns: goodbenefit.Columns,
@@ -91,7 +115,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			goodbenefit.FieldTransactionID: {Type: field.TypeUUID, Column: goodbenefit.FieldTransactionID},
 		},
 	}
-	graph.Nodes[3] = &sqlgraph.Node{
+	graph.Nodes[4] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   orderbenefit.Table,
 			Columns: orderbenefit.Columns,
@@ -113,7 +137,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			orderbenefit.FieldOrderID:    {Type: field.TypeUUID, Column: orderbenefit.FieldOrderID},
 		},
 	}
-	graph.Nodes[4] = &sqlgraph.Node{
+	graph.Nodes[5] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   payment.Table,
 			Columns: payment.Columns,
@@ -133,7 +157,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			payment.FieldAvailableAt:   {Type: field.TypeUint32, Column: payment.FieldAvailableAt},
 		},
 	}
-	graph.Nodes[5] = &sqlgraph.Node{
+	graph.Nodes[6] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   platform.Table,
 			Columns: platform.Columns,
@@ -153,7 +177,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			platform.FieldBackup:    {Type: field.TypeBool, Column: platform.FieldBackup},
 		},
 	}
-	graph.Nodes[6] = &sqlgraph.Node{
+	graph.Nodes[7] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   transfer.Table,
 			Columns: transfer.Columns,
@@ -173,7 +197,7 @@ var schemaGraph = func() *sqlgraph.Schema {
 			transfer.FieldTargetUserID: {Type: field.TypeUUID, Column: transfer.FieldTargetUserID},
 		},
 	}
-	graph.Nodes[7] = &sqlgraph.Node{
+	graph.Nodes[8] = &sqlgraph.Node{
 		NodeSpec: sqlgraph.NodeSpec{
 			Table:   user.Table,
 			Columns: user.Columns,
@@ -307,6 +331,96 @@ func (f *AccountFilter) WhereBlocked(p entql.BoolP) {
 }
 
 // addPredicate implements the predicateAdder interface.
+func (cq *ContractQuery) addPredicate(pred func(s *sql.Selector)) {
+	cq.predicates = append(cq.predicates, pred)
+}
+
+// Filter returns a Filter implementation to apply filters on the ContractQuery builder.
+func (cq *ContractQuery) Filter() *ContractFilter {
+	return &ContractFilter{config: cq.config, predicateAdder: cq}
+}
+
+// addPredicate implements the predicateAdder interface.
+func (m *ContractMutation) addPredicate(pred func(s *sql.Selector)) {
+	m.predicates = append(m.predicates, pred)
+}
+
+// Filter returns an entql.Where implementation to apply filters on the ContractMutation builder.
+func (m *ContractMutation) Filter() *ContractFilter {
+	return &ContractFilter{config: m.config, predicateAdder: m}
+}
+
+// ContractFilter provides a generic filtering capability at runtime for ContractQuery.
+type ContractFilter struct {
+	predicateAdder
+	config
+}
+
+// Where applies the entql predicate on the query filter.
+func (f *ContractFilter) Where(p entql.P) {
+	f.addPredicate(func(s *sql.Selector) {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
+			s.AddError(err)
+		}
+	})
+}
+
+// WhereID applies the entql uint32 predicate on the id field.
+func (f *ContractFilter) WhereID(p entql.Uint32P) {
+	f.Where(p.Field(contract.FieldID))
+}
+
+// WhereCreatedAt applies the entql uint32 predicate on the created_at field.
+func (f *ContractFilter) WhereCreatedAt(p entql.Uint32P) {
+	f.Where(p.Field(contract.FieldCreatedAt))
+}
+
+// WhereUpdatedAt applies the entql uint32 predicate on the updated_at field.
+func (f *ContractFilter) WhereUpdatedAt(p entql.Uint32P) {
+	f.Where(p.Field(contract.FieldUpdatedAt))
+}
+
+// WhereDeletedAt applies the entql uint32 predicate on the deleted_at field.
+func (f *ContractFilter) WhereDeletedAt(p entql.Uint32P) {
+	f.Where(p.Field(contract.FieldDeletedAt))
+}
+
+// WhereEntID applies the entql [16]byte predicate on the ent_id field.
+func (f *ContractFilter) WhereEntID(p entql.ValueP) {
+	f.Where(p.Field(contract.FieldEntID))
+}
+
+// WhereGoodID applies the entql [16]byte predicate on the good_id field.
+func (f *ContractFilter) WhereGoodID(p entql.ValueP) {
+	f.Where(p.Field(contract.FieldGoodID))
+}
+
+// WherePledgeID applies the entql [16]byte predicate on the pledge_id field.
+func (f *ContractFilter) WherePledgeID(p entql.ValueP) {
+	f.Where(p.Field(contract.FieldPledgeID))
+}
+
+// WhereAccountID applies the entql [16]byte predicate on the account_id field.
+func (f *ContractFilter) WhereAccountID(p entql.ValueP) {
+	f.Where(p.Field(contract.FieldAccountID))
+}
+
+// WhereBackup applies the entql bool predicate on the backup field.
+func (f *ContractFilter) WhereBackup(p entql.BoolP) {
+	f.Where(p.Field(contract.FieldBackup))
+}
+
+// WhereTransactionID applies the entql [16]byte predicate on the transaction_id field.
+func (f *ContractFilter) WhereTransactionID(p entql.ValueP) {
+	f.Where(p.Field(contract.FieldTransactionID))
+}
+
+// WhereContractType applies the entql string predicate on the contract_type field.
+func (f *ContractFilter) WhereContractType(p entql.StringP) {
+	f.Where(p.Field(contract.FieldContractType))
+}
+
+// addPredicate implements the predicateAdder interface.
 func (dq *DepositQuery) addPredicate(pred func(s *sql.Selector)) {
 	dq.predicates = append(dq.predicates, pred)
 }
@@ -335,7 +449,7 @@ type DepositFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *DepositFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[1].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -430,7 +544,7 @@ type GoodBenefitFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *GoodBenefitFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[2].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -510,7 +624,7 @@ type OrderBenefitFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *OrderBenefitFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[3].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -595,7 +709,7 @@ type PaymentFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PaymentFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[4].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -670,7 +784,7 @@ type PlatformFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *PlatformFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[5].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -745,7 +859,7 @@ type TransferFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *TransferFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[6].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
@@ -820,7 +934,7 @@ type UserFilter struct {
 // Where applies the entql predicate on the query filter.
 func (f *UserFilter) Where(p entql.P) {
 	f.addPredicate(func(s *sql.Selector) {
-		if err := schemaGraph.EvalP(schemaGraph.Nodes[7].Type, p, s); err != nil {
+		if err := schemaGraph.EvalP(schemaGraph.Nodes[8].Type, p, s); err != nil {
 			s.AddError(err)
 		}
 	})
