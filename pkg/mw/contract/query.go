@@ -13,6 +13,7 @@ import (
 
 	contractcrud "github.com/NpoolPlatform/account-middleware/pkg/crud/contract"
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/contract"
+	accounttypes "github.com/NpoolPlatform/message/npool/basetypes/account/v1"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
 	"github.com/google/uuid"
@@ -185,6 +186,7 @@ func (h *queryHandler) formalize() {
 		if _, err := uuid.Parse(info.CoinTypeID); err != nil {
 			info.CoinTypeID = uuid.Nil.String()
 		}
+		info.ContractType = accounttypes.ContractType(accounttypes.ContractType_value[info.ContractTypeStr])
 		info.LockedBy = basetypes.AccountLockedBy(basetypes.AccountLockedBy_value[info.LockedByStr])
 	}
 }
