@@ -48,7 +48,6 @@ var (
 		{Name: "pledge_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "backup", Type: field.TypeBool, Nullable: true, Default: false},
-		{Name: "transaction_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "contract_type", Type: field.TypeString, Nullable: true, Default: "DefaultContractType"},
 	}
 	// ContractsTable holds the schema information for the "contracts" table.

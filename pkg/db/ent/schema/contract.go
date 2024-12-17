@@ -47,12 +47,6 @@ func (Contract) Fields() []ent.Field {
 			Optional().
 			Default(false),
 		field.
-			UUID("transaction_id", uuid.UUID{}).
-			Optional().
-			Default(func() uuid.UUID {
-				return uuid.UUID{}
-			}),
-		field.
 			String("contract_type").
 			Optional().
 			Default(basetypes.ContractType_DefaultContractType.String()),

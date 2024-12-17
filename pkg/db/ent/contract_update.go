@@ -178,26 +178,6 @@ func (cu *ContractUpdate) ClearBackup() *ContractUpdate {
 	return cu
 }
 
-// SetTransactionID sets the "transaction_id" field.
-func (cu *ContractUpdate) SetTransactionID(u uuid.UUID) *ContractUpdate {
-	cu.mutation.SetTransactionID(u)
-	return cu
-}
-
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (cu *ContractUpdate) SetNillableTransactionID(u *uuid.UUID) *ContractUpdate {
-	if u != nil {
-		cu.SetTransactionID(*u)
-	}
-	return cu
-}
-
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (cu *ContractUpdate) ClearTransactionID() *ContractUpdate {
-	cu.mutation.ClearTransactionID()
-	return cu
-}
-
 // SetContractType sets the "contract_type" field.
 func (cu *ContractUpdate) SetContractType(s string) *ContractUpdate {
 	cu.mutation.SetContractType(s)
@@ -417,19 +397,6 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: contract.FieldBackup,
 		})
 	}
-	if value, ok := cu.mutation.TransactionID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: contract.FieldTransactionID,
-		})
-	}
-	if cu.mutation.TransactionIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Column: contract.FieldTransactionID,
-		})
-	}
 	if value, ok := cu.mutation.ContractType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -610,26 +577,6 @@ func (cuo *ContractUpdateOne) SetNillableBackup(b *bool) *ContractUpdateOne {
 // ClearBackup clears the value of the "backup" field.
 func (cuo *ContractUpdateOne) ClearBackup() *ContractUpdateOne {
 	cuo.mutation.ClearBackup()
-	return cuo
-}
-
-// SetTransactionID sets the "transaction_id" field.
-func (cuo *ContractUpdateOne) SetTransactionID(u uuid.UUID) *ContractUpdateOne {
-	cuo.mutation.SetTransactionID(u)
-	return cuo
-}
-
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (cuo *ContractUpdateOne) SetNillableTransactionID(u *uuid.UUID) *ContractUpdateOne {
-	if u != nil {
-		cuo.SetTransactionID(*u)
-	}
-	return cuo
-}
-
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (cuo *ContractUpdateOne) ClearTransactionID() *ContractUpdateOne {
-	cuo.mutation.ClearTransactionID()
 	return cuo
 }
 
@@ -880,19 +827,6 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeBool,
 			Column: contract.FieldBackup,
-		})
-	}
-	if value, ok := cuo.mutation.TransactionID(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: contract.FieldTransactionID,
-		})
-	}
-	if cuo.mutation.TransactionIDCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Column: contract.FieldTransactionID,
 		})
 	}
 	if value, ok := cuo.mutation.ContractType(); ok {

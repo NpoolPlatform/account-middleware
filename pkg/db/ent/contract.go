@@ -32,8 +32,6 @@ type Contract struct {
 	AccountID uuid.UUID `json:"account_id,omitempty"`
 	// Backup holds the value of the "backup" field.
 	Backup bool `json:"backup,omitempty"`
-	// TransactionID holds the value of the "transaction_id" field.
-	TransactionID uuid.UUID `json:"transaction_id,omitempty"`
 	// ContractType holds the value of the "contract_type" field.
 	ContractType string `json:"contract_type,omitempty"`
 }
@@ -49,7 +47,7 @@ func (*Contract) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case contract.FieldContractType:
 			values[i] = new(sql.NullString)
-		case contract.FieldEntID, contract.FieldGoodID, contract.FieldPledgeID, contract.FieldAccountID, contract.FieldTransactionID:
+		case contract.FieldEntID, contract.FieldGoodID, contract.FieldPledgeID, contract.FieldAccountID:
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Contract", columns[i])
@@ -120,12 +118,6 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.Backup = value.Bool
 			}
-		case contract.FieldTransactionID:
-			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field transaction_id", values[i])
-			} else if value != nil {
-				c.TransactionID = *value
-			}
 		case contract.FieldContractType:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field contract_type", values[i])
@@ -183,9 +175,6 @@ func (c *Contract) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("backup=")
 	builder.WriteString(fmt.Sprintf("%v", c.Backup))
-	builder.WriteString(", ")
-	builder.WriteString("transaction_id=")
-	builder.WriteString(fmt.Sprintf("%v", c.TransactionID))
 	builder.WriteString(", ")
 	builder.WriteString("contract_type=")
 	builder.WriteString(c.ContractType)

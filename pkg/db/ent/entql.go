@@ -58,16 +58,15 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Contract",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			contract.FieldCreatedAt:     {Type: field.TypeUint32, Column: contract.FieldCreatedAt},
-			contract.FieldUpdatedAt:     {Type: field.TypeUint32, Column: contract.FieldUpdatedAt},
-			contract.FieldDeletedAt:     {Type: field.TypeUint32, Column: contract.FieldDeletedAt},
-			contract.FieldEntID:         {Type: field.TypeUUID, Column: contract.FieldEntID},
-			contract.FieldGoodID:        {Type: field.TypeUUID, Column: contract.FieldGoodID},
-			contract.FieldPledgeID:      {Type: field.TypeUUID, Column: contract.FieldPledgeID},
-			contract.FieldAccountID:     {Type: field.TypeUUID, Column: contract.FieldAccountID},
-			contract.FieldBackup:        {Type: field.TypeBool, Column: contract.FieldBackup},
-			contract.FieldTransactionID: {Type: field.TypeUUID, Column: contract.FieldTransactionID},
-			contract.FieldContractType:  {Type: field.TypeString, Column: contract.FieldContractType},
+			contract.FieldCreatedAt:    {Type: field.TypeUint32, Column: contract.FieldCreatedAt},
+			contract.FieldUpdatedAt:    {Type: field.TypeUint32, Column: contract.FieldUpdatedAt},
+			contract.FieldDeletedAt:    {Type: field.TypeUint32, Column: contract.FieldDeletedAt},
+			contract.FieldEntID:        {Type: field.TypeUUID, Column: contract.FieldEntID},
+			contract.FieldGoodID:       {Type: field.TypeUUID, Column: contract.FieldGoodID},
+			contract.FieldPledgeID:     {Type: field.TypeUUID, Column: contract.FieldPledgeID},
+			contract.FieldAccountID:    {Type: field.TypeUUID, Column: contract.FieldAccountID},
+			contract.FieldBackup:       {Type: field.TypeBool, Column: contract.FieldBackup},
+			contract.FieldContractType: {Type: field.TypeString, Column: contract.FieldContractType},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -408,11 +407,6 @@ func (f *ContractFilter) WhereAccountID(p entql.ValueP) {
 // WhereBackup applies the entql bool predicate on the backup field.
 func (f *ContractFilter) WhereBackup(p entql.BoolP) {
 	f.Where(p.Field(contract.FieldBackup))
-}
-
-// WhereTransactionID applies the entql [16]byte predicate on the transaction_id field.
-func (f *ContractFilter) WhereTransactionID(p entql.ValueP) {
-	f.Where(p.Field(contract.FieldTransactionID))
 }
 
 // WhereContractType applies the entql string predicate on the contract_type field.

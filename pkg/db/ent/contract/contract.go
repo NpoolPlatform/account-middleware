@@ -28,8 +28,6 @@ const (
 	FieldAccountID = "account_id"
 	// FieldBackup holds the string denoting the backup field in the database.
 	FieldBackup = "backup"
-	// FieldTransactionID holds the string denoting the transaction_id field in the database.
-	FieldTransactionID = "transaction_id"
 	// FieldContractType holds the string denoting the contract_type field in the database.
 	FieldContractType = "contract_type"
 	// Table holds the table name of the contract in the database.
@@ -47,7 +45,6 @@ var Columns = []string{
 	FieldPledgeID,
 	FieldAccountID,
 	FieldBackup,
-	FieldTransactionID,
 	FieldContractType,
 }
 
@@ -88,8 +85,6 @@ var (
 	DefaultAccountID func() uuid.UUID
 	// DefaultBackup holds the default value on creation for the "backup" field.
 	DefaultBackup bool
-	// DefaultTransactionID holds the default value on creation for the "transaction_id" field.
-	DefaultTransactionID func() uuid.UUID
 	// DefaultContractType holds the default value on creation for the "contract_type" field.
 	DefaultContractType string
 )

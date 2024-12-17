@@ -135,13 +135,6 @@ func Backup(v bool) predicate.Contract {
 	})
 }
 
-// TransactionID applies equality check predicate on the "transaction_id" field. It's identical to TransactionIDEQ.
-func TransactionID(v uuid.UUID) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTransactionID), v))
-	})
-}
-
 // ContractType applies equality check predicate on the "contract_type" field. It's identical to ContractTypeEQ.
 func ContractType(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
@@ -664,84 +657,6 @@ func BackupIsNil() predicate.Contract {
 func BackupNotNil() predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldBackup)))
-	})
-}
-
-// TransactionIDEQ applies the EQ predicate on the "transaction_id" field.
-func TransactionIDEQ(v uuid.UUID) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTransactionID), v))
-	})
-}
-
-// TransactionIDNEQ applies the NEQ predicate on the "transaction_id" field.
-func TransactionIDNEQ(v uuid.UUID) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTransactionID), v))
-	})
-}
-
-// TransactionIDIn applies the In predicate on the "transaction_id" field.
-func TransactionIDIn(vs ...uuid.UUID) predicate.Contract {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldTransactionID), v...))
-	})
-}
-
-// TransactionIDNotIn applies the NotIn predicate on the "transaction_id" field.
-func TransactionIDNotIn(vs ...uuid.UUID) predicate.Contract {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldTransactionID), v...))
-	})
-}
-
-// TransactionIDGT applies the GT predicate on the "transaction_id" field.
-func TransactionIDGT(v uuid.UUID) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTransactionID), v))
-	})
-}
-
-// TransactionIDGTE applies the GTE predicate on the "transaction_id" field.
-func TransactionIDGTE(v uuid.UUID) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTransactionID), v))
-	})
-}
-
-// TransactionIDLT applies the LT predicate on the "transaction_id" field.
-func TransactionIDLT(v uuid.UUID) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTransactionID), v))
-	})
-}
-
-// TransactionIDLTE applies the LTE predicate on the "transaction_id" field.
-func TransactionIDLTE(v uuid.UUID) predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTransactionID), v))
-	})
-}
-
-// TransactionIDIsNil applies the IsNil predicate on the "transaction_id" field.
-func TransactionIDIsNil() predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldTransactionID)))
-	})
-}
-
-// TransactionIDNotNil applies the NotNil predicate on the "transaction_id" field.
-func TransactionIDNotNil() predicate.Contract {
-	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldTransactionID)))
 	})
 }
 

@@ -1215,26 +1215,25 @@ func (m *AccountMutation) ResetEdge(name string) error {
 // ContractMutation represents an operation that mutates the Contract nodes in the graph.
 type ContractMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *uint32
-	created_at     *uint32
-	addcreated_at  *int32
-	updated_at     *uint32
-	addupdated_at  *int32
-	deleted_at     *uint32
-	adddeleted_at  *int32
-	ent_id         *uuid.UUID
-	good_id        *uuid.UUID
-	pledge_id      *uuid.UUID
-	account_id     *uuid.UUID
-	backup         *bool
-	transaction_id *uuid.UUID
-	contract_type  *string
-	clearedFields  map[string]struct{}
-	done           bool
-	oldValue       func(context.Context) (*Contract, error)
-	predicates     []predicate.Contract
+	op            Op
+	typ           string
+	id            *uint32
+	created_at    *uint32
+	addcreated_at *int32
+	updated_at    *uint32
+	addupdated_at *int32
+	deleted_at    *uint32
+	adddeleted_at *int32
+	ent_id        *uuid.UUID
+	good_id       *uuid.UUID
+	pledge_id     *uuid.UUID
+	account_id    *uuid.UUID
+	backup        *bool
+	contract_type *string
+	clearedFields map[string]struct{}
+	done          bool
+	oldValue      func(context.Context) (*Contract, error)
+	predicates    []predicate.Contract
 }
 
 var _ ent.Mutation = (*ContractMutation)(nil)
@@ -1741,55 +1740,6 @@ func (m *ContractMutation) ResetBackup() {
 	delete(m.clearedFields, contract.FieldBackup)
 }
 
-// SetTransactionID sets the "transaction_id" field.
-func (m *ContractMutation) SetTransactionID(u uuid.UUID) {
-	m.transaction_id = &u
-}
-
-// TransactionID returns the value of the "transaction_id" field in the mutation.
-func (m *ContractMutation) TransactionID() (r uuid.UUID, exists bool) {
-	v := m.transaction_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTransactionID returns the old "transaction_id" field's value of the Contract entity.
-// If the Contract object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ContractMutation) OldTransactionID(ctx context.Context) (v uuid.UUID, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTransactionID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTransactionID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTransactionID: %w", err)
-	}
-	return oldValue.TransactionID, nil
-}
-
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (m *ContractMutation) ClearTransactionID() {
-	m.transaction_id = nil
-	m.clearedFields[contract.FieldTransactionID] = struct{}{}
-}
-
-// TransactionIDCleared returns if the "transaction_id" field was cleared in this mutation.
-func (m *ContractMutation) TransactionIDCleared() bool {
-	_, ok := m.clearedFields[contract.FieldTransactionID]
-	return ok
-}
-
-// ResetTransactionID resets all changes to the "transaction_id" field.
-func (m *ContractMutation) ResetTransactionID() {
-	m.transaction_id = nil
-	delete(m.clearedFields, contract.FieldTransactionID)
-}
-
 // SetContractType sets the "contract_type" field.
 func (m *ContractMutation) SetContractType(s string) {
 	m.contract_type = &s
@@ -1858,7 +1808,7 @@ func (m *ContractMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ContractMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 9)
 	if m.created_at != nil {
 		fields = append(fields, contract.FieldCreatedAt)
 	}
@@ -1882,9 +1832,6 @@ func (m *ContractMutation) Fields() []string {
 	}
 	if m.backup != nil {
 		fields = append(fields, contract.FieldBackup)
-	}
-	if m.transaction_id != nil {
-		fields = append(fields, contract.FieldTransactionID)
 	}
 	if m.contract_type != nil {
 		fields = append(fields, contract.FieldContractType)
@@ -1913,8 +1860,6 @@ func (m *ContractMutation) Field(name string) (ent.Value, bool) {
 		return m.AccountID()
 	case contract.FieldBackup:
 		return m.Backup()
-	case contract.FieldTransactionID:
-		return m.TransactionID()
 	case contract.FieldContractType:
 		return m.ContractType()
 	}
@@ -1942,8 +1887,6 @@ func (m *ContractMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldAccountID(ctx)
 	case contract.FieldBackup:
 		return m.OldBackup(ctx)
-	case contract.FieldTransactionID:
-		return m.OldTransactionID(ctx)
 	case contract.FieldContractType:
 		return m.OldContractType(ctx)
 	}
@@ -2010,13 +1953,6 @@ func (m *ContractMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetBackup(v)
-		return nil
-	case contract.FieldTransactionID:
-		v, ok := value.(uuid.UUID)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTransactionID(v)
 		return nil
 	case contract.FieldContractType:
 		v, ok := value.(string)
@@ -2106,9 +2042,6 @@ func (m *ContractMutation) ClearedFields() []string {
 	if m.FieldCleared(contract.FieldBackup) {
 		fields = append(fields, contract.FieldBackup)
 	}
-	if m.FieldCleared(contract.FieldTransactionID) {
-		fields = append(fields, contract.FieldTransactionID)
-	}
 	if m.FieldCleared(contract.FieldContractType) {
 		fields = append(fields, contract.FieldContractType)
 	}
@@ -2137,9 +2070,6 @@ func (m *ContractMutation) ClearField(name string) error {
 		return nil
 	case contract.FieldBackup:
 		m.ClearBackup()
-		return nil
-	case contract.FieldTransactionID:
-		m.ClearTransactionID()
 		return nil
 	case contract.FieldContractType:
 		m.ClearContractType()
@@ -2175,9 +2105,6 @@ func (m *ContractMutation) ResetField(name string) error {
 		return nil
 	case contract.FieldBackup:
 		m.ResetBackup()
-		return nil
-	case contract.FieldTransactionID:
-		m.ResetTransactionID()
 		return nil
 	case contract.FieldContractType:
 		m.ResetContractType()

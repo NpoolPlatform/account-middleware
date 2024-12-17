@@ -142,12 +142,8 @@ func init() {
 	contractDescBackup := contractFields[3].Descriptor()
 	// contract.DefaultBackup holds the default value on creation for the backup field.
 	contract.DefaultBackup = contractDescBackup.Default.(bool)
-	// contractDescTransactionID is the schema descriptor for transaction_id field.
-	contractDescTransactionID := contractFields[4].Descriptor()
-	// contract.DefaultTransactionID holds the default value on creation for the transaction_id field.
-	contract.DefaultTransactionID = contractDescTransactionID.Default.(func() uuid.UUID)
 	// contractDescContractType is the schema descriptor for contract_type field.
-	contractDescContractType := contractFields[5].Descriptor()
+	contractDescContractType := contractFields[4].Descriptor()
 	// contract.DefaultContractType holds the default value on creation for the contract_type field.
 	contract.DefaultContractType = contractDescContractType.Default.(string)
 	depositMixin := schema.Deposit{}.Mixin()

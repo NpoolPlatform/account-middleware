@@ -134,20 +134,6 @@ func (cc *ContractCreate) SetNillableBackup(b *bool) *ContractCreate {
 	return cc
 }
 
-// SetTransactionID sets the "transaction_id" field.
-func (cc *ContractCreate) SetTransactionID(u uuid.UUID) *ContractCreate {
-	cc.mutation.SetTransactionID(u)
-	return cc
-}
-
-// SetNillableTransactionID sets the "transaction_id" field if the given value is not nil.
-func (cc *ContractCreate) SetNillableTransactionID(u *uuid.UUID) *ContractCreate {
-	if u != nil {
-		cc.SetTransactionID(*u)
-	}
-	return cc
-}
-
 // SetContractType sets the "contract_type" field.
 func (cc *ContractCreate) SetContractType(s string) *ContractCreate {
 	cc.mutation.SetContractType(s)
@@ -300,13 +286,6 @@ func (cc *ContractCreate) defaults() error {
 		v := contract.DefaultBackup
 		cc.mutation.SetBackup(v)
 	}
-	if _, ok := cc.mutation.TransactionID(); !ok {
-		if contract.DefaultTransactionID == nil {
-			return fmt.Errorf("ent: uninitialized contract.DefaultTransactionID (forgotten import ent/runtime?)")
-		}
-		v := contract.DefaultTransactionID()
-		cc.mutation.SetTransactionID(v)
-	}
 	if _, ok := cc.mutation.ContractType(); !ok {
 		v := contract.DefaultContractType
 		cc.mutation.SetContractType(v)
@@ -425,14 +404,6 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 			Column: contract.FieldBackup,
 		})
 		_node.Backup = value
-	}
-	if value, ok := cc.mutation.TransactionID(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeUUID,
-			Value:  value,
-			Column: contract.FieldTransactionID,
-		})
-		_node.TransactionID = value
 	}
 	if value, ok := cc.mutation.ContractType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -631,24 +602,6 @@ func (u *ContractUpsert) UpdateBackup() *ContractUpsert {
 // ClearBackup clears the value of the "backup" field.
 func (u *ContractUpsert) ClearBackup() *ContractUpsert {
 	u.SetNull(contract.FieldBackup)
-	return u
-}
-
-// SetTransactionID sets the "transaction_id" field.
-func (u *ContractUpsert) SetTransactionID(v uuid.UUID) *ContractUpsert {
-	u.Set(contract.FieldTransactionID, v)
-	return u
-}
-
-// UpdateTransactionID sets the "transaction_id" field to the value that was provided on create.
-func (u *ContractUpsert) UpdateTransactionID() *ContractUpsert {
-	u.SetExcluded(contract.FieldTransactionID)
-	return u
-}
-
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (u *ContractUpsert) ClearTransactionID() *ContractUpsert {
-	u.SetNull(contract.FieldTransactionID)
 	return u
 }
 
@@ -878,27 +831,6 @@ func (u *ContractUpsertOne) UpdateBackup() *ContractUpsertOne {
 func (u *ContractUpsertOne) ClearBackup() *ContractUpsertOne {
 	return u.Update(func(s *ContractUpsert) {
 		s.ClearBackup()
-	})
-}
-
-// SetTransactionID sets the "transaction_id" field.
-func (u *ContractUpsertOne) SetTransactionID(v uuid.UUID) *ContractUpsertOne {
-	return u.Update(func(s *ContractUpsert) {
-		s.SetTransactionID(v)
-	})
-}
-
-// UpdateTransactionID sets the "transaction_id" field to the value that was provided on create.
-func (u *ContractUpsertOne) UpdateTransactionID() *ContractUpsertOne {
-	return u.Update(func(s *ContractUpsert) {
-		s.UpdateTransactionID()
-	})
-}
-
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (u *ContractUpsertOne) ClearTransactionID() *ContractUpsertOne {
-	return u.Update(func(s *ContractUpsert) {
-		s.ClearTransactionID()
 	})
 }
 
@@ -1296,27 +1228,6 @@ func (u *ContractUpsertBulk) UpdateBackup() *ContractUpsertBulk {
 func (u *ContractUpsertBulk) ClearBackup() *ContractUpsertBulk {
 	return u.Update(func(s *ContractUpsert) {
 		s.ClearBackup()
-	})
-}
-
-// SetTransactionID sets the "transaction_id" field.
-func (u *ContractUpsertBulk) SetTransactionID(v uuid.UUID) *ContractUpsertBulk {
-	return u.Update(func(s *ContractUpsert) {
-		s.SetTransactionID(v)
-	})
-}
-
-// UpdateTransactionID sets the "transaction_id" field to the value that was provided on create.
-func (u *ContractUpsertBulk) UpdateTransactionID() *ContractUpsertBulk {
-	return u.Update(func(s *ContractUpsert) {
-		s.UpdateTransactionID()
-	})
-}
-
-// ClearTransactionID clears the value of the "transaction_id" field.
-func (u *ContractUpsertBulk) ClearTransactionID() *ContractUpsertBulk {
-	return u.Update(func(s *ContractUpsert) {
-		s.ClearTransactionID()
 	})
 }
 
