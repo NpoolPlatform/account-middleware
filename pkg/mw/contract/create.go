@@ -23,7 +23,7 @@ type createHandler struct {
 func (h *createHandler) constructCreatepledgeSQL() {
 	comma := ""
 	now := uint32(time.Now().Unix())
-	_sql := "insert into pledges "
+	_sql := "insert into contracts "
 	_sql += "("
 	if h.EntID != nil {
 		_sql += "ent_id"
@@ -49,12 +49,12 @@ func (h *createHandler) constructCreatepledgeSQL() {
 	comma = ", "
 	_sql += fmt.Sprintf("%v'%v' as pledge_id", comma, *h.PledgeID)
 	_sql += fmt.Sprintf("%v'%v' as account_id", comma, *h.AccountID)
-	_sql += fmt.Sprintf("%v'%v' as backup", comma, *h.Backup)
+	_sql += fmt.Sprintf("%v%v as backup", comma, *h.Backup)
 	_sql += fmt.Sprintf("%v'%v' as contract_type", comma, *h.ContractType)
 	_sql += fmt.Sprintf("%v%v as created_at", comma, now)
 	_sql += fmt.Sprintf("%v%v as updated_at", comma, now)
 	_sql += fmt.Sprintf("%v0 as deleted_at", comma)
-	_sql += ")"
+	_sql += ") as tmp"
 	h.pledgeSQL = _sql
 }
 
@@ -73,7 +73,6 @@ func (h *createHandler) constructCreateaccountSQL() {
 	comma = ", "
 	_sql += comma + "address"
 	_sql += comma + "used_for"
-	_sql += comma + "backup"
 	_sql += comma + "platform_hold_private_key"
 	_sql += comma + "created_at"
 	_sql += comma + "updated_at"
@@ -88,9 +87,8 @@ func (h *createHandler) constructCreateaccountSQL() {
 	_sql += fmt.Sprintf("%v'%v' as coin_type_id", comma, *h.CoinTypeID)
 	comma = ", "
 	_sql += fmt.Sprintf("%v'%v' as address", comma, *h.Address)
-	_sql += fmt.Sprintf("%v'%v' as account_id", comma, *h.AccountID)
 	_sql += fmt.Sprintf("%v'%v' as used_for", comma, usedFor)
-	_sql += fmt.Sprintf("%v'%v' as platform_hold_private_key", comma, privateKey)
+	_sql += fmt.Sprintf("%v%v as platform_hold_private_key", comma, privateKey)
 	_sql += fmt.Sprintf("%v%v as created_at", comma, now)
 	_sql += fmt.Sprintf("%v%v as updated_at", comma, now)
 	_sql += fmt.Sprintf("%v0 as deleted_at", comma)

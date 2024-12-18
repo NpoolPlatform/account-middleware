@@ -14,14 +14,13 @@ import (
 )
 
 type Req struct {
-	EntID         *uuid.UUID
-	GoodID        *uuid.UUID
-	PledgeID      *uuid.UUID
-	AccountID     *uuid.UUID
-	TransactionID *uuid.UUID
-	Backup        *bool
-	ContractType  *basetypes.ContractType
-	DeletedAt     *uint32
+	EntID        *uuid.UUID
+	GoodID       *uuid.UUID
+	PledgeID     *uuid.UUID
+	AccountID    *uuid.UUID
+	Backup       *bool
+	ContractType *basetypes.ContractType
+	DeletedAt    *uint32
 }
 
 func CreateSet(c *ent.ContractCreate, req *Req) *ent.ContractCreate {
@@ -49,9 +48,6 @@ func CreateSet(c *ent.ContractCreate, req *Req) *ent.ContractCreate {
 func UpdateSet(u *ent.ContractUpdateOne, req *Req) *ent.ContractUpdateOne {
 	if req.Backup != nil {
 		u.SetBackup(*req.Backup)
-	}
-	if req.TransactionID != nil {
-		u.SetTransactionID(*req.TransactionID)
 	}
 	if req.AccountID != nil {
 		u.SetAccountID(*req.AccountID)

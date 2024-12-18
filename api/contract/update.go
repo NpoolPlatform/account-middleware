@@ -28,7 +28,6 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 		contract1.WithLocked(req.Locked, false),
 		contract1.WithLockedBy(req.LockedBy, false),
 		contract1.WithBlocked(req.Blocked, false),
-		contract1.WithTransactionID(req.TransactionID, false),
 	)
 	if err != nil {
 		logger.Sugar().Errorw(

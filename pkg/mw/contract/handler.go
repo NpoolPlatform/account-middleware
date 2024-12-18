@@ -91,6 +91,23 @@ func WithGoodID(id *string, must bool) func(context.Context, *Handler) error {
 	}
 }
 
+func WithPledgeID(id *string, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if id == nil {
+			if must {
+				return fmt.Errorf("invalid pledgeid")
+			}
+			return nil
+		}
+		_id, err := uuid.Parse(*id)
+		if err != nil {
+			return err
+		}
+		h.PledgeID = &_id
+		return nil
+	}
+}
+
 func WithCoinTypeID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
@@ -162,6 +179,25 @@ func WithLocked(locked *bool, must bool) func(context.Context, *Handler) error {
 	}
 }
 
+func WithContractType(contractType *accounttypes.ContractType, must bool) func(context.Context, *Handler) error {
+	return func(ctx context.Context, h *Handler) error {
+		if contractType == nil {
+			if must {
+				return fmt.Errorf("invalid contracttype")
+			}
+			return nil
+		}
+		switch *contractType {
+		case accounttypes.ContractType_ContractSettlement:
+		case accounttypes.ContractType_ContractDeployment:
+		default:
+			return fmt.Errorf("invalid contracttype")
+		}
+		h.ContractType = contractType
+		return nil
+	}
+}
+
 func WithLockedBy(lockedBy *basetypes.AccountLockedBy, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if lockedBy == nil {
@@ -184,23 +220,6 @@ func WithLockedBy(lockedBy *basetypes.AccountLockedBy, must bool) func(context.C
 func WithBlocked(blocked *bool, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		h.Blocked = blocked
-		return nil
-	}
-}
-
-func WithTransactionID(id *string, must bool) func(context.Context, *Handler) error {
-	return func(ctx context.Context, h *Handler) error {
-		if id == nil {
-			if must {
-				return fmt.Errorf("invalid transactionid")
-			}
-			return nil
-		}
-		_id, err := uuid.Parse(*id)
-		if err != nil {
-			return err
-		}
-		h.TransactionID = &_id
 		return nil
 	}
 }

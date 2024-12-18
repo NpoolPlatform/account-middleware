@@ -60,9 +60,10 @@ func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
 		t.C(entcontract.FieldID),
 		t.C(entcontract.FieldEntID),
 		t.C(entcontract.FieldGoodID),
+		t.C(entcontract.FieldPledgeID),
 		t.C(entcontract.FieldAccountID),
 		t.C(entcontract.FieldBackup),
-		t.C(entcontract.FieldTransactionID),
+		t.C(entcontract.FieldContractType),
 		t.C(entcontract.FieldCreatedAt),
 		t.C(entcontract.FieldUpdatedAt),
 	)

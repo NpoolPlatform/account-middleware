@@ -7,14 +7,22 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
+	"github.com/NpoolPlatform/go-service-framework/pkg/config"
 	"github.com/NpoolPlatform/libent-cruder/pkg/cruder"
+
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/contract"
 	accounttypes "github.com/NpoolPlatform/message/npool/basetypes/account/v1"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
-	"github.com/google/uuid"
+
+	"bou.ke/monkey"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/NpoolPlatform/account-middleware/pkg/testinit"
+	grpc2 "github.com/NpoolPlatform/go-service-framework/pkg/grpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/google/uuid"
 )
 
 func init() {
@@ -33,32 +41,33 @@ var ret = npool.Account{
 	CoinTypeID:      uuid.NewString(),
 	AccountID:       uuid.NewString(),
 	Address:         uuid.NewString(),
-	Active:          true,
 	Backup:          true,
+	Active:          true,
+	Locked:          false,
 	LockedByStr:     basetypes.AccountLockedBy_DefaultLockedBy.String(),
+	Blocked:         false,
 	ContractType:    accounttypes.ContractType_ContractDeployment,
 	ContractTypeStr: accounttypes.ContractType_ContractDeployment.String(),
 }
 
-func creatAccount(t *testing.T) {
-	handler, err := NewHandler(
-		context.Background(),
-		WithEntID(&ret.EntID, false),
-		WithGoodID(&ret.GoodID, true),
-		WithPledgeID(&ret.PledgeID, true),
-		WithCoinTypeID(&ret.CoinTypeID, true),
-		WithAccountID(&ret.AccountID, true),
-		WithAddress(&ret.Address, true),
-		WithBackup(&ret.Backup, true),
-		WithContractType(&ret.ContractType, true),
-	)
+var req = npool.AccountReq{
+	EntID:        &ret.EntID,
+	GoodID:       &ret.GoodID,
+	PledgeID:     &ret.PledgeID,
+	ContractType: &ret.ContractType,
+	CoinTypeID:   &ret.CoinTypeID,
+	AccountID:    &ret.AccountID,
+	Address:      &ret.Address,
+	Backup:       &ret.Backup,
+	Active:       &ret.Active,
+	Locked:       &ret.Locked,
+	Blocked:      &ret.Blocked,
+}
 
-	assert.Nil(t, err)
-	assert.NotNil(t, handler)
-
-	err = handler.CreateAccount(context.Background())
+func createAccount(t *testing.T) {
+	_, err := CreateAccount(context.Background(), &req)
 	if assert.Nil(t, err) {
-		info, err := handler.GetAccount(context.Background())
+		info, err := GetAccount(context.Background(), ret.EntID)
 		if assert.Nil(t, err) {
 			ret.CreatedAt = info.CreatedAt
 			ret.UpdatedAt = info.UpdatedAt
@@ -66,60 +75,48 @@ func creatAccount(t *testing.T) {
 			assert.Equal(t, info, &ret)
 		}
 	}
+
 }
 
 func updateAccount(t *testing.T) {
-	ret.Active = false
-	ret.Locked = true
-	ret.LockedBy = basetypes.AccountLockedBy_Payment
-	ret.LockedByStr = basetypes.AccountLockedBy_Payment.String()
+	locked := true
+	lockedBy := basetypes.AccountLockedBy_Collecting
+	blocked := true
+	active := false
 
-	handler, err := NewHandler(
-		context.Background(),
-		WithID(&ret.ID, true),
-		WithActive(&ret.Active, false),
-		WithLocked(&ret.Locked, false),
-		WithLockedBy(&ret.LockedBy, false),
-		WithBlocked(&ret.Blocked, false),
-	)
-	assert.Nil(t, err)
+	ret.Active = active
+	ret.Blocked = blocked
+	ret.Locked = locked
+	ret.LockedBy = lockedBy
+	ret.LockedByStr = lockedBy.String()
 
-	info, err := handler.UpdateAccount(context.Background())
+	req.ID = &ret.ID
+	req.Active = &active
+	req.Blocked = &blocked
+	req.Locked = &locked
+	req.LockedBy = &lockedBy
+
+	_, err := UpdateAccount(context.Background(), &req)
 	if assert.Nil(t, err) {
-		ret.UpdatedAt = info.UpdatedAt
-		assert.Equal(t, info, &ret)
-	}
-
-	ret.Locked = false
-	handler, err = NewHandler(
-		context.Background(),
-		WithID(&ret.ID, true),
-		WithLocked(&ret.Locked, true),
-	)
-	assert.Nil(t, err)
-
-	info, err = handler.UpdateAccount(context.Background())
-	if assert.Nil(t, err) {
-		assert.Equal(t, info, &ret)
+		info, err := GetAccount(context.Background(), ret.EntID)
+		if assert.Nil(t, err) {
+			ret.UpdatedAt = info.UpdatedAt
+			assert.Equal(t, info, &ret)
+		}
 	}
 }
 
 func getAccount(t *testing.T) {
-	handler, err := NewHandler(
-		context.Background(),
-		WithEntID(&ret.EntID, true),
-	)
-	assert.Nil(t, err)
-	info, err := handler.GetAccount(context.Background())
+	info, err := GetAccount(context.Background(), ret.EntID)
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
 }
 
 func getAccounts(t *testing.T) {
-	handler, err := NewHandler(
+	infos, total, err := GetAccounts(
 		context.Background(),
-		WithConds(&npool.Conds{
+		&npool.Conds{
 			EntID:      &basetypes.StringVal{Op: cruder.EQ, Value: ret.EntID},
 			GoodID:     &basetypes.StringVal{Op: cruder.EQ, Value: ret.GoodID},
 			CoinTypeID: &basetypes.StringVal{Op: cruder.EQ, Value: ret.CoinTypeID},
@@ -128,39 +125,39 @@ func getAccounts(t *testing.T) {
 			Active:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Active},
 			Locked:     &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Locked},
 			Blocked:    &basetypes.BoolVal{Op: cruder.EQ, Value: ret.Blocked},
-		}),
-		WithOffset(0),
-		WithLimit(2),
+		},
+		0,
+		int32(2),
 	)
-	assert.Nil(t, err)
-	infos, _, err := handler.GetAccounts(context.Background())
 	if assert.Nil(t, err) {
-		assert.NotEqual(t, len(infos), 0)
-		assert.Equal(t, infos[0], &ret)
+		if assert.Equal(t, total, uint32(1)) {
+			assert.Equal(t, infos[0], &ret)
+		}
 	}
 }
 
 func deleteAccount(t *testing.T) {
-	handler, err := NewHandler(
-		context.Background(),
-		WithID(&ret.ID, true),
-	)
-	assert.Nil(t, err)
-	info, err := handler.DeleteAccount(context.Background())
+	info, err := DeleteAccount(context.Background(), ret.ID)
 	if assert.Nil(t, err) {
 		assert.Equal(t, info, &ret)
 	}
-
-	info, err = handler.GetAccount(context.Background())
-	assert.Nil(t, err)
-	assert.Nil(t, info)
 }
 
-func TestMainOrder(t *testing.T) {
+func TestClient(t *testing.T) {
 	if runByGithubAction, err := strconv.ParseBool(os.Getenv("RUN_BY_GITHUB_ACTION")); err == nil && runByGithubAction {
 		return
 	}
-	t.Run("createAccount", creatAccount)
+
+	gport := config.GetIntValueWithNameSpace("", config.KeyGRPCPort)
+
+	monkey.Patch(grpc2.GetGRPCConn, func(service string, tags ...string) (*grpc.ClientConn, error) {
+		return grpc.Dial(fmt.Sprintf("localhost:%v", gport), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	})
+	monkey.Patch(grpc2.GetGRPCConnV1, func(service string, recvMsgBytes int, tags ...string) (*grpc.ClientConn, error) {
+		return grpc.Dial(fmt.Sprintf("localhost:%v", gport), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	})
+
+	t.Run("createAccount", createAccount)
 	t.Run("updateAccount", updateAccount)
 	t.Run("getAccount", getAccount)
 	t.Run("getAccounts", getAccounts)

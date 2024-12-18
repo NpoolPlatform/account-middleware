@@ -25,6 +25,8 @@ func (s *Server) CreateAccount(ctx context.Context, in *npool.CreateAccountReque
 		ctx,
 		contract1.WithEntID(req.EntID, false),
 		contract1.WithGoodID(req.GoodID, true),
+		contract1.WithPledgeID(req.PledgeID, true),
+		contract1.WithContractType(req.ContractType, true),
 		contract1.WithCoinTypeID(req.CoinTypeID, true),
 		contract1.WithBackup(req.Backup, false),
 		contract1.WithAccountID(req.AccountID, false),

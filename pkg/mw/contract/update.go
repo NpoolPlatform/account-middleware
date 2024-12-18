@@ -62,8 +62,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 		if _, err := contractcrud.UpdateSet(
 			contract.Update(),
 			&contractcrud.Req{
-				Backup:        h.Backup,
-				TransactionID: h.TransactionID,
+				Backup: h.Backup,
 			},
 		).Save(_ctx); err != nil {
 			return err
