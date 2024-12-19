@@ -75,7 +75,6 @@ func createAccount(t *testing.T) {
 			assert.Equal(t, info, &ret)
 		}
 	}
-
 }
 
 func updateAccount(t *testing.T) {

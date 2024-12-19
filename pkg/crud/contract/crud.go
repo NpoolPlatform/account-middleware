@@ -66,7 +66,7 @@ type Conds struct {
 	ContractType *cruder.Cond
 }
 
-//nolint:gocyclo
+//nolint:funlen,gocyclo
 func SetQueryConds(q *ent.ContractQuery, conds *Conds) (*ent.ContractQuery, error) {
 	if conds.EntID != nil {
 		id, ok := conds.EntID.Val.(uuid.UUID)
