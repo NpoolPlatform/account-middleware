@@ -60,9 +60,10 @@ func UpdateSet(u *ent.ContractUpdateOne, req *Req) *ent.ContractUpdateOne {
 
 type Conds struct {
 	accountcrud.Conds
-	GoodID    *cruder.Cond
-	AccountID *cruder.Cond
-	Backup    *cruder.Cond
+	GoodID       *cruder.Cond
+	AccountID    *cruder.Cond
+	Backup       *cruder.Cond
+	ContractType *cruder.Cond
 }
 
 //nolint:gocyclo
@@ -125,6 +126,18 @@ func SetQueryConds(q *ent.ContractQuery, conds *Conds) (*ent.ContractQuery, erro
 			q.Where(entcontract.Backup(backup))
 		default:
 			return nil, fmt.Errorf("invalid contract field")
+		}
+	}
+	if conds.ContractType != nil {
+		contractType, ok := conds.ContractType.Val.(basetypes.ContractType)
+		if !ok {
+			return nil, fmt.Errorf("invalid account contracttype")
+		}
+		switch conds.ContractType.Op {
+		case cruder.EQ:
+			q.Where(entcontract.ContractType(contractType.String()))
+		default:
+			return nil, fmt.Errorf("invalid account field")
 		}
 	}
 	q.Where(entcontract.DeletedAt(0))

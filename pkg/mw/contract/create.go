@@ -33,7 +33,9 @@ func (h *createHandler) constructCreatepledgeSQL() {
 	comma = ", "
 	_sql += comma + "pledge_id"
 	_sql += comma + "account_id"
-	_sql += comma + "backup"
+	if h.Backup != nil {
+		_sql += comma + "backup"
+	}
 	_sql += comma + "contract_type"
 	_sql += comma + "created_at"
 	_sql += comma + "updated_at"
@@ -49,7 +51,9 @@ func (h *createHandler) constructCreatepledgeSQL() {
 	comma = ", "
 	_sql += fmt.Sprintf("%v'%v' as pledge_id", comma, *h.PledgeID)
 	_sql += fmt.Sprintf("%v'%v' as account_id", comma, *h.AccountID)
-	_sql += fmt.Sprintf("%v%v as backup", comma, *h.Backup)
+	if h.Backup != nil {
+		_sql += fmt.Sprintf("%v%v as backup", comma, *h.Backup)
+	}
 	_sql += fmt.Sprintf("%v'%v' as contract_type", comma, *h.ContractType)
 	_sql += fmt.Sprintf("%v%v as created_at", comma, now)
 	_sql += fmt.Sprintf("%v%v as updated_at", comma, now)
@@ -134,6 +138,9 @@ func (h *Handler) CreateAccount(ctx context.Context) error {
 	}
 	if h.EntID == nil {
 		h.EntID = func() *uuid.UUID { s := uuid.New(); return &s }()
+	}
+	if h.AccountID == nil {
+		h.AccountID = func() *uuid.UUID { s := uuid.New(); return &s }()
 	}
 	handler.constructCreateaccountSQL()
 	handler.constructCreatepledgeSQL()

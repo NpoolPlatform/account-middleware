@@ -8,7 +8,7 @@ require (
 	github.com/NpoolPlatform/basal-middleware v0.0.0-20231011062124-7ea6e9549a66
 	github.com/NpoolPlatform/go-service-framework v0.0.0-20240507084859-362174af9b92
 	github.com/NpoolPlatform/libent-cruder v0.0.0-20240323085036-7679b4818ce7
-	github.com/NpoolPlatform/message v0.0.0-20241218031609-a77ae84b3d51
+	github.com/NpoolPlatform/message v0.0.0-20241219092755-ecd4f585ef0f
 	github.com/go-resty/resty/v2 v2.7.0
 	github.com/google/uuid v1.3.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.10.0

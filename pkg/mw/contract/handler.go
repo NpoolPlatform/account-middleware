@@ -308,6 +308,12 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 				Val: conds.GetBlocked().GetValue(),
 			}
 		}
+		if conds.ContractType != nil {
+			h.Conds.ContractType = &cruder.Cond{
+				Op:  conds.GetContractType().GetOp(),
+				Val: accounttypes.ContractType(conds.GetContractType().GetValue()),
+			}
+		}
 		return nil
 	}
 }
