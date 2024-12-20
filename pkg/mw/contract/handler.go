@@ -188,7 +188,7 @@ func WithContractType(contractType *accounttypes.ContractType, must bool) func(c
 			return nil
 		}
 		switch *contractType {
-		case accounttypes.ContractType_ContractSettlement:
+		case accounttypes.ContractType_ContractCalculate:
 		case accounttypes.ContractType_ContractDeployment:
 		default:
 			return fmt.Errorf("invalid contracttype")
@@ -313,6 +313,17 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 				Op:  conds.GetContractType().GetOp(),
 				Val: accounttypes.ContractType(conds.GetContractType().GetValue()),
 			}
+		}
+		if conds.PledgeIDs != nil {
+			ids := []uuid.UUID{}
+			for _, id := range conds.GetPledgeIDs().GetValue() {
+				_id, err := uuid.Parse(id)
+				if err != nil {
+					return err
+				}
+				ids = append(ids, _id)
+			}
+			h.Conds.PledgeIDs = &cruder.Cond{Op: conds.GetPledgeIDs().GetOp(), Val: ids}
 		}
 		return nil
 	}

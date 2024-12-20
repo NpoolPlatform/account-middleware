@@ -64,6 +64,7 @@ type Conds struct {
 	AccountID    *cruder.Cond
 	Backup       *cruder.Cond
 	ContractType *cruder.Cond
+	PledgeIDs    *cruder.Cond
 }
 
 //nolint:funlen,gocyclo
@@ -136,6 +137,18 @@ func SetQueryConds(q *ent.ContractQuery, conds *Conds) (*ent.ContractQuery, erro
 		switch conds.ContractType.Op {
 		case cruder.EQ:
 			q.Where(entcontract.ContractType(contractType.String()))
+		default:
+			return nil, fmt.Errorf("invalid account field")
+		}
+	}
+	if conds.PledgeIDs != nil {
+		ids, ok := conds.PledgeIDs.Val.([]uuid.UUID)
+		if !ok {
+			return nil, fmt.Errorf("invalid account pledgeids")
+		}
+		switch conds.PledgeIDs.Op {
+		case cruder.IN:
+			q.Where(entcontract.PledgeIDIn(ids...))
 		default:
 			return nil, fmt.Errorf("invalid account field")
 		}
