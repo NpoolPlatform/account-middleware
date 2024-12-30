@@ -272,6 +272,13 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 			}
 			h.Conds.AccountID = &cruder.Cond{Op: conds.GetAccountID().GetOp(), Val: id}
 		}
+		if conds.PledgeID != nil {
+			id, err := uuid.Parse(conds.GetPledgeID().GetValue())
+			if err != nil {
+				return err
+			}
+			h.Conds.PledgeID = &cruder.Cond{Op: conds.GetPledgeID().GetOp(), Val: id}
+		}
 		if conds.Backup != nil {
 			h.Conds.Backup = &cruder.Cond{
 				Op:  conds.GetBackup().GetOp(),
