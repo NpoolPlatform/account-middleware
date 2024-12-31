@@ -77,6 +77,7 @@ func updateAccount(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID, true),
+		WithEntID(&ret.EntID, true),
 		WithActive(&ret.Active, false),
 		WithLocked(&ret.Locked, false),
 		WithLockedBy(&ret.LockedBy, false),
@@ -144,7 +145,6 @@ func deleteAccount(t *testing.T) {
 	handler, err := NewHandler(
 		context.Background(),
 		WithID(&ret.ID, true),
-		WithEntID(&ret.EntID, true),
 	)
 	assert.Nil(t, err)
 	info, err := handler.DeleteAccount(context.Background())
