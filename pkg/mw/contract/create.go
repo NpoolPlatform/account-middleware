@@ -7,6 +7,7 @@ import (
 
 	"github.com/NpoolPlatform/account-middleware/pkg/db"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent"
+	entcontract "github.com/NpoolPlatform/account-middleware/pkg/db/ent/contract"
 	wlog "github.com/NpoolPlatform/go-service-framework/pkg/wlog"
 	basetypes "github.com/NpoolPlatform/message/npool/basetypes/v1"
 
@@ -17,6 +18,25 @@ type createHandler struct {
 	*Handler
 	accountSQL string
 	pledgeSQL  string
+}
+
+func (h *createHandler) checkBackupAccount(ctx context.Context, tx *ent.Tx) (err error) {
+	stm := tx.Contract.Query()
+
+	backup := true
+	stm.Where(entcontract.Backup(backup))
+	stm.Where(entcontract.GoodID(*h.GoodID))
+
+	if _, err = stm.Only(ctx); err != nil {
+		if ent.IsNotFound(err) {
+			h.Backup = &backup
+			return nil
+		}
+		return err
+	}
+	backup = false
+	h.Backup = &backup
+	return nil
 }
 
 //nolint:goconst
@@ -142,9 +162,13 @@ func (h *Handler) CreateAccount(ctx context.Context) error {
 	if h.AccountID == nil {
 		h.AccountID = func() *uuid.UUID { s := uuid.New(); return &s }()
 	}
-	handler.constructCreateaccountSQL()
-	handler.constructCreatepledgeSQL()
+
 	return db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
+		if err := handler.checkBackupAccount(_ctx, tx); err != nil {
+			return err
+		}
+		handler.constructCreateaccountSQL()
+		handler.constructCreatepledgeSQL()
 		if err := handler.createAccount(_ctx, tx); err != nil {
 			return err
 		}

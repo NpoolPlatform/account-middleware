@@ -39,7 +39,7 @@ func (h *updateHandler) getContract(ctx context.Context, tx *ent.Tx, must bool) 
 	return nil
 }
 
-func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { //nolint
+func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) {
 	if h.ID == nil && h.EntID == nil {
 		return nil, fmt.Errorf("invalid id")
 	}
