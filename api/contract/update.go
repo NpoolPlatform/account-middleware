@@ -22,7 +22,8 @@ func (s *Server) UpdateAccount(ctx context.Context, in *npool.UpdateAccountReque
 	}
 	handler, err := contract1.NewHandler(
 		ctx,
-		contract1.WithID(req.ID, true),
+		contract1.WithID(req.ID, false),
+		contract1.WithEntID(req.EntID, false),
 		contract1.WithBackup(req.Backup, false),
 		contract1.WithActive(req.Active, false),
 		contract1.WithLocked(req.Locked, false),

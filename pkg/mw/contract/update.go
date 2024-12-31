@@ -16,30 +16,46 @@ import (
 	npool "github.com/NpoolPlatform/message/npool/account/mw/v1/contract"
 )
 
-func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { //nolint
-	if h.ID == nil {
-		return nil, fmt.Errorf("invalid id")
+type updateHandler struct {
+	*Handler
+	contract *ent.Contract
+}
+
+func (h *updateHandler) getContract(ctx context.Context, tx *ent.Tx, must bool) (err error) {
+	stm := tx.Contract.Query()
+	if h.ID != nil {
+		stm.Where(entcontract.ID(*h.ID))
+	}
+	if h.EntID != nil {
+		stm.Where(entcontract.EntID(*h.EntID))
 	}
 
+	if h.contract, err = stm.Only(ctx); err != nil {
+		if ent.IsNotFound(err) && !must {
+			return nil
+		}
+		return err
+	}
+	return nil
+}
+
+func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { //nolint
+	if h.ID == nil && h.EntID == nil {
+		return nil, fmt.Errorf("invalid id")
+	}
+	handler := &updateHandler{
+		Handler: h,
+	}
 	err := db.WithTx(ctx, func(_ctx context.Context, tx *ent.Tx) error {
-		contract, err := tx.Contract.
-			Query().
-			Where(
-				entcontract.ID(*h.ID),
-			).
-			ForUpdate().
-			Only(_ctx)
+		err := handler.getContract(ctx, tx, true)
 		if err != nil {
 			return err
-		}
-		if contract == nil {
-			return fmt.Errorf("invalid contract")
 		}
 
 		account, err := tx.Account.
 			Query().
 			Where(
-				entaccount.EntID(contract.AccountID),
+				entaccount.EntID(handler.contract.AccountID),
 			).
 			ForUpdate().
 			Only(_ctx)
@@ -60,7 +76,7 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 		}
 
 		if _, err := contractcrud.UpdateSet(
-			contract.Update(),
+			handler.contract.Update(),
 			&contractcrud.Req{
 				Backup: h.Backup,
 			},
@@ -94,8 +110,8 @@ func (h *Handler) UpdateAccount(ctx context.Context) (*npool.Account, error) { /
 				)
 			}).
 			Where(
-				entcontract.GoodID(contract.GoodID),
-				entcontract.IDNEQ(*h.ID),
+				entcontract.GoodID(handler.contract.GoodID),
+				entcontract.IDNEQ(handler.contract.ID),
 				entcontract.Backup(false),
 			).
 			IDs(_ctx)
