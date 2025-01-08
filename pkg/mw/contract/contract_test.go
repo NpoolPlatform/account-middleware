@@ -34,7 +34,7 @@ var ret = npool.Account{
 	AccountID:       uuid.NewString(),
 	Address:         uuid.NewString(),
 	Active:          true,
-	Backup:          true,
+	Backup:          false,
 	LockedByStr:     basetypes.AccountLockedBy_DefaultLockedBy.String(),
 	ContractType:    accounttypes.ContractType_ContractDeployment,
 	ContractTypeStr: accounttypes.ContractType_ContractDeployment.String(),
