@@ -27,7 +27,7 @@ func (h *createHandler) checkBackupAccount(ctx context.Context, tx *ent.Tx) (err
 	stm.Where(entcontract.Backup(backup))
 	stm.Where(entcontract.GoodID(*h.GoodID))
 
-	if _, err = stm.Only(ctx); err != nil {
+	if _, err = stm.Exist(ctx); err != nil {
 		if ent.IsNotFound(err) {
 			h.Backup = &backup
 			return nil
