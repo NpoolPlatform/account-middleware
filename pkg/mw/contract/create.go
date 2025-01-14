@@ -16,8 +16,8 @@ import (
 
 type createHandler struct {
 	*Handler
-	accountSQL string
-	pledgeSQL  string
+	accountSQL         string
+	contractAccountSQL string
 }
 
 func (h *createHandler) checkBackupAccount(ctx context.Context, tx *ent.Tx) (err error) {
@@ -40,7 +40,7 @@ func (h *createHandler) checkBackupAccount(ctx context.Context, tx *ent.Tx) (err
 }
 
 //nolint:goconst
-func (h *createHandler) constructCreatepledgeSQL() {
+func (h *createHandler) constructCreateContractAccountSQL() {
 	comma := ""
 	now := uint32(time.Now().Unix())
 	_sql := "insert into contracts "
@@ -51,12 +51,12 @@ func (h *createHandler) constructCreatepledgeSQL() {
 	}
 	_sql += comma + "good_id"
 	comma = ", "
-	_sql += comma + "pledge_id"
+	_sql += comma + "delegated_staking_id"
 	_sql += comma + "account_id"
 	if h.Backup != nil {
 		_sql += comma + "backup"
 	}
-	_sql += comma + "contract_type"
+	_sql += comma + "contract_operator_type"
 	_sql += comma + "created_at"
 	_sql += comma + "updated_at"
 	_sql += comma + "deleted_at"
@@ -79,7 +79,7 @@ func (h *createHandler) constructCreatepledgeSQL() {
 	_sql += fmt.Sprintf("%v%v as updated_at", comma, now)
 	_sql += fmt.Sprintf("%v0 as deleted_at", comma)
 	_sql += ") as tmp"
-	h.pledgeSQL = _sql
+	h.contractAccountSQL = _sql
 }
 
 func (h *createHandler) constructCreateaccountSQL() {
@@ -140,14 +140,14 @@ func (h *createHandler) createAccount(ctx context.Context, tx *ent.Tx) error {
 	return nil
 }
 
-func (h *createHandler) createPledge(ctx context.Context, tx *ent.Tx) error {
-	rc, err := tx.ExecContext(ctx, h.pledgeSQL)
+func (h *createHandler) createContractAccount(ctx context.Context, tx *ent.Tx) error {
+	rc, err := tx.ExecContext(ctx, h.contractAccountSQL)
 	if err != nil {
 		return wlog.WrapError(err)
 	}
 	n, err := rc.RowsAffected()
 	if err != nil || n != 1 {
-		return wlog.Errorf("fail create pledge: %v", err)
+		return wlog.Errorf("fail create delegatedtaking: %v", err)
 	}
 	return nil
 }
@@ -168,10 +168,10 @@ func (h *Handler) CreateAccount(ctx context.Context) error {
 			return err
 		}
 		handler.constructCreateaccountSQL()
-		handler.constructCreatepledgeSQL()
+		handler.constructCreateContractAccountSQL()
 		if err := handler.createAccount(_ctx, tx); err != nil {
 			return err
 		}
-		return handler.createPledge(_ctx, tx)
+		return handler.createContractAccount(_ctx, tx)
 	})
 }
