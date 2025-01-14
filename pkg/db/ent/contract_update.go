@@ -118,23 +118,23 @@ func (cu *ContractUpdate) ClearGoodID() *ContractUpdate {
 	return cu
 }
 
-// SetPledgeID sets the "pledge_id" field.
-func (cu *ContractUpdate) SetPledgeID(u uuid.UUID) *ContractUpdate {
-	cu.mutation.SetPledgeID(u)
+// SetDelegatedStakingID sets the "delegated_staking_id" field.
+func (cu *ContractUpdate) SetDelegatedStakingID(u uuid.UUID) *ContractUpdate {
+	cu.mutation.SetDelegatedStakingID(u)
 	return cu
 }
 
-// SetNillablePledgeID sets the "pledge_id" field if the given value is not nil.
-func (cu *ContractUpdate) SetNillablePledgeID(u *uuid.UUID) *ContractUpdate {
+// SetNillableDelegatedStakingID sets the "delegated_staking_id" field if the given value is not nil.
+func (cu *ContractUpdate) SetNillableDelegatedStakingID(u *uuid.UUID) *ContractUpdate {
 	if u != nil {
-		cu.SetPledgeID(*u)
+		cu.SetDelegatedStakingID(*u)
 	}
 	return cu
 }
 
-// ClearPledgeID clears the value of the "pledge_id" field.
-func (cu *ContractUpdate) ClearPledgeID() *ContractUpdate {
-	cu.mutation.ClearPledgeID()
+// ClearDelegatedStakingID clears the value of the "delegated_staking_id" field.
+func (cu *ContractUpdate) ClearDelegatedStakingID() *ContractUpdate {
+	cu.mutation.ClearDelegatedStakingID()
 	return cu
 }
 
@@ -178,23 +178,23 @@ func (cu *ContractUpdate) ClearBackup() *ContractUpdate {
 	return cu
 }
 
-// SetContractType sets the "contract_type" field.
-func (cu *ContractUpdate) SetContractType(s string) *ContractUpdate {
-	cu.mutation.SetContractType(s)
+// SetContractOperatorType sets the "contract_operator_type" field.
+func (cu *ContractUpdate) SetContractOperatorType(s string) *ContractUpdate {
+	cu.mutation.SetContractOperatorType(s)
 	return cu
 }
 
-// SetNillableContractType sets the "contract_type" field if the given value is not nil.
-func (cu *ContractUpdate) SetNillableContractType(s *string) *ContractUpdate {
+// SetNillableContractOperatorType sets the "contract_operator_type" field if the given value is not nil.
+func (cu *ContractUpdate) SetNillableContractOperatorType(s *string) *ContractUpdate {
 	if s != nil {
-		cu.SetContractType(*s)
+		cu.SetContractOperatorType(*s)
 	}
 	return cu
 }
 
-// ClearContractType clears the value of the "contract_type" field.
-func (cu *ContractUpdate) ClearContractType() *ContractUpdate {
-	cu.mutation.ClearContractType()
+// ClearContractOperatorType clears the value of the "contract_operator_type" field.
+func (cu *ContractUpdate) ClearContractOperatorType() *ContractUpdate {
+	cu.mutation.ClearContractOperatorType()
 	return cu
 }
 
@@ -358,17 +358,17 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: contract.FieldGoodID,
 		})
 	}
-	if value, ok := cu.mutation.PledgeID(); ok {
+	if value, ok := cu.mutation.DelegatedStakingID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  value,
-			Column: contract.FieldPledgeID,
+			Column: contract.FieldDelegatedStakingID,
 		})
 	}
-	if cu.mutation.PledgeIDCleared() {
+	if cu.mutation.DelegatedStakingIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Column: contract.FieldPledgeID,
+			Column: contract.FieldDelegatedStakingID,
 		})
 	}
 	if value, ok := cu.mutation.AccountID(); ok {
@@ -397,17 +397,17 @@ func (cu *ContractUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: contract.FieldBackup,
 		})
 	}
-	if value, ok := cu.mutation.ContractType(); ok {
+	if value, ok := cu.mutation.ContractOperatorType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: contract.FieldContractType,
+			Column: contract.FieldContractOperatorType,
 		})
 	}
-	if cu.mutation.ContractTypeCleared() {
+	if cu.mutation.ContractOperatorTypeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: contract.FieldContractType,
+			Column: contract.FieldContractOperatorType,
 		})
 	}
 	_spec.Modifiers = cu.modifiers
@@ -520,23 +520,23 @@ func (cuo *ContractUpdateOne) ClearGoodID() *ContractUpdateOne {
 	return cuo
 }
 
-// SetPledgeID sets the "pledge_id" field.
-func (cuo *ContractUpdateOne) SetPledgeID(u uuid.UUID) *ContractUpdateOne {
-	cuo.mutation.SetPledgeID(u)
+// SetDelegatedStakingID sets the "delegated_staking_id" field.
+func (cuo *ContractUpdateOne) SetDelegatedStakingID(u uuid.UUID) *ContractUpdateOne {
+	cuo.mutation.SetDelegatedStakingID(u)
 	return cuo
 }
 
-// SetNillablePledgeID sets the "pledge_id" field if the given value is not nil.
-func (cuo *ContractUpdateOne) SetNillablePledgeID(u *uuid.UUID) *ContractUpdateOne {
+// SetNillableDelegatedStakingID sets the "delegated_staking_id" field if the given value is not nil.
+func (cuo *ContractUpdateOne) SetNillableDelegatedStakingID(u *uuid.UUID) *ContractUpdateOne {
 	if u != nil {
-		cuo.SetPledgeID(*u)
+		cuo.SetDelegatedStakingID(*u)
 	}
 	return cuo
 }
 
-// ClearPledgeID clears the value of the "pledge_id" field.
-func (cuo *ContractUpdateOne) ClearPledgeID() *ContractUpdateOne {
-	cuo.mutation.ClearPledgeID()
+// ClearDelegatedStakingID clears the value of the "delegated_staking_id" field.
+func (cuo *ContractUpdateOne) ClearDelegatedStakingID() *ContractUpdateOne {
+	cuo.mutation.ClearDelegatedStakingID()
 	return cuo
 }
 
@@ -580,23 +580,23 @@ func (cuo *ContractUpdateOne) ClearBackup() *ContractUpdateOne {
 	return cuo
 }
 
-// SetContractType sets the "contract_type" field.
-func (cuo *ContractUpdateOne) SetContractType(s string) *ContractUpdateOne {
-	cuo.mutation.SetContractType(s)
+// SetContractOperatorType sets the "contract_operator_type" field.
+func (cuo *ContractUpdateOne) SetContractOperatorType(s string) *ContractUpdateOne {
+	cuo.mutation.SetContractOperatorType(s)
 	return cuo
 }
 
-// SetNillableContractType sets the "contract_type" field if the given value is not nil.
-func (cuo *ContractUpdateOne) SetNillableContractType(s *string) *ContractUpdateOne {
+// SetNillableContractOperatorType sets the "contract_operator_type" field if the given value is not nil.
+func (cuo *ContractUpdateOne) SetNillableContractOperatorType(s *string) *ContractUpdateOne {
 	if s != nil {
-		cuo.SetContractType(*s)
+		cuo.SetContractOperatorType(*s)
 	}
 	return cuo
 }
 
-// ClearContractType clears the value of the "contract_type" field.
-func (cuo *ContractUpdateOne) ClearContractType() *ContractUpdateOne {
-	cuo.mutation.ClearContractType()
+// ClearContractOperatorType clears the value of the "contract_operator_type" field.
+func (cuo *ContractUpdateOne) ClearContractOperatorType() *ContractUpdateOne {
+	cuo.mutation.ClearContractOperatorType()
 	return cuo
 }
 
@@ -790,17 +790,17 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 			Column: contract.FieldGoodID,
 		})
 	}
-	if value, ok := cuo.mutation.PledgeID(); ok {
+	if value, ok := cuo.mutation.DelegatedStakingID(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  value,
-			Column: contract.FieldPledgeID,
+			Column: contract.FieldDelegatedStakingID,
 		})
 	}
-	if cuo.mutation.PledgeIDCleared() {
+	if cuo.mutation.DelegatedStakingIDCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
-			Column: contract.FieldPledgeID,
+			Column: contract.FieldDelegatedStakingID,
 		})
 	}
 	if value, ok := cuo.mutation.AccountID(); ok {
@@ -829,17 +829,17 @@ func (cuo *ContractUpdateOne) sqlSave(ctx context.Context) (_node *Contract, err
 			Column: contract.FieldBackup,
 		})
 	}
-	if value, ok := cuo.mutation.ContractType(); ok {
+	if value, ok := cuo.mutation.ContractOperatorType(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: contract.FieldContractType,
+			Column: contract.FieldContractOperatorType,
 		})
 	}
-	if cuo.mutation.ContractTypeCleared() {
+	if cuo.mutation.ContractOperatorTypeCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
-			Column: contract.FieldContractType,
+			Column: contract.FieldContractOperatorType,
 		})
 	}
 	_spec.Modifiers = cuo.modifiers

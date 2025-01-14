@@ -27,17 +27,17 @@ func init() {
 }
 
 var ret = npool.Account{
-	EntID:           uuid.NewString(),
-	GoodID:          uuid.NewString(),
-	PledgeID:        uuid.NewString(),
-	CoinTypeID:      uuid.NewString(),
-	AccountID:       uuid.NewString(),
-	Address:         uuid.NewString(),
-	Active:          true,
-	Backup:          false,
-	LockedByStr:     basetypes.AccountLockedBy_DefaultLockedBy.String(),
-	ContractType:    accounttypes.ContractType_ContractDeployment,
-	ContractTypeStr: accounttypes.ContractType_ContractDeployment.String(),
+	EntID:                   uuid.NewString(),
+	GoodID:                  uuid.NewString(),
+	DelegatedStakingID:      uuid.NewString(),
+	CoinTypeID:              uuid.NewString(),
+	AccountID:               uuid.NewString(),
+	Address:                 uuid.NewString(),
+	Active:                  true,
+	Backup:                  false,
+	LockedByStr:             basetypes.AccountLockedBy_DefaultLockedBy.String(),
+	ContractOperatorType:    accounttypes.ContractOperatorType_ContractOwner,
+	ContractOperatorTypeStr: accounttypes.ContractOperatorType_ContractOwner.String(),
 }
 
 func creatAccount(t *testing.T) {
@@ -45,12 +45,12 @@ func creatAccount(t *testing.T) {
 		context.Background(),
 		WithEntID(&ret.EntID, false),
 		WithGoodID(&ret.GoodID, true),
-		WithPledgeID(&ret.PledgeID, true),
+		WithDelegatedStakingID(&ret.DelegatedStakingID, true),
 		WithCoinTypeID(&ret.CoinTypeID, true),
 		WithAccountID(&ret.AccountID, true),
 		WithAddress(&ret.Address, true),
 		WithBackup(&ret.Backup, true),
-		WithContractType(&ret.ContractType, true),
+		WithContractOperatorType(&ret.ContractOperatorType, true),
 	)
 
 	assert.Nil(t, err)

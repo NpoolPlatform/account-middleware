@@ -22,14 +22,14 @@ const (
 	FieldEntID = "ent_id"
 	// FieldGoodID holds the string denoting the good_id field in the database.
 	FieldGoodID = "good_id"
-	// FieldPledgeID holds the string denoting the pledge_id field in the database.
-	FieldPledgeID = "pledge_id"
+	// FieldDelegatedStakingID holds the string denoting the delegated_staking_id field in the database.
+	FieldDelegatedStakingID = "delegated_staking_id"
 	// FieldAccountID holds the string denoting the account_id field in the database.
 	FieldAccountID = "account_id"
 	// FieldBackup holds the string denoting the backup field in the database.
 	FieldBackup = "backup"
-	// FieldContractType holds the string denoting the contract_type field in the database.
-	FieldContractType = "contract_type"
+	// FieldContractOperatorType holds the string denoting the contract_operator_type field in the database.
+	FieldContractOperatorType = "contract_operator_type"
 	// Table holds the table name of the contract in the database.
 	Table = "contracts"
 )
@@ -42,10 +42,10 @@ var Columns = []string{
 	FieldDeletedAt,
 	FieldEntID,
 	FieldGoodID,
-	FieldPledgeID,
+	FieldDelegatedStakingID,
 	FieldAccountID,
 	FieldBackup,
-	FieldContractType,
+	FieldContractOperatorType,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -79,12 +79,12 @@ var (
 	DefaultEntID func() uuid.UUID
 	// DefaultGoodID holds the default value on creation for the "good_id" field.
 	DefaultGoodID func() uuid.UUID
-	// DefaultPledgeID holds the default value on creation for the "pledge_id" field.
-	DefaultPledgeID func() uuid.UUID
+	// DefaultDelegatedStakingID holds the default value on creation for the "delegated_staking_id" field.
+	DefaultDelegatedStakingID func() uuid.UUID
 	// DefaultAccountID holds the default value on creation for the "account_id" field.
 	DefaultAccountID func() uuid.UUID
 	// DefaultBackup holds the default value on creation for the "backup" field.
 	DefaultBackup bool
-	// DefaultContractType holds the default value on creation for the "contract_type" field.
-	DefaultContractType string
+	// DefaultContractOperatorType holds the default value on creation for the "contract_operator_type" field.
+	DefaultContractOperatorType string
 )

@@ -26,14 +26,14 @@ type Contract struct {
 	EntID uuid.UUID `json:"ent_id,omitempty"`
 	// GoodID holds the value of the "good_id" field.
 	GoodID uuid.UUID `json:"good_id,omitempty"`
-	// PledgeID holds the value of the "pledge_id" field.
-	PledgeID uuid.UUID `json:"pledge_id,omitempty"`
+	// DelegatedStakingID holds the value of the "delegated_staking_id" field.
+	DelegatedStakingID uuid.UUID `json:"delegated_staking_id,omitempty"`
 	// AccountID holds the value of the "account_id" field.
 	AccountID uuid.UUID `json:"account_id,omitempty"`
 	// Backup holds the value of the "backup" field.
 	Backup bool `json:"backup,omitempty"`
-	// ContractType holds the value of the "contract_type" field.
-	ContractType string `json:"contract_type,omitempty"`
+	// ContractOperatorType holds the value of the "contract_operator_type" field.
+	ContractOperatorType string `json:"contract_operator_type,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -45,9 +45,9 @@ func (*Contract) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case contract.FieldID, contract.FieldCreatedAt, contract.FieldUpdatedAt, contract.FieldDeletedAt:
 			values[i] = new(sql.NullInt64)
-		case contract.FieldContractType:
+		case contract.FieldContractOperatorType:
 			values[i] = new(sql.NullString)
-		case contract.FieldEntID, contract.FieldGoodID, contract.FieldPledgeID, contract.FieldAccountID:
+		case contract.FieldEntID, contract.FieldGoodID, contract.FieldDelegatedStakingID, contract.FieldAccountID:
 			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Contract", columns[i])
@@ -100,11 +100,11 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 			} else if value != nil {
 				c.GoodID = *value
 			}
-		case contract.FieldPledgeID:
+		case contract.FieldDelegatedStakingID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
-				return fmt.Errorf("unexpected type %T for field pledge_id", values[i])
+				return fmt.Errorf("unexpected type %T for field delegated_staking_id", values[i])
 			} else if value != nil {
-				c.PledgeID = *value
+				c.DelegatedStakingID = *value
 			}
 		case contract.FieldAccountID:
 			if value, ok := values[i].(*uuid.UUID); !ok {
@@ -118,11 +118,11 @@ func (c *Contract) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				c.Backup = value.Bool
 			}
-		case contract.FieldContractType:
+		case contract.FieldContractOperatorType:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field contract_type", values[i])
+				return fmt.Errorf("unexpected type %T for field contract_operator_type", values[i])
 			} else if value.Valid {
-				c.ContractType = value.String
+				c.ContractOperatorType = value.String
 			}
 		}
 	}
@@ -167,8 +167,8 @@ func (c *Contract) String() string {
 	builder.WriteString("good_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.GoodID))
 	builder.WriteString(", ")
-	builder.WriteString("pledge_id=")
-	builder.WriteString(fmt.Sprintf("%v", c.PledgeID))
+	builder.WriteString("delegated_staking_id=")
+	builder.WriteString(fmt.Sprintf("%v", c.DelegatedStakingID))
 	builder.WriteString(", ")
 	builder.WriteString("account_id=")
 	builder.WriteString(fmt.Sprintf("%v", c.AccountID))
@@ -176,8 +176,8 @@ func (c *Contract) String() string {
 	builder.WriteString("backup=")
 	builder.WriteString(fmt.Sprintf("%v", c.Backup))
 	builder.WriteString(", ")
-	builder.WriteString("contract_type=")
-	builder.WriteString(c.ContractType)
+	builder.WriteString("contract_operator_type=")
+	builder.WriteString(c.ContractOperatorType)
 	builder.WriteByte(')')
 	return builder.String()
 }

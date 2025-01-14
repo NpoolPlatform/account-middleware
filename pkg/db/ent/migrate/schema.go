@@ -45,10 +45,10 @@ var (
 		{Name: "deleted_at", Type: field.TypeUint32},
 		{Name: "ent_id", Type: field.TypeUUID, Unique: true},
 		{Name: "good_id", Type: field.TypeUUID, Nullable: true},
-		{Name: "pledge_id", Type: field.TypeUUID, Nullable: true},
+		{Name: "delegated_staking_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "account_id", Type: field.TypeUUID, Nullable: true},
 		{Name: "backup", Type: field.TypeBool, Nullable: true, Default: false},
-		{Name: "contract_type", Type: field.TypeString, Nullable: true, Default: "DefaultContractType"},
+		{Name: "contract_operator_type", Type: field.TypeString, Nullable: true, Default: "DefaultContractOperatorType"},
 	}
 	// ContractsTable holds the schema information for the "contracts" table.
 	ContractsTable = &schema.Table{

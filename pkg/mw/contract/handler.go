@@ -15,23 +15,23 @@ import (
 )
 
 type Handler struct {
-	ID            *uint32
-	EntID         *uuid.UUID
-	GoodID        *uuid.UUID
-	PledgeID      *uuid.UUID
-	CoinTypeID    *uuid.UUID
-	AccountID     *uuid.UUID
-	Address       *string
-	Backup        *bool
-	Active        *bool
-	Locked        *bool
-	LockedBy      *basetypes.AccountLockedBy
-	Blocked       *bool
-	ContractType  *accounttypes.ContractType
-	TransactionID *uuid.UUID
-	Conds         *contractcrud.Conds
-	Offset        int32
-	Limit         int32
+	ID                   *uint32
+	EntID                *uuid.UUID
+	GoodID               *uuid.UUID
+	DelegatedStakingID   *uuid.UUID
+	CoinTypeID           *uuid.UUID
+	AccountID            *uuid.UUID
+	Address              *string
+	Backup               *bool
+	Active               *bool
+	Locked               *bool
+	LockedBy             *basetypes.AccountLockedBy
+	Blocked              *bool
+	ContractOperatorType *accounttypes.ContractOperatorType
+	TransactionID        *uuid.UUID
+	Conds                *contractcrud.Conds
+	Offset               int32
+	Limit                int32
 }
 
 func NewHandler(ctx context.Context, options ...func(context.Context, *Handler) error) (*Handler, error) {
@@ -91,11 +91,11 @@ func WithGoodID(id *string, must bool) func(context.Context, *Handler) error {
 	}
 }
 
-func WithPledgeID(id *string, must bool) func(context.Context, *Handler) error {
+func WithDelegatedStakingID(id *string, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
 		if id == nil {
 			if must {
-				return fmt.Errorf("invalid pledgeid")
+				return fmt.Errorf("invalid delegatedstakingid")
 			}
 			return nil
 		}
@@ -103,7 +103,7 @@ func WithPledgeID(id *string, must bool) func(context.Context, *Handler) error {
 		if err != nil {
 			return err
 		}
-		h.PledgeID = &_id
+		h.DelegatedStakingID = &_id
 		return nil
 	}
 }
@@ -179,21 +179,21 @@ func WithLocked(locked *bool, must bool) func(context.Context, *Handler) error {
 	}
 }
 
-func WithContractType(contractType *accounttypes.ContractType, must bool) func(context.Context, *Handler) error {
+func WithContractOperatorType(contractOperatorType *accounttypes.ContractOperatorType, must bool) func(context.Context, *Handler) error {
 	return func(ctx context.Context, h *Handler) error {
-		if contractType == nil {
+		if contractOperatorType == nil {
 			if must {
-				return fmt.Errorf("invalid contracttype")
+				return fmt.Errorf("invalid contractoperatortype")
 			}
 			return nil
 		}
-		switch *contractType {
-		case accounttypes.ContractType_ContractCalculate:
-		case accounttypes.ContractType_ContractDeployment:
+		switch *contractOperatorType {
+		case accounttypes.ContractOperatorType_ContractOwner:
+		case accounttypes.ContractOperatorType_ContractCalculator:
 		default:
-			return fmt.Errorf("invalid contracttype")
+			return fmt.Errorf("invalid contractoperatortype")
 		}
-		h.ContractType = contractType
+		h.ContractOperatorType = contractOperatorType
 		return nil
 	}
 }
@@ -272,12 +272,12 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 			}
 			h.Conds.AccountID = &cruder.Cond{Op: conds.GetAccountID().GetOp(), Val: id}
 		}
-		if conds.PledgeID != nil {
-			id, err := uuid.Parse(conds.GetPledgeID().GetValue())
+		if conds.DelegatedStakingID != nil {
+			id, err := uuid.Parse(conds.GetDelegatedStakingID().GetValue())
 			if err != nil {
 				return err
 			}
-			h.Conds.PledgeID = &cruder.Cond{Op: conds.GetPledgeID().GetOp(), Val: id}
+			h.Conds.DelegatedStakingID = &cruder.Cond{Op: conds.GetDelegatedStakingID().GetOp(), Val: id}
 		}
 		if conds.Backup != nil {
 			h.Conds.Backup = &cruder.Cond{
@@ -315,22 +315,22 @@ func WithConds(conds *npool.Conds) func(context.Context, *Handler) error { //nol
 				Val: conds.GetBlocked().GetValue(),
 			}
 		}
-		if conds.ContractType != nil {
-			h.Conds.ContractType = &cruder.Cond{
-				Op:  conds.GetContractType().GetOp(),
-				Val: accounttypes.ContractType(conds.GetContractType().GetValue()),
+		if conds.ContractOperatorType != nil {
+			h.Conds.ContractOperatorType = &cruder.Cond{
+				Op:  conds.GetContractOperatorType().GetOp(),
+				Val: accounttypes.ContractOperatorType(conds.GetContractOperatorType().GetValue()),
 			}
 		}
-		if conds.PledgeIDs != nil {
+		if conds.DelegatedStakingIDs != nil {
 			ids := []uuid.UUID{}
-			for _, id := range conds.GetPledgeIDs().GetValue() {
+			for _, id := range conds.GetDelegatedStakingIDs().GetValue() {
 				_id, err := uuid.Parse(id)
 				if err != nil {
 					return err
 				}
 				ids = append(ids, _id)
 			}
-			h.Conds.PledgeIDs = &cruder.Cond{Op: conds.GetPledgeIDs().GetOp(), Val: ids}
+			h.Conds.DelegatedStakingIDs = &cruder.Cond{Op: conds.GetDelegatedStakingIDs().GetOp(), Val: ids}
 		}
 		return nil
 	}

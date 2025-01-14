@@ -92,16 +92,16 @@ func (cc *ContractCreate) SetNillableGoodID(u *uuid.UUID) *ContractCreate {
 	return cc
 }
 
-// SetPledgeID sets the "pledge_id" field.
-func (cc *ContractCreate) SetPledgeID(u uuid.UUID) *ContractCreate {
-	cc.mutation.SetPledgeID(u)
+// SetDelegatedStakingID sets the "delegated_staking_id" field.
+func (cc *ContractCreate) SetDelegatedStakingID(u uuid.UUID) *ContractCreate {
+	cc.mutation.SetDelegatedStakingID(u)
 	return cc
 }
 
-// SetNillablePledgeID sets the "pledge_id" field if the given value is not nil.
-func (cc *ContractCreate) SetNillablePledgeID(u *uuid.UUID) *ContractCreate {
+// SetNillableDelegatedStakingID sets the "delegated_staking_id" field if the given value is not nil.
+func (cc *ContractCreate) SetNillableDelegatedStakingID(u *uuid.UUID) *ContractCreate {
 	if u != nil {
-		cc.SetPledgeID(*u)
+		cc.SetDelegatedStakingID(*u)
 	}
 	return cc
 }
@@ -134,16 +134,16 @@ func (cc *ContractCreate) SetNillableBackup(b *bool) *ContractCreate {
 	return cc
 }
 
-// SetContractType sets the "contract_type" field.
-func (cc *ContractCreate) SetContractType(s string) *ContractCreate {
-	cc.mutation.SetContractType(s)
+// SetContractOperatorType sets the "contract_operator_type" field.
+func (cc *ContractCreate) SetContractOperatorType(s string) *ContractCreate {
+	cc.mutation.SetContractOperatorType(s)
 	return cc
 }
 
-// SetNillableContractType sets the "contract_type" field if the given value is not nil.
-func (cc *ContractCreate) SetNillableContractType(s *string) *ContractCreate {
+// SetNillableContractOperatorType sets the "contract_operator_type" field if the given value is not nil.
+func (cc *ContractCreate) SetNillableContractOperatorType(s *string) *ContractCreate {
 	if s != nil {
-		cc.SetContractType(*s)
+		cc.SetContractOperatorType(*s)
 	}
 	return cc
 }
@@ -268,12 +268,12 @@ func (cc *ContractCreate) defaults() error {
 		v := contract.DefaultGoodID()
 		cc.mutation.SetGoodID(v)
 	}
-	if _, ok := cc.mutation.PledgeID(); !ok {
-		if contract.DefaultPledgeID == nil {
-			return fmt.Errorf("ent: uninitialized contract.DefaultPledgeID (forgotten import ent/runtime?)")
+	if _, ok := cc.mutation.DelegatedStakingID(); !ok {
+		if contract.DefaultDelegatedStakingID == nil {
+			return fmt.Errorf("ent: uninitialized contract.DefaultDelegatedStakingID (forgotten import ent/runtime?)")
 		}
-		v := contract.DefaultPledgeID()
-		cc.mutation.SetPledgeID(v)
+		v := contract.DefaultDelegatedStakingID()
+		cc.mutation.SetDelegatedStakingID(v)
 	}
 	if _, ok := cc.mutation.AccountID(); !ok {
 		if contract.DefaultAccountID == nil {
@@ -286,9 +286,9 @@ func (cc *ContractCreate) defaults() error {
 		v := contract.DefaultBackup
 		cc.mutation.SetBackup(v)
 	}
-	if _, ok := cc.mutation.ContractType(); !ok {
-		v := contract.DefaultContractType
-		cc.mutation.SetContractType(v)
+	if _, ok := cc.mutation.ContractOperatorType(); !ok {
+		v := contract.DefaultContractOperatorType
+		cc.mutation.SetContractOperatorType(v)
 	}
 	return nil
 }
@@ -381,13 +381,13 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 		})
 		_node.GoodID = value
 	}
-	if value, ok := cc.mutation.PledgeID(); ok {
+	if value, ok := cc.mutation.DelegatedStakingID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeUUID,
 			Value:  value,
-			Column: contract.FieldPledgeID,
+			Column: contract.FieldDelegatedStakingID,
 		})
-		_node.PledgeID = value
+		_node.DelegatedStakingID = value
 	}
 	if value, ok := cc.mutation.AccountID(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
@@ -405,13 +405,13 @@ func (cc *ContractCreate) createSpec() (*Contract, *sqlgraph.CreateSpec) {
 		})
 		_node.Backup = value
 	}
-	if value, ok := cc.mutation.ContractType(); ok {
+	if value, ok := cc.mutation.ContractOperatorType(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: contract.FieldContractType,
+			Column: contract.FieldContractOperatorType,
 		})
-		_node.ContractType = value
+		_node.ContractOperatorType = value
 	}
 	return _node, _spec
 }
@@ -551,21 +551,21 @@ func (u *ContractUpsert) ClearGoodID() *ContractUpsert {
 	return u
 }
 
-// SetPledgeID sets the "pledge_id" field.
-func (u *ContractUpsert) SetPledgeID(v uuid.UUID) *ContractUpsert {
-	u.Set(contract.FieldPledgeID, v)
+// SetDelegatedStakingID sets the "delegated_staking_id" field.
+func (u *ContractUpsert) SetDelegatedStakingID(v uuid.UUID) *ContractUpsert {
+	u.Set(contract.FieldDelegatedStakingID, v)
 	return u
 }
 
-// UpdatePledgeID sets the "pledge_id" field to the value that was provided on create.
-func (u *ContractUpsert) UpdatePledgeID() *ContractUpsert {
-	u.SetExcluded(contract.FieldPledgeID)
+// UpdateDelegatedStakingID sets the "delegated_staking_id" field to the value that was provided on create.
+func (u *ContractUpsert) UpdateDelegatedStakingID() *ContractUpsert {
+	u.SetExcluded(contract.FieldDelegatedStakingID)
 	return u
 }
 
-// ClearPledgeID clears the value of the "pledge_id" field.
-func (u *ContractUpsert) ClearPledgeID() *ContractUpsert {
-	u.SetNull(contract.FieldPledgeID)
+// ClearDelegatedStakingID clears the value of the "delegated_staking_id" field.
+func (u *ContractUpsert) ClearDelegatedStakingID() *ContractUpsert {
+	u.SetNull(contract.FieldDelegatedStakingID)
 	return u
 }
 
@@ -605,21 +605,21 @@ func (u *ContractUpsert) ClearBackup() *ContractUpsert {
 	return u
 }
 
-// SetContractType sets the "contract_type" field.
-func (u *ContractUpsert) SetContractType(v string) *ContractUpsert {
-	u.Set(contract.FieldContractType, v)
+// SetContractOperatorType sets the "contract_operator_type" field.
+func (u *ContractUpsert) SetContractOperatorType(v string) *ContractUpsert {
+	u.Set(contract.FieldContractOperatorType, v)
 	return u
 }
 
-// UpdateContractType sets the "contract_type" field to the value that was provided on create.
-func (u *ContractUpsert) UpdateContractType() *ContractUpsert {
-	u.SetExcluded(contract.FieldContractType)
+// UpdateContractOperatorType sets the "contract_operator_type" field to the value that was provided on create.
+func (u *ContractUpsert) UpdateContractOperatorType() *ContractUpsert {
+	u.SetExcluded(contract.FieldContractOperatorType)
 	return u
 }
 
-// ClearContractType clears the value of the "contract_type" field.
-func (u *ContractUpsert) ClearContractType() *ContractUpsert {
-	u.SetNull(contract.FieldContractType)
+// ClearContractOperatorType clears the value of the "contract_operator_type" field.
+func (u *ContractUpsert) ClearContractOperatorType() *ContractUpsert {
+	u.SetNull(contract.FieldContractOperatorType)
 	return u
 }
 
@@ -771,24 +771,24 @@ func (u *ContractUpsertOne) ClearGoodID() *ContractUpsertOne {
 	})
 }
 
-// SetPledgeID sets the "pledge_id" field.
-func (u *ContractUpsertOne) SetPledgeID(v uuid.UUID) *ContractUpsertOne {
+// SetDelegatedStakingID sets the "delegated_staking_id" field.
+func (u *ContractUpsertOne) SetDelegatedStakingID(v uuid.UUID) *ContractUpsertOne {
 	return u.Update(func(s *ContractUpsert) {
-		s.SetPledgeID(v)
+		s.SetDelegatedStakingID(v)
 	})
 }
 
-// UpdatePledgeID sets the "pledge_id" field to the value that was provided on create.
-func (u *ContractUpsertOne) UpdatePledgeID() *ContractUpsertOne {
+// UpdateDelegatedStakingID sets the "delegated_staking_id" field to the value that was provided on create.
+func (u *ContractUpsertOne) UpdateDelegatedStakingID() *ContractUpsertOne {
 	return u.Update(func(s *ContractUpsert) {
-		s.UpdatePledgeID()
+		s.UpdateDelegatedStakingID()
 	})
 }
 
-// ClearPledgeID clears the value of the "pledge_id" field.
-func (u *ContractUpsertOne) ClearPledgeID() *ContractUpsertOne {
+// ClearDelegatedStakingID clears the value of the "delegated_staking_id" field.
+func (u *ContractUpsertOne) ClearDelegatedStakingID() *ContractUpsertOne {
 	return u.Update(func(s *ContractUpsert) {
-		s.ClearPledgeID()
+		s.ClearDelegatedStakingID()
 	})
 }
 
@@ -834,24 +834,24 @@ func (u *ContractUpsertOne) ClearBackup() *ContractUpsertOne {
 	})
 }
 
-// SetContractType sets the "contract_type" field.
-func (u *ContractUpsertOne) SetContractType(v string) *ContractUpsertOne {
+// SetContractOperatorType sets the "contract_operator_type" field.
+func (u *ContractUpsertOne) SetContractOperatorType(v string) *ContractUpsertOne {
 	return u.Update(func(s *ContractUpsert) {
-		s.SetContractType(v)
+		s.SetContractOperatorType(v)
 	})
 }
 
-// UpdateContractType sets the "contract_type" field to the value that was provided on create.
-func (u *ContractUpsertOne) UpdateContractType() *ContractUpsertOne {
+// UpdateContractOperatorType sets the "contract_operator_type" field to the value that was provided on create.
+func (u *ContractUpsertOne) UpdateContractOperatorType() *ContractUpsertOne {
 	return u.Update(func(s *ContractUpsert) {
-		s.UpdateContractType()
+		s.UpdateContractOperatorType()
 	})
 }
 
-// ClearContractType clears the value of the "contract_type" field.
-func (u *ContractUpsertOne) ClearContractType() *ContractUpsertOne {
+// ClearContractOperatorType clears the value of the "contract_operator_type" field.
+func (u *ContractUpsertOne) ClearContractOperatorType() *ContractUpsertOne {
 	return u.Update(func(s *ContractUpsert) {
-		s.ClearContractType()
+		s.ClearContractOperatorType()
 	})
 }
 
@@ -1168,24 +1168,24 @@ func (u *ContractUpsertBulk) ClearGoodID() *ContractUpsertBulk {
 	})
 }
 
-// SetPledgeID sets the "pledge_id" field.
-func (u *ContractUpsertBulk) SetPledgeID(v uuid.UUID) *ContractUpsertBulk {
+// SetDelegatedStakingID sets the "delegated_staking_id" field.
+func (u *ContractUpsertBulk) SetDelegatedStakingID(v uuid.UUID) *ContractUpsertBulk {
 	return u.Update(func(s *ContractUpsert) {
-		s.SetPledgeID(v)
+		s.SetDelegatedStakingID(v)
 	})
 }
 
-// UpdatePledgeID sets the "pledge_id" field to the value that was provided on create.
-func (u *ContractUpsertBulk) UpdatePledgeID() *ContractUpsertBulk {
+// UpdateDelegatedStakingID sets the "delegated_staking_id" field to the value that was provided on create.
+func (u *ContractUpsertBulk) UpdateDelegatedStakingID() *ContractUpsertBulk {
 	return u.Update(func(s *ContractUpsert) {
-		s.UpdatePledgeID()
+		s.UpdateDelegatedStakingID()
 	})
 }
 
-// ClearPledgeID clears the value of the "pledge_id" field.
-func (u *ContractUpsertBulk) ClearPledgeID() *ContractUpsertBulk {
+// ClearDelegatedStakingID clears the value of the "delegated_staking_id" field.
+func (u *ContractUpsertBulk) ClearDelegatedStakingID() *ContractUpsertBulk {
 	return u.Update(func(s *ContractUpsert) {
-		s.ClearPledgeID()
+		s.ClearDelegatedStakingID()
 	})
 }
 
@@ -1231,24 +1231,24 @@ func (u *ContractUpsertBulk) ClearBackup() *ContractUpsertBulk {
 	})
 }
 
-// SetContractType sets the "contract_type" field.
-func (u *ContractUpsertBulk) SetContractType(v string) *ContractUpsertBulk {
+// SetContractOperatorType sets the "contract_operator_type" field.
+func (u *ContractUpsertBulk) SetContractOperatorType(v string) *ContractUpsertBulk {
 	return u.Update(func(s *ContractUpsert) {
-		s.SetContractType(v)
+		s.SetContractOperatorType(v)
 	})
 }
 
-// UpdateContractType sets the "contract_type" field to the value that was provided on create.
-func (u *ContractUpsertBulk) UpdateContractType() *ContractUpsertBulk {
+// UpdateContractOperatorType sets the "contract_operator_type" field to the value that was provided on create.
+func (u *ContractUpsertBulk) UpdateContractOperatorType() *ContractUpsertBulk {
 	return u.Update(func(s *ContractUpsert) {
-		s.UpdateContractType()
+		s.UpdateContractOperatorType()
 	})
 }
 
-// ClearContractType clears the value of the "contract_type" field.
-func (u *ContractUpsertBulk) ClearContractType() *ContractUpsertBulk {
+// ClearContractOperatorType clears the value of the "contract_operator_type" field.
+func (u *ContractUpsertBulk) ClearContractOperatorType() *ContractUpsertBulk {
 	return u.Update(func(s *ContractUpsert) {
-		s.ClearContractType()
+		s.ClearContractOperatorType()
 	})
 }
 

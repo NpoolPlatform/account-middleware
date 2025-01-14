@@ -60,10 +60,10 @@ func (h *queryHandler) queryJoinMyself(s *sql.Selector) {
 		t.C(entcontract.FieldID),
 		t.C(entcontract.FieldEntID),
 		t.C(entcontract.FieldGoodID),
-		t.C(entcontract.FieldPledgeID),
+		t.C(entcontract.FieldDelegatedStakingID),
 		t.C(entcontract.FieldAccountID),
 		t.C(entcontract.FieldBackup),
-		t.C(entcontract.FieldContractType),
+		t.C(entcontract.FieldContractOperatorType),
 		t.C(entcontract.FieldCreatedAt),
 		t.C(entcontract.FieldUpdatedAt),
 	)
@@ -187,7 +187,7 @@ func (h *queryHandler) formalize() {
 		if _, err := uuid.Parse(info.CoinTypeID); err != nil {
 			info.CoinTypeID = uuid.Nil.String()
 		}
-		info.ContractType = accounttypes.ContractType(accounttypes.ContractType_value[info.ContractTypeStr])
+		info.ContractOperatorType = accounttypes.ContractOperatorType(accounttypes.ContractOperatorType_value[info.ContractOperatorTypeStr])
 		info.LockedBy = basetypes.AccountLockedBy(basetypes.AccountLockedBy_value[info.LockedByStr])
 	}
 }

@@ -130,10 +130,10 @@ func init() {
 	contractDescGoodID := contractFields[0].Descriptor()
 	// contract.DefaultGoodID holds the default value on creation for the good_id field.
 	contract.DefaultGoodID = contractDescGoodID.Default.(func() uuid.UUID)
-	// contractDescPledgeID is the schema descriptor for pledge_id field.
-	contractDescPledgeID := contractFields[1].Descriptor()
-	// contract.DefaultPledgeID holds the default value on creation for the pledge_id field.
-	contract.DefaultPledgeID = contractDescPledgeID.Default.(func() uuid.UUID)
+	// contractDescDelegatedStakingID is the schema descriptor for delegated_staking_id field.
+	contractDescDelegatedStakingID := contractFields[1].Descriptor()
+	// contract.DefaultDelegatedStakingID holds the default value on creation for the delegated_staking_id field.
+	contract.DefaultDelegatedStakingID = contractDescDelegatedStakingID.Default.(func() uuid.UUID)
 	// contractDescAccountID is the schema descriptor for account_id field.
 	contractDescAccountID := contractFields[2].Descriptor()
 	// contract.DefaultAccountID holds the default value on creation for the account_id field.
@@ -142,10 +142,10 @@ func init() {
 	contractDescBackup := contractFields[3].Descriptor()
 	// contract.DefaultBackup holds the default value on creation for the backup field.
 	contract.DefaultBackup = contractDescBackup.Default.(bool)
-	// contractDescContractType is the schema descriptor for contract_type field.
-	contractDescContractType := contractFields[4].Descriptor()
-	// contract.DefaultContractType holds the default value on creation for the contract_type field.
-	contract.DefaultContractType = contractDescContractType.Default.(string)
+	// contractDescContractOperatorType is the schema descriptor for contract_operator_type field.
+	contractDescContractOperatorType := contractFields[4].Descriptor()
+	// contract.DefaultContractOperatorType holds the default value on creation for the contract_operator_type field.
+	contract.DefaultContractOperatorType = contractDescContractOperatorType.Default.(string)
 	depositMixin := schema.Deposit{}.Mixin()
 	deposit.Policy = privacy.NewPolicies(depositMixin[0], schema.Deposit{})
 	deposit.Hooks[0] = func(next ent.Mutator) ent.Mutator {

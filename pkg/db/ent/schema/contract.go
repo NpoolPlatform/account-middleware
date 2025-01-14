@@ -31,7 +31,7 @@ func (Contract) Fields() []ent.Field {
 				return uuid.UUID{}
 			}),
 		field.
-			UUID("pledge_id", uuid.UUID{}).
+			UUID("delegated_staking_id", uuid.UUID{}).
 			Optional().
 			Default(func() uuid.UUID {
 				return uuid.UUID{}
@@ -47,9 +47,9 @@ func (Contract) Fields() []ent.Field {
 			Optional().
 			Default(false),
 		field.
-			String("contract_type").
+			String("contract_operator_type").
 			Optional().
-			Default(basetypes.ContractType_DefaultContractType.String()),
+			Default(basetypes.ContractOperatorType_DefaultContractOperatorType.String()),
 	}
 }
 

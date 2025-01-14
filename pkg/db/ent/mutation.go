@@ -1215,25 +1215,25 @@ func (m *AccountMutation) ResetEdge(name string) error {
 // ContractMutation represents an operation that mutates the Contract nodes in the graph.
 type ContractMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *uint32
-	created_at    *uint32
-	addcreated_at *int32
-	updated_at    *uint32
-	addupdated_at *int32
-	deleted_at    *uint32
-	adddeleted_at *int32
-	ent_id        *uuid.UUID
-	good_id       *uuid.UUID
-	pledge_id     *uuid.UUID
-	account_id    *uuid.UUID
-	backup        *bool
-	contract_type *string
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Contract, error)
-	predicates    []predicate.Contract
+	op                     Op
+	typ                    string
+	id                     *uint32
+	created_at             *uint32
+	addcreated_at          *int32
+	updated_at             *uint32
+	addupdated_at          *int32
+	deleted_at             *uint32
+	adddeleted_at          *int32
+	ent_id                 *uuid.UUID
+	good_id                *uuid.UUID
+	delegated_staking_id   *uuid.UUID
+	account_id             *uuid.UUID
+	backup                 *bool
+	contract_operator_type *string
+	clearedFields          map[string]struct{}
+	done                   bool
+	oldValue               func(context.Context) (*Contract, error)
+	predicates             []predicate.Contract
 }
 
 var _ ent.Mutation = (*ContractMutation)(nil)
@@ -1593,53 +1593,53 @@ func (m *ContractMutation) ResetGoodID() {
 	delete(m.clearedFields, contract.FieldGoodID)
 }
 
-// SetPledgeID sets the "pledge_id" field.
-func (m *ContractMutation) SetPledgeID(u uuid.UUID) {
-	m.pledge_id = &u
+// SetDelegatedStakingID sets the "delegated_staking_id" field.
+func (m *ContractMutation) SetDelegatedStakingID(u uuid.UUID) {
+	m.delegated_staking_id = &u
 }
 
-// PledgeID returns the value of the "pledge_id" field in the mutation.
-func (m *ContractMutation) PledgeID() (r uuid.UUID, exists bool) {
-	v := m.pledge_id
+// DelegatedStakingID returns the value of the "delegated_staking_id" field in the mutation.
+func (m *ContractMutation) DelegatedStakingID() (r uuid.UUID, exists bool) {
+	v := m.delegated_staking_id
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldPledgeID returns the old "pledge_id" field's value of the Contract entity.
+// OldDelegatedStakingID returns the old "delegated_staking_id" field's value of the Contract entity.
 // If the Contract object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ContractMutation) OldPledgeID(ctx context.Context) (v uuid.UUID, err error) {
+func (m *ContractMutation) OldDelegatedStakingID(ctx context.Context) (v uuid.UUID, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPledgeID is only allowed on UpdateOne operations")
+		return v, errors.New("OldDelegatedStakingID is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPledgeID requires an ID field in the mutation")
+		return v, errors.New("OldDelegatedStakingID requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPledgeID: %w", err)
+		return v, fmt.Errorf("querying old value for OldDelegatedStakingID: %w", err)
 	}
-	return oldValue.PledgeID, nil
+	return oldValue.DelegatedStakingID, nil
 }
 
-// ClearPledgeID clears the value of the "pledge_id" field.
-func (m *ContractMutation) ClearPledgeID() {
-	m.pledge_id = nil
-	m.clearedFields[contract.FieldPledgeID] = struct{}{}
+// ClearDelegatedStakingID clears the value of the "delegated_staking_id" field.
+func (m *ContractMutation) ClearDelegatedStakingID() {
+	m.delegated_staking_id = nil
+	m.clearedFields[contract.FieldDelegatedStakingID] = struct{}{}
 }
 
-// PledgeIDCleared returns if the "pledge_id" field was cleared in this mutation.
-func (m *ContractMutation) PledgeIDCleared() bool {
-	_, ok := m.clearedFields[contract.FieldPledgeID]
+// DelegatedStakingIDCleared returns if the "delegated_staking_id" field was cleared in this mutation.
+func (m *ContractMutation) DelegatedStakingIDCleared() bool {
+	_, ok := m.clearedFields[contract.FieldDelegatedStakingID]
 	return ok
 }
 
-// ResetPledgeID resets all changes to the "pledge_id" field.
-func (m *ContractMutation) ResetPledgeID() {
-	m.pledge_id = nil
-	delete(m.clearedFields, contract.FieldPledgeID)
+// ResetDelegatedStakingID resets all changes to the "delegated_staking_id" field.
+func (m *ContractMutation) ResetDelegatedStakingID() {
+	m.delegated_staking_id = nil
+	delete(m.clearedFields, contract.FieldDelegatedStakingID)
 }
 
 // SetAccountID sets the "account_id" field.
@@ -1740,53 +1740,53 @@ func (m *ContractMutation) ResetBackup() {
 	delete(m.clearedFields, contract.FieldBackup)
 }
 
-// SetContractType sets the "contract_type" field.
-func (m *ContractMutation) SetContractType(s string) {
-	m.contract_type = &s
+// SetContractOperatorType sets the "contract_operator_type" field.
+func (m *ContractMutation) SetContractOperatorType(s string) {
+	m.contract_operator_type = &s
 }
 
-// ContractType returns the value of the "contract_type" field in the mutation.
-func (m *ContractMutation) ContractType() (r string, exists bool) {
-	v := m.contract_type
+// ContractOperatorType returns the value of the "contract_operator_type" field in the mutation.
+func (m *ContractMutation) ContractOperatorType() (r string, exists bool) {
+	v := m.contract_operator_type
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldContractType returns the old "contract_type" field's value of the Contract entity.
+// OldContractOperatorType returns the old "contract_operator_type" field's value of the Contract entity.
 // If the Contract object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ContractMutation) OldContractType(ctx context.Context) (v string, err error) {
+func (m *ContractMutation) OldContractOperatorType(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldContractType is only allowed on UpdateOne operations")
+		return v, errors.New("OldContractOperatorType is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldContractType requires an ID field in the mutation")
+		return v, errors.New("OldContractOperatorType requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldContractType: %w", err)
+		return v, fmt.Errorf("querying old value for OldContractOperatorType: %w", err)
 	}
-	return oldValue.ContractType, nil
+	return oldValue.ContractOperatorType, nil
 }
 
-// ClearContractType clears the value of the "contract_type" field.
-func (m *ContractMutation) ClearContractType() {
-	m.contract_type = nil
-	m.clearedFields[contract.FieldContractType] = struct{}{}
+// ClearContractOperatorType clears the value of the "contract_operator_type" field.
+func (m *ContractMutation) ClearContractOperatorType() {
+	m.contract_operator_type = nil
+	m.clearedFields[contract.FieldContractOperatorType] = struct{}{}
 }
 
-// ContractTypeCleared returns if the "contract_type" field was cleared in this mutation.
-func (m *ContractMutation) ContractTypeCleared() bool {
-	_, ok := m.clearedFields[contract.FieldContractType]
+// ContractOperatorTypeCleared returns if the "contract_operator_type" field was cleared in this mutation.
+func (m *ContractMutation) ContractOperatorTypeCleared() bool {
+	_, ok := m.clearedFields[contract.FieldContractOperatorType]
 	return ok
 }
 
-// ResetContractType resets all changes to the "contract_type" field.
-func (m *ContractMutation) ResetContractType() {
-	m.contract_type = nil
-	delete(m.clearedFields, contract.FieldContractType)
+// ResetContractOperatorType resets all changes to the "contract_operator_type" field.
+func (m *ContractMutation) ResetContractOperatorType() {
+	m.contract_operator_type = nil
+	delete(m.clearedFields, contract.FieldContractOperatorType)
 }
 
 // Where appends a list predicates to the ContractMutation builder.
@@ -1824,8 +1824,8 @@ func (m *ContractMutation) Fields() []string {
 	if m.good_id != nil {
 		fields = append(fields, contract.FieldGoodID)
 	}
-	if m.pledge_id != nil {
-		fields = append(fields, contract.FieldPledgeID)
+	if m.delegated_staking_id != nil {
+		fields = append(fields, contract.FieldDelegatedStakingID)
 	}
 	if m.account_id != nil {
 		fields = append(fields, contract.FieldAccountID)
@@ -1833,8 +1833,8 @@ func (m *ContractMutation) Fields() []string {
 	if m.backup != nil {
 		fields = append(fields, contract.FieldBackup)
 	}
-	if m.contract_type != nil {
-		fields = append(fields, contract.FieldContractType)
+	if m.contract_operator_type != nil {
+		fields = append(fields, contract.FieldContractOperatorType)
 	}
 	return fields
 }
@@ -1854,14 +1854,14 @@ func (m *ContractMutation) Field(name string) (ent.Value, bool) {
 		return m.EntID()
 	case contract.FieldGoodID:
 		return m.GoodID()
-	case contract.FieldPledgeID:
-		return m.PledgeID()
+	case contract.FieldDelegatedStakingID:
+		return m.DelegatedStakingID()
 	case contract.FieldAccountID:
 		return m.AccountID()
 	case contract.FieldBackup:
 		return m.Backup()
-	case contract.FieldContractType:
-		return m.ContractType()
+	case contract.FieldContractOperatorType:
+		return m.ContractOperatorType()
 	}
 	return nil, false
 }
@@ -1881,14 +1881,14 @@ func (m *ContractMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldEntID(ctx)
 	case contract.FieldGoodID:
 		return m.OldGoodID(ctx)
-	case contract.FieldPledgeID:
-		return m.OldPledgeID(ctx)
+	case contract.FieldDelegatedStakingID:
+		return m.OldDelegatedStakingID(ctx)
 	case contract.FieldAccountID:
 		return m.OldAccountID(ctx)
 	case contract.FieldBackup:
 		return m.OldBackup(ctx)
-	case contract.FieldContractType:
-		return m.OldContractType(ctx)
+	case contract.FieldContractOperatorType:
+		return m.OldContractOperatorType(ctx)
 	}
 	return nil, fmt.Errorf("unknown Contract field %s", name)
 }
@@ -1933,12 +1933,12 @@ func (m *ContractMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetGoodID(v)
 		return nil
-	case contract.FieldPledgeID:
+	case contract.FieldDelegatedStakingID:
 		v, ok := value.(uuid.UUID)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetPledgeID(v)
+		m.SetDelegatedStakingID(v)
 		return nil
 	case contract.FieldAccountID:
 		v, ok := value.(uuid.UUID)
@@ -1954,12 +1954,12 @@ func (m *ContractMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetBackup(v)
 		return nil
-	case contract.FieldContractType:
+	case contract.FieldContractOperatorType:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetContractType(v)
+		m.SetContractOperatorType(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)
@@ -2033,8 +2033,8 @@ func (m *ContractMutation) ClearedFields() []string {
 	if m.FieldCleared(contract.FieldGoodID) {
 		fields = append(fields, contract.FieldGoodID)
 	}
-	if m.FieldCleared(contract.FieldPledgeID) {
-		fields = append(fields, contract.FieldPledgeID)
+	if m.FieldCleared(contract.FieldDelegatedStakingID) {
+		fields = append(fields, contract.FieldDelegatedStakingID)
 	}
 	if m.FieldCleared(contract.FieldAccountID) {
 		fields = append(fields, contract.FieldAccountID)
@@ -2042,8 +2042,8 @@ func (m *ContractMutation) ClearedFields() []string {
 	if m.FieldCleared(contract.FieldBackup) {
 		fields = append(fields, contract.FieldBackup)
 	}
-	if m.FieldCleared(contract.FieldContractType) {
-		fields = append(fields, contract.FieldContractType)
+	if m.FieldCleared(contract.FieldContractOperatorType) {
+		fields = append(fields, contract.FieldContractOperatorType)
 	}
 	return fields
 }
@@ -2062,8 +2062,8 @@ func (m *ContractMutation) ClearField(name string) error {
 	case contract.FieldGoodID:
 		m.ClearGoodID()
 		return nil
-	case contract.FieldPledgeID:
-		m.ClearPledgeID()
+	case contract.FieldDelegatedStakingID:
+		m.ClearDelegatedStakingID()
 		return nil
 	case contract.FieldAccountID:
 		m.ClearAccountID()
@@ -2071,8 +2071,8 @@ func (m *ContractMutation) ClearField(name string) error {
 	case contract.FieldBackup:
 		m.ClearBackup()
 		return nil
-	case contract.FieldContractType:
-		m.ClearContractType()
+	case contract.FieldContractOperatorType:
+		m.ClearContractOperatorType()
 		return nil
 	}
 	return fmt.Errorf("unknown Contract nullable field %s", name)
@@ -2097,8 +2097,8 @@ func (m *ContractMutation) ResetField(name string) error {
 	case contract.FieldGoodID:
 		m.ResetGoodID()
 		return nil
-	case contract.FieldPledgeID:
-		m.ResetPledgeID()
+	case contract.FieldDelegatedStakingID:
+		m.ResetDelegatedStakingID()
 		return nil
 	case contract.FieldAccountID:
 		m.ResetAccountID()
@@ -2106,8 +2106,8 @@ func (m *ContractMutation) ResetField(name string) error {
 	case contract.FieldBackup:
 		m.ResetBackup()
 		return nil
-	case contract.FieldContractType:
-		m.ResetContractType()
+	case contract.FieldContractOperatorType:
+		m.ResetContractOperatorType()
 		return nil
 	}
 	return fmt.Errorf("unknown Contract field %s", name)

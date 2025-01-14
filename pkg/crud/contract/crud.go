@@ -14,13 +14,13 @@ import (
 )
 
 type Req struct {
-	EntID        *uuid.UUID
-	GoodID       *uuid.UUID
-	PledgeID     *uuid.UUID
-	AccountID    *uuid.UUID
-	Backup       *bool
-	ContractType *basetypes.ContractType
-	DeletedAt    *uint32
+	EntID                *uuid.UUID
+	GoodID               *uuid.UUID
+	DelegatedStakingID   *uuid.UUID
+	AccountID            *uuid.UUID
+	Backup               *bool
+	ContractOperatorType *basetypes.ContractOperatorType
+	DeletedAt            *uint32
 }
 
 func CreateSet(c *ent.ContractCreate, req *Req) *ent.ContractCreate {
@@ -30,8 +30,8 @@ func CreateSet(c *ent.ContractCreate, req *Req) *ent.ContractCreate {
 	if req.GoodID != nil {
 		c.SetGoodID(*req.GoodID)
 	}
-	if req.PledgeID != nil {
-		c.SetPledgeID(*req.PledgeID)
+	if req.DelegatedStakingID != nil {
+		c.SetDelegatedStakingID(*req.DelegatedStakingID)
 	}
 	if req.AccountID != nil {
 		c.SetAccountID(*req.AccountID)
@@ -39,8 +39,8 @@ func CreateSet(c *ent.ContractCreate, req *Req) *ent.ContractCreate {
 	if req.Backup != nil {
 		c.SetBackup(*req.Backup)
 	}
-	if req.ContractType != nil {
-		c.SetContractType(req.ContractType.String())
+	if req.ContractOperatorType != nil {
+		c.SetContractOperatorType(req.ContractOperatorType.String())
 	}
 	return c
 }
@@ -60,12 +60,12 @@ func UpdateSet(u *ent.ContractUpdateOne, req *Req) *ent.ContractUpdateOne {
 
 type Conds struct {
 	accountcrud.Conds
-	GoodID       *cruder.Cond
-	AccountID    *cruder.Cond
-	Backup       *cruder.Cond
-	ContractType *cruder.Cond
-	PledgeID     *cruder.Cond
-	PledgeIDs    *cruder.Cond
+	GoodID               *cruder.Cond
+	AccountID            *cruder.Cond
+	Backup               *cruder.Cond
+	ContractOperatorType *cruder.Cond
+	DelegatedStakingID   *cruder.Cond
+	DelegatedStakingIDs  *cruder.Cond
 }
 
 //nolint:funlen,gocyclo
@@ -130,38 +130,38 @@ func SetQueryConds(q *ent.ContractQuery, conds *Conds) (*ent.ContractQuery, erro
 			return nil, fmt.Errorf("invalid contract field")
 		}
 	}
-	if conds.ContractType != nil {
-		contractType, ok := conds.ContractType.Val.(basetypes.ContractType)
+	if conds.ContractOperatorType != nil {
+		contractOperatorType, ok := conds.ContractOperatorType.Val.(basetypes.ContractOperatorType)
 		if !ok {
-			return nil, fmt.Errorf("invalid account contracttype")
+			return nil, fmt.Errorf("invalid account ContractOperatorType")
 		}
-		switch conds.ContractType.Op {
+		switch conds.ContractOperatorType.Op {
 		case cruder.EQ:
-			q.Where(entcontract.ContractType(contractType.String()))
+			q.Where(entcontract.ContractOperatorType(contractOperatorType.String()))
 		default:
 			return nil, fmt.Errorf("invalid account field")
 		}
 	}
-	if conds.PledgeID != nil {
-		id, ok := conds.PledgeID.Val.(uuid.UUID)
+	if conds.DelegatedStakingID != nil {
+		id, ok := conds.DelegatedStakingID.Val.(uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid contract pledgeid")
+			return nil, fmt.Errorf("invalid contract DelegatedStakingID")
 		}
-		switch conds.PledgeID.Op {
+		switch conds.DelegatedStakingID.Op {
 		case cruder.EQ:
-			q.Where(entcontract.PledgeID(id))
+			q.Where(entcontract.DelegatedStakingID(id))
 		default:
 			return nil, fmt.Errorf("invalid contract field")
 		}
 	}
-	if conds.PledgeIDs != nil {
-		ids, ok := conds.PledgeIDs.Val.([]uuid.UUID)
+	if conds.DelegatedStakingIDs != nil {
+		ids, ok := conds.DelegatedStakingIDs.Val.([]uuid.UUID)
 		if !ok {
-			return nil, fmt.Errorf("invalid account pledgeids")
+			return nil, fmt.Errorf("invalid account DelegatedStakingIDs")
 		}
-		switch conds.PledgeIDs.Op {
+		switch conds.DelegatedStakingIDs.Op {
 		case cruder.IN:
-			q.Where(entcontract.PledgeIDIn(ids...))
+			q.Where(entcontract.DelegatedStakingIDIn(ids...))
 		default:
 			return nil, fmt.Errorf("invalid account field")
 		}

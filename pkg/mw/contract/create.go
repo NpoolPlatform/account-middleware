@@ -69,12 +69,12 @@ func (h *createHandler) constructCreatepledgeSQL() {
 	}
 	_sql += fmt.Sprintf("%v'%v' as good_id", comma, *h.GoodID)
 	comma = ", "
-	_sql += fmt.Sprintf("%v'%v' as pledge_id", comma, *h.PledgeID)
+	_sql += fmt.Sprintf("%v'%v' as delegated_staking_id", comma, *h.DelegatedStakingID)
 	_sql += fmt.Sprintf("%v'%v' as account_id", comma, *h.AccountID)
 	if h.Backup != nil {
 		_sql += fmt.Sprintf("%v%v as backup", comma, *h.Backup)
 	}
-	_sql += fmt.Sprintf("%v'%v' as contract_type", comma, *h.ContractType)
+	_sql += fmt.Sprintf("%v'%v' as contract_operator_type", comma, *h.ContractOperatorType)
 	_sql += fmt.Sprintf("%v%v as created_at", comma, now)
 	_sql += fmt.Sprintf("%v%v as updated_at", comma, now)
 	_sql += fmt.Sprintf("%v0 as deleted_at", comma)

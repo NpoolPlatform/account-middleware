@@ -58,15 +58,15 @@ var schemaGraph = func() *sqlgraph.Schema {
 		},
 		Type: "Contract",
 		Fields: map[string]*sqlgraph.FieldSpec{
-			contract.FieldCreatedAt:    {Type: field.TypeUint32, Column: contract.FieldCreatedAt},
-			contract.FieldUpdatedAt:    {Type: field.TypeUint32, Column: contract.FieldUpdatedAt},
-			contract.FieldDeletedAt:    {Type: field.TypeUint32, Column: contract.FieldDeletedAt},
-			contract.FieldEntID:        {Type: field.TypeUUID, Column: contract.FieldEntID},
-			contract.FieldGoodID:       {Type: field.TypeUUID, Column: contract.FieldGoodID},
-			contract.FieldPledgeID:     {Type: field.TypeUUID, Column: contract.FieldPledgeID},
-			contract.FieldAccountID:    {Type: field.TypeUUID, Column: contract.FieldAccountID},
-			contract.FieldBackup:       {Type: field.TypeBool, Column: contract.FieldBackup},
-			contract.FieldContractType: {Type: field.TypeString, Column: contract.FieldContractType},
+			contract.FieldCreatedAt:            {Type: field.TypeUint32, Column: contract.FieldCreatedAt},
+			contract.FieldUpdatedAt:            {Type: field.TypeUint32, Column: contract.FieldUpdatedAt},
+			contract.FieldDeletedAt:            {Type: field.TypeUint32, Column: contract.FieldDeletedAt},
+			contract.FieldEntID:                {Type: field.TypeUUID, Column: contract.FieldEntID},
+			contract.FieldGoodID:               {Type: field.TypeUUID, Column: contract.FieldGoodID},
+			contract.FieldDelegatedStakingID:   {Type: field.TypeUUID, Column: contract.FieldDelegatedStakingID},
+			contract.FieldAccountID:            {Type: field.TypeUUID, Column: contract.FieldAccountID},
+			contract.FieldBackup:               {Type: field.TypeBool, Column: contract.FieldBackup},
+			contract.FieldContractOperatorType: {Type: field.TypeString, Column: contract.FieldContractOperatorType},
 		},
 	}
 	graph.Nodes[2] = &sqlgraph.Node{
@@ -394,9 +394,9 @@ func (f *ContractFilter) WhereGoodID(p entql.ValueP) {
 	f.Where(p.Field(contract.FieldGoodID))
 }
 
-// WherePledgeID applies the entql [16]byte predicate on the pledge_id field.
-func (f *ContractFilter) WherePledgeID(p entql.ValueP) {
-	f.Where(p.Field(contract.FieldPledgeID))
+// WhereDelegatedStakingID applies the entql [16]byte predicate on the delegated_staking_id field.
+func (f *ContractFilter) WhereDelegatedStakingID(p entql.ValueP) {
+	f.Where(p.Field(contract.FieldDelegatedStakingID))
 }
 
 // WhereAccountID applies the entql [16]byte predicate on the account_id field.
@@ -409,9 +409,9 @@ func (f *ContractFilter) WhereBackup(p entql.BoolP) {
 	f.Where(p.Field(contract.FieldBackup))
 }
 
-// WhereContractType applies the entql string predicate on the contract_type field.
-func (f *ContractFilter) WhereContractType(p entql.StringP) {
-	f.Where(p.Field(contract.FieldContractType))
+// WhereContractOperatorType applies the entql string predicate on the contract_operator_type field.
+func (f *ContractFilter) WhereContractOperatorType(p entql.StringP) {
+	f.Where(p.Field(contract.FieldContractOperatorType))
 }
 
 // addPredicate implements the predicateAdder interface.

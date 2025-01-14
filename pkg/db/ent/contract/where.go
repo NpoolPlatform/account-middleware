@@ -114,10 +114,10 @@ func GoodID(v uuid.UUID) predicate.Contract {
 	})
 }
 
-// PledgeID applies equality check predicate on the "pledge_id" field. It's identical to PledgeIDEQ.
-func PledgeID(v uuid.UUID) predicate.Contract {
+// DelegatedStakingID applies equality check predicate on the "delegated_staking_id" field. It's identical to DelegatedStakingIDEQ.
+func DelegatedStakingID(v uuid.UUID) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPledgeID), v))
+		s.Where(sql.EQ(s.C(FieldDelegatedStakingID), v))
 	})
 }
 
@@ -135,10 +135,10 @@ func Backup(v bool) predicate.Contract {
 	})
 }
 
-// ContractType applies equality check predicate on the "contract_type" field. It's identical to ContractTypeEQ.
-func ContractType(v string) predicate.Contract {
+// ContractOperatorType applies equality check predicate on the "contract_operator_type" field. It's identical to ContractOperatorTypeEQ.
+func ContractOperatorType(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldContractType), v))
+		s.Where(sql.EQ(s.C(FieldContractOperatorType), v))
 	})
 }
 
@@ -476,81 +476,81 @@ func GoodIDNotNil() predicate.Contract {
 	})
 }
 
-// PledgeIDEQ applies the EQ predicate on the "pledge_id" field.
-func PledgeIDEQ(v uuid.UUID) predicate.Contract {
+// DelegatedStakingIDEQ applies the EQ predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDEQ(v uuid.UUID) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldPledgeID), v))
+		s.Where(sql.EQ(s.C(FieldDelegatedStakingID), v))
 	})
 }
 
-// PledgeIDNEQ applies the NEQ predicate on the "pledge_id" field.
-func PledgeIDNEQ(v uuid.UUID) predicate.Contract {
+// DelegatedStakingIDNEQ applies the NEQ predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDNEQ(v uuid.UUID) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldPledgeID), v))
+		s.Where(sql.NEQ(s.C(FieldDelegatedStakingID), v))
 	})
 }
 
-// PledgeIDIn applies the In predicate on the "pledge_id" field.
-func PledgeIDIn(vs ...uuid.UUID) predicate.Contract {
+// DelegatedStakingIDIn applies the In predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDIn(vs ...uuid.UUID) predicate.Contract {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldPledgeID), v...))
+		s.Where(sql.In(s.C(FieldDelegatedStakingID), v...))
 	})
 }
 
-// PledgeIDNotIn applies the NotIn predicate on the "pledge_id" field.
-func PledgeIDNotIn(vs ...uuid.UUID) predicate.Contract {
+// DelegatedStakingIDNotIn applies the NotIn predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDNotIn(vs ...uuid.UUID) predicate.Contract {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldPledgeID), v...))
+		s.Where(sql.NotIn(s.C(FieldDelegatedStakingID), v...))
 	})
 }
 
-// PledgeIDGT applies the GT predicate on the "pledge_id" field.
-func PledgeIDGT(v uuid.UUID) predicate.Contract {
+// DelegatedStakingIDGT applies the GT predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDGT(v uuid.UUID) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldPledgeID), v))
+		s.Where(sql.GT(s.C(FieldDelegatedStakingID), v))
 	})
 }
 
-// PledgeIDGTE applies the GTE predicate on the "pledge_id" field.
-func PledgeIDGTE(v uuid.UUID) predicate.Contract {
+// DelegatedStakingIDGTE applies the GTE predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDGTE(v uuid.UUID) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldPledgeID), v))
+		s.Where(sql.GTE(s.C(FieldDelegatedStakingID), v))
 	})
 }
 
-// PledgeIDLT applies the LT predicate on the "pledge_id" field.
-func PledgeIDLT(v uuid.UUID) predicate.Contract {
+// DelegatedStakingIDLT applies the LT predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDLT(v uuid.UUID) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldPledgeID), v))
+		s.Where(sql.LT(s.C(FieldDelegatedStakingID), v))
 	})
 }
 
-// PledgeIDLTE applies the LTE predicate on the "pledge_id" field.
-func PledgeIDLTE(v uuid.UUID) predicate.Contract {
+// DelegatedStakingIDLTE applies the LTE predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDLTE(v uuid.UUID) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldPledgeID), v))
+		s.Where(sql.LTE(s.C(FieldDelegatedStakingID), v))
 	})
 }
 
-// PledgeIDIsNil applies the IsNil predicate on the "pledge_id" field.
-func PledgeIDIsNil() predicate.Contract {
+// DelegatedStakingIDIsNil applies the IsNil predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDIsNil() predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldPledgeID)))
+		s.Where(sql.IsNull(s.C(FieldDelegatedStakingID)))
 	})
 }
 
-// PledgeIDNotNil applies the NotNil predicate on the "pledge_id" field.
-func PledgeIDNotNil() predicate.Contract {
+// DelegatedStakingIDNotNil applies the NotNil predicate on the "delegated_staking_id" field.
+func DelegatedStakingIDNotNil() predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldPledgeID)))
+		s.Where(sql.NotNull(s.C(FieldDelegatedStakingID)))
 	})
 }
 
@@ -660,116 +660,116 @@ func BackupNotNil() predicate.Contract {
 	})
 }
 
-// ContractTypeEQ applies the EQ predicate on the "contract_type" field.
-func ContractTypeEQ(v string) predicate.Contract {
+// ContractOperatorTypeEQ applies the EQ predicate on the "contract_operator_type" field.
+func ContractOperatorTypeEQ(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldContractType), v))
+		s.Where(sql.EQ(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeNEQ applies the NEQ predicate on the "contract_type" field.
-func ContractTypeNEQ(v string) predicate.Contract {
+// ContractOperatorTypeNEQ applies the NEQ predicate on the "contract_operator_type" field.
+func ContractOperatorTypeNEQ(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldContractType), v))
+		s.Where(sql.NEQ(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeIn applies the In predicate on the "contract_type" field.
-func ContractTypeIn(vs ...string) predicate.Contract {
+// ContractOperatorTypeIn applies the In predicate on the "contract_operator_type" field.
+func ContractOperatorTypeIn(vs ...string) predicate.Contract {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.In(s.C(FieldContractType), v...))
+		s.Where(sql.In(s.C(FieldContractOperatorType), v...))
 	})
 }
 
-// ContractTypeNotIn applies the NotIn predicate on the "contract_type" field.
-func ContractTypeNotIn(vs ...string) predicate.Contract {
+// ContractOperatorTypeNotIn applies the NotIn predicate on the "contract_operator_type" field.
+func ContractOperatorTypeNotIn(vs ...string) predicate.Contract {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
 	}
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotIn(s.C(FieldContractType), v...))
+		s.Where(sql.NotIn(s.C(FieldContractOperatorType), v...))
 	})
 }
 
-// ContractTypeGT applies the GT predicate on the "contract_type" field.
-func ContractTypeGT(v string) predicate.Contract {
+// ContractOperatorTypeGT applies the GT predicate on the "contract_operator_type" field.
+func ContractOperatorTypeGT(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldContractType), v))
+		s.Where(sql.GT(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeGTE applies the GTE predicate on the "contract_type" field.
-func ContractTypeGTE(v string) predicate.Contract {
+// ContractOperatorTypeGTE applies the GTE predicate on the "contract_operator_type" field.
+func ContractOperatorTypeGTE(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldContractType), v))
+		s.Where(sql.GTE(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeLT applies the LT predicate on the "contract_type" field.
-func ContractTypeLT(v string) predicate.Contract {
+// ContractOperatorTypeLT applies the LT predicate on the "contract_operator_type" field.
+func ContractOperatorTypeLT(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldContractType), v))
+		s.Where(sql.LT(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeLTE applies the LTE predicate on the "contract_type" field.
-func ContractTypeLTE(v string) predicate.Contract {
+// ContractOperatorTypeLTE applies the LTE predicate on the "contract_operator_type" field.
+func ContractOperatorTypeLTE(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldContractType), v))
+		s.Where(sql.LTE(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeContains applies the Contains predicate on the "contract_type" field.
-func ContractTypeContains(v string) predicate.Contract {
+// ContractOperatorTypeContains applies the Contains predicate on the "contract_operator_type" field.
+func ContractOperatorTypeContains(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldContractType), v))
+		s.Where(sql.Contains(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeHasPrefix applies the HasPrefix predicate on the "contract_type" field.
-func ContractTypeHasPrefix(v string) predicate.Contract {
+// ContractOperatorTypeHasPrefix applies the HasPrefix predicate on the "contract_operator_type" field.
+func ContractOperatorTypeHasPrefix(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldContractType), v))
+		s.Where(sql.HasPrefix(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeHasSuffix applies the HasSuffix predicate on the "contract_type" field.
-func ContractTypeHasSuffix(v string) predicate.Contract {
+// ContractOperatorTypeHasSuffix applies the HasSuffix predicate on the "contract_operator_type" field.
+func ContractOperatorTypeHasSuffix(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldContractType), v))
+		s.Where(sql.HasSuffix(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeIsNil applies the IsNil predicate on the "contract_type" field.
-func ContractTypeIsNil() predicate.Contract {
+// ContractOperatorTypeIsNil applies the IsNil predicate on the "contract_operator_type" field.
+func ContractOperatorTypeIsNil() predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldContractType)))
+		s.Where(sql.IsNull(s.C(FieldContractOperatorType)))
 	})
 }
 
-// ContractTypeNotNil applies the NotNil predicate on the "contract_type" field.
-func ContractTypeNotNil() predicate.Contract {
+// ContractOperatorTypeNotNil applies the NotNil predicate on the "contract_operator_type" field.
+func ContractOperatorTypeNotNil() predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldContractType)))
+		s.Where(sql.NotNull(s.C(FieldContractOperatorType)))
 	})
 }
 
-// ContractTypeEqualFold applies the EqualFold predicate on the "contract_type" field.
-func ContractTypeEqualFold(v string) predicate.Contract {
+// ContractOperatorTypeEqualFold applies the EqualFold predicate on the "contract_operator_type" field.
+func ContractOperatorTypeEqualFold(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldContractType), v))
+		s.Where(sql.EqualFold(s.C(FieldContractOperatorType), v))
 	})
 }
 
-// ContractTypeContainsFold applies the ContainsFold predicate on the "contract_type" field.
-func ContractTypeContainsFold(v string) predicate.Contract {
+// ContractOperatorTypeContainsFold applies the ContainsFold predicate on the "contract_operator_type" field.
+func ContractOperatorTypeContainsFold(v string) predicate.Contract {
 	return predicate.Contract(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldContractType), v))
+		s.Where(sql.ContainsFold(s.C(FieldContractOperatorType), v))
 	})
 }
 
