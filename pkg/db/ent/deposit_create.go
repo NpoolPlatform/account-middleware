@@ -491,6 +491,7 @@ func (dc *DepositCreate) createSpec() (*Deposit, *sqlgraph.CreateSpec) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (dc *DepositCreate) OnConflict(opts ...sql.ConflictOption) *DepositUpsertOne {
 	dc.conflict = opts
 	return &DepositUpsertOne{
@@ -504,6 +505,7 @@ func (dc *DepositCreate) OnConflict(opts ...sql.ConflictOption) *DepositUpsertOn
 //	client.Deposit.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (dc *DepositCreate) OnConflictColumns(columns ...string) *DepositUpsertOne {
 	dc.conflict = append(dc.conflict, sql.ConflictColumns(columns...))
 	return &DepositUpsertOne{
@@ -733,6 +735,7 @@ func (u *DepositUpsert) ClearScannableAt() *DepositUpsert {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *DepositUpsertOne) UpdateNewValues() *DepositUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -746,9 +749,10 @@ func (u *DepositUpsertOne) UpdateNewValues() *DepositUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.Deposit.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.Deposit.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *DepositUpsertOne) Ignore() *DepositUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -1135,6 +1139,7 @@ func (dcb *DepositCreateBulk) ExecX(ctx context.Context) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (dcb *DepositCreateBulk) OnConflict(opts ...sql.ConflictOption) *DepositUpsertBulk {
 	dcb.conflict = opts
 	return &DepositUpsertBulk{
@@ -1148,6 +1153,7 @@ func (dcb *DepositCreateBulk) OnConflict(opts ...sql.ConflictOption) *DepositUps
 //	client.Deposit.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (dcb *DepositCreateBulk) OnConflictColumns(columns ...string) *DepositUpsertBulk {
 	dcb.conflict = append(dcb.conflict, sql.ConflictColumns(columns...))
 	return &DepositUpsertBulk{
@@ -1172,6 +1178,7 @@ type DepositUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *DepositUpsertBulk) UpdateNewValues() *DepositUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -1191,6 +1198,7 @@ func (u *DepositUpsertBulk) UpdateNewValues() *DepositUpsertBulk {
 //	client.Deposit.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *DepositUpsertBulk) Ignore() *DepositUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

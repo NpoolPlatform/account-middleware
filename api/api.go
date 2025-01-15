@@ -4,6 +4,7 @@ import (
 	"context"
 
 	account1 "github.com/NpoolPlatform/account-middleware/api/account"
+	"github.com/NpoolPlatform/account-middleware/api/contract"
 	"github.com/NpoolPlatform/account-middleware/api/deposit"
 	"github.com/NpoolPlatform/account-middleware/api/goodbenefit"
 	"github.com/NpoolPlatform/account-middleware/api/orderbenefit"
@@ -32,6 +33,7 @@ func Register(server grpc.ServiceRegistrar) {
 	user.Register(server)
 	orderbenefit.Register(server)
 	transfer.Register(server)
+	contract.Register(server)
 }
 
 func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) error {
@@ -48,6 +50,9 @@ func RegisterGateway(mux *runtime.ServeMux, endpoint string, opts []grpc.DialOpt
 		return err
 	}
 	if err := platform.RegisterGateway(mux, endpoint, opts); err != nil {
+		return err
+	}
+	if err := contract.RegisterGateway(mux, endpoint, opts); err != nil {
 		return err
 	}
 	return nil

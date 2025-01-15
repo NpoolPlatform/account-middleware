@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/contract"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
@@ -39,6 +40,7 @@ type OrderFunc func(*sql.Selector)
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
 		account.Table:      account.ValidColumn,
+		contract.Table:     contract.ValidColumn,
 		deposit.Table:      deposit.ValidColumn,
 		goodbenefit.Table:  goodbenefit.ValidColumn,
 		orderbenefit.Table: orderbenefit.ValidColumn,
@@ -95,6 +97,7 @@ type AggregateFunc func(*sql.Selector) string
 //	GroupBy(field1, field2).
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
+//
 func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.As(fn(s), end)

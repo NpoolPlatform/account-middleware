@@ -264,6 +264,7 @@ func (obq *OrderBenefitQuery) Clone() *OrderBenefitQuery {
 //		GroupBy(orderbenefit.FieldCreatedAt).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (obq *OrderBenefitQuery) GroupBy(field string, fields ...string) *OrderBenefitGroupBy {
 	grbuild := &OrderBenefitGroupBy{config: obq.config}
 	grbuild.fields = append([]string{field}, fields...)
@@ -290,6 +291,7 @@ func (obq *OrderBenefitQuery) GroupBy(field string, fields ...string) *OrderBene
 //	client.OrderBenefit.Query().
 //		Select(orderbenefit.FieldCreatedAt).
 //		Scan(ctx, &v)
+//
 func (obq *OrderBenefitQuery) Select(fields ...string) *OrderBenefitSelect {
 	obq.fields = append(obq.fields, fields...)
 	selbuild := &OrderBenefitSelect{OrderBenefitQuery: obq}

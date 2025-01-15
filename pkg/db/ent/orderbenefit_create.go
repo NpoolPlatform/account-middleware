@@ -438,6 +438,7 @@ func (obc *OrderBenefitCreate) createSpec() (*OrderBenefit, *sqlgraph.CreateSpec
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (obc *OrderBenefitCreate) OnConflict(opts ...sql.ConflictOption) *OrderBenefitUpsertOne {
 	obc.conflict = opts
 	return &OrderBenefitUpsertOne{
@@ -451,6 +452,7 @@ func (obc *OrderBenefitCreate) OnConflict(opts ...sql.ConflictOption) *OrderBene
 //	client.OrderBenefit.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (obc *OrderBenefitCreate) OnConflictColumns(columns ...string) *OrderBenefitUpsertOne {
 	obc.conflict = append(obc.conflict, sql.ConflictColumns(columns...))
 	return &OrderBenefitUpsertOne{
@@ -638,6 +640,7 @@ func (u *OrderBenefitUpsert) ClearOrderID() *OrderBenefitUpsert {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *OrderBenefitUpsertOne) UpdateNewValues() *OrderBenefitUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -651,9 +654,10 @@ func (u *OrderBenefitUpsertOne) UpdateNewValues() *OrderBenefitUpsertOne {
 // Ignore sets each column to itself in case of conflict.
 // Using this option is equivalent to using:
 //
-//	client.OrderBenefit.Create().
-//	    OnConflict(sql.ResolveWithIgnore()).
-//	    Exec(ctx)
+//  client.OrderBenefit.Create().
+//      OnConflict(sql.ResolveWithIgnore()).
+//      Exec(ctx)
+//
 func (u *OrderBenefitUpsertOne) Ignore() *OrderBenefitUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
@@ -991,6 +995,7 @@ func (obcb *OrderBenefitCreateBulk) ExecX(ctx context.Context) {
 //			SetCreatedAt(v+v).
 //		}).
 //		Exec(ctx)
+//
 func (obcb *OrderBenefitCreateBulk) OnConflict(opts ...sql.ConflictOption) *OrderBenefitUpsertBulk {
 	obcb.conflict = opts
 	return &OrderBenefitUpsertBulk{
@@ -1004,6 +1009,7 @@ func (obcb *OrderBenefitCreateBulk) OnConflict(opts ...sql.ConflictOption) *Orde
 //	client.OrderBenefit.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
+//
 func (obcb *OrderBenefitCreateBulk) OnConflictColumns(columns ...string) *OrderBenefitUpsertBulk {
 	obcb.conflict = append(obcb.conflict, sql.ConflictColumns(columns...))
 	return &OrderBenefitUpsertBulk{
@@ -1028,6 +1034,7 @@ type OrderBenefitUpsertBulk struct {
 //			}),
 //		).
 //		Exec(ctx)
+//
 func (u *OrderBenefitUpsertBulk) UpdateNewValues() *OrderBenefitUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(s *sql.UpdateSet) {
@@ -1047,6 +1054,7 @@ func (u *OrderBenefitUpsertBulk) UpdateNewValues() *OrderBenefitUpsertBulk {
 //	client.OrderBenefit.Create().
 //		OnConflict(sql.ResolveWithIgnore()).
 //		Exec(ctx)
+//
 func (u *OrderBenefitUpsertBulk) Ignore() *OrderBenefitUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u

@@ -174,6 +174,30 @@ func (f AccountMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutatio
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.AccountMutation", m)
 }
 
+// The ContractQueryRuleFunc type is an adapter to allow the use of ordinary
+// functions as a query rule.
+type ContractQueryRuleFunc func(context.Context, *ent.ContractQuery) error
+
+// EvalQuery return f(ctx, q).
+func (f ContractQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.ContractQuery); ok {
+		return f(ctx, q)
+	}
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ContractQuery", q)
+}
+
+// The ContractMutationRuleFunc type is an adapter to allow the use of ordinary
+// functions as a mutation rule.
+type ContractMutationRuleFunc func(context.Context, *ent.ContractMutation) error
+
+// EvalMutation calls f(ctx, m).
+func (f ContractMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.ContractMutation); ok {
+		return f(ctx, m)
+	}
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ContractMutation", m)
+}
+
 // The DepositQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
 type DepositQueryRuleFunc func(context.Context, *ent.DepositQuery) error
@@ -379,6 +403,8 @@ func queryFilter(q ent.Query) (Filter, error) {
 	switch q := q.(type) {
 	case *ent.AccountQuery:
 		return q.Filter(), nil
+	case *ent.ContractQuery:
+		return q.Filter(), nil
 	case *ent.DepositQuery:
 		return q.Filter(), nil
 	case *ent.GoodBenefitQuery:
@@ -401,6 +427,8 @@ func queryFilter(q ent.Query) (Filter, error) {
 func mutationFilter(m ent.Mutation) (Filter, error) {
 	switch m := m.(type) {
 	case *ent.AccountMutation:
+		return m.Filter(), nil
+	case *ent.ContractMutation:
 		return m.Filter(), nil
 	case *ent.DepositMutation:
 		return m.Filter(), nil

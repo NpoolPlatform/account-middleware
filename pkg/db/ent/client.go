@@ -11,6 +11,7 @@ import (
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/migrate"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/contract"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
@@ -30,6 +31,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// Contract is the client for interacting with the Contract builders.
+	Contract *ContractClient
 	// Deposit is the client for interacting with the Deposit builders.
 	Deposit *DepositClient
 	// GoodBenefit is the client for interacting with the GoodBenefit builders.
@@ -58,6 +61,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Account = NewAccountClient(c.config)
+	c.Contract = NewContractClient(c.config)
 	c.Deposit = NewDepositClient(c.config)
 	c.GoodBenefit = NewGoodBenefitClient(c.config)
 	c.OrderBenefit = NewOrderBenefitClient(c.config)
@@ -99,6 +103,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:          ctx,
 		config:       cfg,
 		Account:      NewAccountClient(cfg),
+		Contract:     NewContractClient(cfg),
 		Deposit:      NewDepositClient(cfg),
 		GoodBenefit:  NewGoodBenefitClient(cfg),
 		OrderBenefit: NewOrderBenefitClient(cfg),
@@ -126,6 +131,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:          ctx,
 		config:       cfg,
 		Account:      NewAccountClient(cfg),
+		Contract:     NewContractClient(cfg),
 		Deposit:      NewDepositClient(cfg),
 		GoodBenefit:  NewGoodBenefitClient(cfg),
 		OrderBenefit: NewOrderBenefitClient(cfg),
@@ -142,6 +148,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 //		Account.
 //		Query().
 //		Count(ctx)
+//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
@@ -162,6 +169,7 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	c.Account.Use(hooks...)
+	c.Contract.Use(hooks...)
 	c.Deposit.Use(hooks...)
 	c.GoodBenefit.Use(hooks...)
 	c.OrderBenefit.Use(hooks...)
@@ -260,6 +268,97 @@ func (c *AccountClient) GetX(ctx context.Context, id uint32) *Account {
 func (c *AccountClient) Hooks() []Hook {
 	hooks := c.hooks.Account
 	return append(hooks[:len(hooks):len(hooks)], account.Hooks[:]...)
+}
+
+// ContractClient is a client for the Contract schema.
+type ContractClient struct {
+	config
+}
+
+// NewContractClient returns a client for the Contract from the given config.
+func NewContractClient(c config) *ContractClient {
+	return &ContractClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `contract.Hooks(f(g(h())))`.
+func (c *ContractClient) Use(hooks ...Hook) {
+	c.hooks.Contract = append(c.hooks.Contract, hooks...)
+}
+
+// Create returns a builder for creating a Contract entity.
+func (c *ContractClient) Create() *ContractCreate {
+	mutation := newContractMutation(c.config, OpCreate)
+	return &ContractCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Contract entities.
+func (c *ContractClient) CreateBulk(builders ...*ContractCreate) *ContractCreateBulk {
+	return &ContractCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Contract.
+func (c *ContractClient) Update() *ContractUpdate {
+	mutation := newContractMutation(c.config, OpUpdate)
+	return &ContractUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ContractClient) UpdateOne(co *Contract) *ContractUpdateOne {
+	mutation := newContractMutation(c.config, OpUpdateOne, withContract(co))
+	return &ContractUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ContractClient) UpdateOneID(id uint32) *ContractUpdateOne {
+	mutation := newContractMutation(c.config, OpUpdateOne, withContractID(id))
+	return &ContractUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Contract.
+func (c *ContractClient) Delete() *ContractDelete {
+	mutation := newContractMutation(c.config, OpDelete)
+	return &ContractDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ContractClient) DeleteOne(co *Contract) *ContractDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOne returns a builder for deleting the given entity by its id.
+func (c *ContractClient) DeleteOneID(id uint32) *ContractDeleteOne {
+	builder := c.Delete().Where(contract.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ContractDeleteOne{builder}
+}
+
+// Query returns a query builder for Contract.
+func (c *ContractClient) Query() *ContractQuery {
+	return &ContractQuery{
+		config: c.config,
+	}
+}
+
+// Get returns a Contract entity by its id.
+func (c *ContractClient) Get(ctx context.Context, id uint32) (*Contract, error) {
+	return c.Query().Where(contract.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ContractClient) GetX(ctx context.Context, id uint32) *Contract {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *ContractClient) Hooks() []Hook {
+	hooks := c.hooks.Contract
+	return append(hooks[:len(hooks):len(hooks)], contract.Hooks[:]...)
 }
 
 // DepositClient is a client for the Deposit schema.

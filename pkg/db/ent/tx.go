@@ -16,6 +16,8 @@ type Tx struct {
 	config
 	// Account is the client for interacting with the Account builders.
 	Account *AccountClient
+	// Contract is the client for interacting with the Contract builders.
+	Contract *ContractClient
 	// Deposit is the client for interacting with the Deposit builders.
 	Deposit *DepositClient
 	// GoodBenefit is the client for interacting with the GoodBenefit builders.
@@ -166,6 +168,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Account = NewAccountClient(tx.config)
+	tx.Contract = NewContractClient(tx.config)
 	tx.Deposit = NewDepositClient(tx.config)
 	tx.GoodBenefit = NewGoodBenefitClient(tx.config)
 	tx.OrderBenefit = NewOrderBenefitClient(tx.config)

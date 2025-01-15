@@ -6,6 +6,7 @@ import (
 	"context"
 
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/account"
+	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/contract"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/deposit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/goodbenefit"
 	"github.com/NpoolPlatform/account-middleware/pkg/db/ent/orderbenefit"
@@ -91,6 +92,60 @@ func init() {
 	accountDescBlocked := accountFields[7].Descriptor()
 	// account.DefaultBlocked holds the default value on creation for the blocked field.
 	account.DefaultBlocked = accountDescBlocked.Default.(bool)
+	contractMixin := schema.Contract{}.Mixin()
+	contract.Policy = privacy.NewPolicies(contractMixin[0], schema.Contract{})
+	contract.Hooks[0] = func(next ent.Mutator) ent.Mutator {
+		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+			if err := contract.Policy.EvalMutation(ctx, m); err != nil {
+				return nil, err
+			}
+			return next.Mutate(ctx, m)
+		})
+	}
+	contractMixinFields0 := contractMixin[0].Fields()
+	_ = contractMixinFields0
+	contractMixinFields1 := contractMixin[1].Fields()
+	_ = contractMixinFields1
+	contractFields := schema.Contract{}.Fields()
+	_ = contractFields
+	// contractDescCreatedAt is the schema descriptor for created_at field.
+	contractDescCreatedAt := contractMixinFields0[0].Descriptor()
+	// contract.DefaultCreatedAt holds the default value on creation for the created_at field.
+	contract.DefaultCreatedAt = contractDescCreatedAt.Default.(func() uint32)
+	// contractDescUpdatedAt is the schema descriptor for updated_at field.
+	contractDescUpdatedAt := contractMixinFields0[1].Descriptor()
+	// contract.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	contract.DefaultUpdatedAt = contractDescUpdatedAt.Default.(func() uint32)
+	// contract.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	contract.UpdateDefaultUpdatedAt = contractDescUpdatedAt.UpdateDefault.(func() uint32)
+	// contractDescDeletedAt is the schema descriptor for deleted_at field.
+	contractDescDeletedAt := contractMixinFields0[2].Descriptor()
+	// contract.DefaultDeletedAt holds the default value on creation for the deleted_at field.
+	contract.DefaultDeletedAt = contractDescDeletedAt.Default.(func() uint32)
+	// contractDescEntID is the schema descriptor for ent_id field.
+	contractDescEntID := contractMixinFields1[1].Descriptor()
+	// contract.DefaultEntID holds the default value on creation for the ent_id field.
+	contract.DefaultEntID = contractDescEntID.Default.(func() uuid.UUID)
+	// contractDescGoodID is the schema descriptor for good_id field.
+	contractDescGoodID := contractFields[0].Descriptor()
+	// contract.DefaultGoodID holds the default value on creation for the good_id field.
+	contract.DefaultGoodID = contractDescGoodID.Default.(func() uuid.UUID)
+	// contractDescDelegatedStakingID is the schema descriptor for delegated_staking_id field.
+	contractDescDelegatedStakingID := contractFields[1].Descriptor()
+	// contract.DefaultDelegatedStakingID holds the default value on creation for the delegated_staking_id field.
+	contract.DefaultDelegatedStakingID = contractDescDelegatedStakingID.Default.(func() uuid.UUID)
+	// contractDescAccountID is the schema descriptor for account_id field.
+	contractDescAccountID := contractFields[2].Descriptor()
+	// contract.DefaultAccountID holds the default value on creation for the account_id field.
+	contract.DefaultAccountID = contractDescAccountID.Default.(func() uuid.UUID)
+	// contractDescBackup is the schema descriptor for backup field.
+	contractDescBackup := contractFields[3].Descriptor()
+	// contract.DefaultBackup holds the default value on creation for the backup field.
+	contract.DefaultBackup = contractDescBackup.Default.(bool)
+	// contractDescContractOperatorType is the schema descriptor for contract_operator_type field.
+	contractDescContractOperatorType := contractFields[4].Descriptor()
+	// contract.DefaultContractOperatorType holds the default value on creation for the contract_operator_type field.
+	contract.DefaultContractOperatorType = contractDescContractOperatorType.Default.(string)
 	depositMixin := schema.Deposit{}.Mixin()
 	deposit.Policy = privacy.NewPolicies(depositMixin[0], schema.Deposit{})
 	deposit.Hooks[0] = func(next ent.Mutator) ent.Mutator {
